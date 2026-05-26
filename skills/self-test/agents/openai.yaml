@@ -19,3 +19,15 @@ metadata:
   stage: "self_test"
   type: "stage_skill"
   trigger_description: "Use when the request is about 生成并执行自测方案，输出失败原因、影响范围和阻断判断。；Do not use when 不伪造测试结果；不忽略失败测试。"
+routing:
+  intent_tags:
+    - "self"
+    - "self-test"
+    - "self_test"
+    - "stage_skill"
+    - "test"
+    - "影响范围和阻断判断。"
+    - "生成并执行自测方案"
+    - "输出失败原因"
+  allow_implicit_invocation: true
+  cost_class: "medium"

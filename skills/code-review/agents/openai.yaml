@@ -19,3 +19,18 @@ metadata:
   stage: "code_review"
   type: "stage_skill"
   trigger_description: "Use when the request is about 对代码进行人工评审辅助，按问题、证据、影响、级别、建议和阻断状态输出。；Do not use when 不替代 code-quality-governor；不输出无证据建议。"
+routing:
+  intent_tags:
+    - "code"
+    - "code-review"
+    - "code_review"
+    - "review"
+    - "stage_skill"
+    - "对代码进行人工评审辅助"
+    - "建议和阻断状态输出。"
+    - "影响"
+    - "按问题"
+    - "级别"
+    - "证据"
+  allow_implicit_invocation: true
+  cost_class: "medium"

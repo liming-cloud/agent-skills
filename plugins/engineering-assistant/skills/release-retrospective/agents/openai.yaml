@@ -19,3 +19,19 @@ metadata:
   stage: "release_retrospective"
   type: "stage_skill"
   trigger_description: "Use when the request is about 复盘发布过程，沉淀发布问题、测试遗漏、设计遗漏、规范改进候选和 skill 改进候选。；Do not use when 不将候选规范直接发布；不隐藏发布问题。"
+routing:
+  intent_tags:
+    - "release"
+    - "release-retrospective"
+    - "release_retrospective"
+    - "retrospective"
+    - "skill"
+    - "stage_skill"
+    - "复盘发布过程"
+    - "改进候选。"
+    - "沉淀发布问题"
+    - "测试遗漏"
+    - "规范改进候选和"
+    - "设计遗漏"
+  allow_implicit_invocation: true
+  cost_class: "medium"

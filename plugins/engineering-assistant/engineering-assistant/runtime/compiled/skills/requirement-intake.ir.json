@@ -1,0 +1,100 @@
+{
+  "skill_id": "requirement-intake",
+  "version": "1.0.0",
+  "stage": "requirement_intake",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "Requirement Intake",
+    "short_description": "判断需求是否具备进入设计阶段的条件，并输出可复用需求契约。",
+    "default_prompt": "使用 requirement-intake，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 判断需求是否具备进入设计阶段的条件，并输出可复用需求契约。；Do not use when 不替代产品决策；不生成代码。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "organization_context",
+    "current_process",
+    "requirement_materials",
+    "risk_policy"
+  ],
+  "outputs": [
+    "requirement-intake-report.md",
+    "requirement-contract.json",
+    "missing-information-list.md",
+    "requirement-risk-assessment.json"
+  ],
+  "routing": {
+    "intent_tags": [
+      "intake",
+      "requirement",
+      "requirement-intake",
+      "requirement_intake",
+      "stage_skill",
+      "判断需求是否具备进入设计阶段的条件",
+      "并输出可复用需求契约。"
+    ],
+    "positive_triggers": [
+      "requirement-intake",
+      "Requirement Intake",
+      "判断需求是否具备进入设计阶段的条件，并输出可复用需求契约。"
+    ],
+    "negative_triggers": [
+      "只解释 Requirement Intake 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "organization_context",
+      "current_process",
+      "requirement_materials",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "业务目标存在",
+      "验收标准存在",
+      "范围清晰",
+      "高风险事项有 owner",
+      "重大依赖已确认"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "高风险需求",
+      "跨系统重大依赖",
+      "数据/权限/发布风险"
+    ]
+  },
+  "quality_gates": [
+    "业务目标存在",
+    "验收标准存在",
+    "范围清晰",
+    "高风险事项有 owner",
+    "重大依赖已确认"
+  ],
+  "workflow": {
+    "node_id": "requirement-intake",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/requirement-intake/SKILL.md",
+    "skills/requirement-intake/contract.yaml",
+    "skills/requirement-intake/workflow/node.yaml",
+    "skills/requirement-intake/agents/openai.yaml"
+  ]
+}

@@ -11,6 +11,50 @@
     "不降级 blocker"
   ],
   "trigger_description": "Use when the request is about 建立 Q0-Q4 多层代码质量门禁，输出可被 CI/CD、PR、workflow 消费的结构化质量报告。；Do not use when 不以 LLM 判断替代 build/test/lint；不在测试失败时输出 pass。",
+  "routing": {
+    "intent_tags": [
+      "CI/CD",
+      "PR",
+      "Q0-Q4",
+      "code",
+      "code-quality-governor",
+      "code_quality",
+      "cross_cutting_skill",
+      "governor",
+      "quality",
+      "workflow",
+      "多层代码质量门禁",
+      "建立"
+    ],
+    "positive_triggers": [
+      "code-quality-governor",
+      "Code Quality Governor",
+      "建立 Q0-Q4 多层代码质量门禁，输出可被 CI/CD、PR、workflow 消费的结构化质量报告。"
+    ],
+    "negative_triggers": [
+      "只解释 Code Quality Governor 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "changed-files-report.json",
+      "design-to-code-mapping.yaml",
+      "self-test-report.md",
+      "ci artifacts"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "Q0 设计一致性",
+      "Q1 确定性工程检查",
+      "Q1.5 Sonar/Qodana/Checkstyle 静态分析",
+      "Q2 语义代码评审",
+      "Q3 风险专项门禁",
+      "Q4 发布前回归门禁"
+    ],
+    "allow_implicit_invocation": false
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

@@ -1,0 +1,99 @@
+{
+  "skill_id": "detailed-design",
+  "version": "1.0.0",
+  "stage": "detailed_design",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "Detailed Design",
+    "short_description": "将概要设计拆解为可实现的详细设计、接口契约、任务清单和测试策略。",
+    "default_prompt": "使用 detailed-design，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 将概要设计拆解为可实现的详细设计、接口契约、任务清单和测试策略。；Do not use when 不批准设计进入研发；不直接修改代码。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "high-level-design.md",
+    "architecture-decision-record.md",
+    "module-boundary.yaml",
+    "team_standards"
+  ],
+  "outputs": [
+    "detailed-design.md",
+    "implementation-plan.md",
+    "interface-contracts.yaml",
+    "test-strategy.md"
+  ],
+  "routing": {
+    "intent_tags": [
+      "design",
+      "detailed",
+      "detailed-design",
+      "detailed_design",
+      "stage_skill",
+      "任务清单和测试策略。",
+      "将概要设计拆解为可实现的详细设计",
+      "接口契约"
+    ],
+    "positive_triggers": [
+      "detailed-design",
+      "Detailed Design",
+      "将概要设计拆解为可实现的详细设计、接口契约、任务清单和测试策略。"
+    ],
+    "negative_triggers": [
+      "只解释 Detailed Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "high-level-design.md",
+      "architecture-decision-record.md",
+      "module-boundary.yaml",
+      "team_standards"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "接口定义完整",
+      "事务边界明确",
+      "幂等策略明确",
+      "测试策略覆盖主干和异常路径"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "核心链路事务边界变化",
+      "高并发路径设计",
+      "权限/认证/鉴权设计"
+    ]
+  },
+  "quality_gates": [
+    "接口定义完整",
+    "事务边界明确",
+    "幂等策略明确",
+    "测试策略覆盖主干和异常路径"
+  ],
+  "workflow": {
+    "node_id": "detailed-design",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/detailed-design/SKILL.md",
+    "skills/detailed-design/contract.yaml",
+    "skills/detailed-design/workflow/node.yaml",
+    "skills/detailed-design/agents/openai.yaml"
+  ]
+}

@@ -19,3 +19,17 @@ metadata:
   stage: "high_level_design"
   type: "stage_skill"
   trigger_description: "Use when the request is about 从需求契约生成概要设计，明确架构边界、数据流、异常流和发布影响。；Do not use when 不深入代码实现细节；不跳过架构风险。"
+routing:
+  intent_tags:
+    - "design"
+    - "high"
+    - "high-level-design"
+    - "high_level_design"
+    - "level"
+    - "stage_skill"
+    - "从需求契约生成概要设计"
+    - "异常流和发布影响。"
+    - "数据流"
+    - "明确架构边界"
+  allow_implicit_invocation: true
+  cost_class: "medium"

@@ -11,6 +11,42 @@
     "不执行未审批高风险动作"
   ],
   "trigger_description": "Use when the request is about 基于设计文档进行最小必要代码变更或生成代码修改计划。；Do not use when 不修改无关模块；不绕过测试。",
+  "routing": {
+    "intent_tags": [
+      "code",
+      "code-development",
+      "code_development",
+      "development",
+      "stage_skill",
+      "基于设计文档进行最小必要代码变更或生成代码修改计划。"
+    ],
+    "positive_triggers": [
+      "code-development",
+      "Code Development",
+      "基于设计文档进行最小必要代码变更或生成代码修改计划。"
+    ],
+    "negative_triggers": [
+      "只解释 Code Development 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "detailed-design.md",
+      "implementation-plan.md",
+      "interface-contracts.yaml",
+      "repo_context"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "每个变更映射到设计",
+      "无无关模块修改",
+      "高风险文件已标记",
+      "测试命令已列出"
+    ],
+    "allow_implicit_invocation": false
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

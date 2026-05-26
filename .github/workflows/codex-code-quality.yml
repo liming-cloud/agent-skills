@@ -1,0 +1,60 @@
+{
+  "name": "Codex Code Quality",
+  "on": {
+    "pull_request": {
+      "types": [
+        "opened",
+        "synchronize",
+        "review_requested"
+      ]
+    },
+    "workflow_dispatch": {}
+  },
+  "permissions": {
+    "contents": "read",
+    "pull-requests": "write",
+    "checks": "write"
+  },
+  "jobs": {
+    "quality": {
+      "runs-on": "ubuntu-latest",
+      "steps": [
+        {
+          "uses": "actions/checkout@v4"
+        },
+        {
+          "name": "Run unit tests",
+          "run": "PYTHONPYCACHEPREFIX=/tmp/agent-pycache python3 -m unittest discover -s tests -v"
+        },
+        {
+          "name": "Validate skill contracts",
+          "run": "python3 engineering-assistant/scripts/validate_skill_contract.py skills/*/contract.yaml"
+        },
+        {
+          "name": "Validate workflows",
+          "run": "python3 engineering-assistant/scripts/validate_workflow.py engineering-assistant/workflows/*.yaml"
+        },
+        {
+          "name": "Validate skill evals",
+          "run": "python3 engineering-assistant/scripts/run_skill_evals.py"
+        },
+        {
+          "name": "Validate scored evals",
+          "run": "python3 engineering-assistant/scripts/run_skill_evals.py --mode scored"
+        },
+        {
+          "name": "Validate metadata",
+          "run": "python3 engineering-assistant/scripts/validate_skill_metadata.py"
+        },
+        {
+          "name": "Check skill mirror sync",
+          "run": "diff -qr skills plugins/engineering-assistant/skills"
+        },
+        {
+          "name": "Check governance mirror sync",
+          "run": "diff -qr engineering-assistant plugins/engineering-assistant/engineering-assistant"
+        }
+      ]
+    }
+  }
+}

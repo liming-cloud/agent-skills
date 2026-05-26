@@ -11,6 +11,46 @@
     "不把 HTML 人工审阅件作为 agent 事实源"
   ],
   "trigger_description": "Use when the request is about 把已审批设计转换为机器可读实现合同和质量合同，并控制代码实现、验证、修复和最终人工审阅。；Do not use when 不审批设计进入研发；不直接替代 code-development 编写业务代码。",
+  "routing": {
+    "intent_tags": [
+      "control_skill",
+      "controller",
+      "implementation",
+      "implementation-controller",
+      "implementation_control",
+      "修复和最终人工审阅。",
+      "并控制代码实现",
+      "把已审批设计转换为机器可读实现合同和质量合同",
+      "验证"
+    ],
+    "positive_triggers": [
+      "implementation-controller",
+      "Implementation Controller",
+      "把已审批设计转换为机器可读实现合同和质量合同，并控制代码实现、验证、修复和最终人工审阅。"
+    ],
+    "negative_triggers": [
+      "只解释 Implementation Controller 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "approved design artifact",
+      "target project root",
+      "project profile",
+      "changed-files-report.json"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "设计合同已编译",
+      "实现范围明确",
+      "质量命令非空",
+      "修复策略明确",
+      "人工审阅包仅在阻断或最终审阅时生成"
+    ],
+    "allow_implicit_invocation": false
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

@@ -11,6 +11,45 @@
     "不替代发布准备审批"
   ],
   "trigger_description": "Use when the request is about 发布后验证核心功能、监控、日志、业务指标和回滚条件。；Do not use when 不执行未审批回滚；不忽略异常。",
+  "routing": {
+    "intent_tags": [
+      "release",
+      "release-verification",
+      "release_verification",
+      "stage_skill",
+      "verification",
+      "业务指标和回滚条件。",
+      "发布后验证核心功能",
+      "日志",
+      "监控"
+    ],
+    "positive_triggers": [
+      "release-verification",
+      "Release Verification",
+      "发布后验证核心功能、监控、日志、业务指标和回滚条件。"
+    ],
+    "negative_triggers": [
+      "只解释 Release Verification 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "release-plan.md",
+      "release-checklist.md",
+      "observability data",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "核心功能验证通过",
+      "错误率/延迟未触发阈值",
+      "业务指标正常",
+      "回滚条件未触发"
+    ],
+    "allow_implicit_invocation": false
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

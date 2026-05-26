@@ -20,3 +20,16 @@ metadata:
   stage: "implementation_control"
   type: "control_skill"
   trigger_description: "Use when the request is about 把已审批设计转换为机器可读实现合同和质量合同，并控制代码实现、验证、修复和最终人工审阅。；Do not use when 不审批设计进入研发；不直接替代 code-development 编写业务代码。"
+routing:
+  intent_tags:
+    - "control_skill"
+    - "controller"
+    - "implementation"
+    - "implementation-controller"
+    - "implementation_control"
+    - "修复和最终人工审阅。"
+    - "并控制代码实现"
+    - "把已审批设计转换为机器可读实现合同和质量合同"
+    - "验证"
+  allow_implicit_invocation: false
+  cost_class: "high"

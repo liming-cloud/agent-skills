@@ -11,6 +11,48 @@
     "不把不同语义消息混成单一处理流"
   ],
   "trigger_description": "Use when the request is about 设计 MQ 主题、消息体、生产消费链路、幂等、重试、死信和回放策略。；Do not use when 不未经审批删除或重命名 topic；不隐藏重复消费风险。",
+  "routing": {
+    "intent_tags": [
+      "MQ",
+      "design",
+      "mq",
+      "mq-design",
+      "mq_design",
+      "stage_skill",
+      "主题",
+      "幂等",
+      "死信和回放策略。",
+      "消息体",
+      "生产消费链路",
+      "设计"
+    ],
+    "positive_triggers": [
+      "mq-design",
+      "MQ Design",
+      "设计 MQ 主题、消息体、生产消费链路、幂等、重试、死信和回放策略。"
+    ],
+    "negative_triggers": [
+      "只解释 MQ Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "detailed-design.md",
+      "mq-standard.md",
+      "repo_context",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "消息 schema 完整",
+      "幂等策略明确",
+      "重试/死信策略明确",
+      "监控告警明确"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

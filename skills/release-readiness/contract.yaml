@@ -11,6 +11,47 @@
     "不省略回滚方案"
   ],
   "trigger_description": "Use when the request is about 判断是否具备发布条件，并输出发布计划、检查清单、回滚计划和 gate 决策。；Do not use when 不执行生产发布；不绕过高风险发布审批。",
+  "routing": {
+    "intent_tags": [
+      "gate",
+      "readiness",
+      "release",
+      "release-readiness",
+      "release_readiness",
+      "stage_skill",
+      "决策。",
+      "判断是否具备发布条件",
+      "回滚计划和",
+      "并输出发布计划",
+      "检查清单"
+    ],
+    "positive_triggers": [
+      "release-readiness",
+      "Release Readiness",
+      "判断是否具备发布条件，并输出发布计划、检查清单、回滚计划和 gate 决策。"
+    ],
+    "negative_triggers": [
+      "只解释 Release Readiness 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "code-quality-report.json",
+      "code-review-report.md",
+      "release-standard.md",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "发布窗口明确",
+      "回滚方案存在",
+      "监控告警存在",
+      "审批状态有效"
+    ],
+    "allow_implicit_invocation": false
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

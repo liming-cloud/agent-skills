@@ -19,3 +19,15 @@ metadata:
   stage: "detailed_design"
   type: "stage_skill"
   trigger_description: "Use when the request is about 将概要设计拆解为可实现的详细设计、接口契约、任务清单和测试策略。；Do not use when 不批准设计进入研发；不直接修改代码。"
+routing:
+  intent_tags:
+    - "design"
+    - "detailed"
+    - "detailed-design"
+    - "detailed_design"
+    - "stage_skill"
+    - "任务清单和测试策略。"
+    - "将概要设计拆解为可实现的详细设计"
+    - "接口契约"
+  allow_implicit_invocation: true
+  cost_class: "medium"

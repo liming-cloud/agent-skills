@@ -11,6 +11,48 @@
     "不自动批准高风险动作"
   ],
   "trigger_description": "Use when the request is about 支持阶段选择、全链路 workflow、状态机、错误处理、审批暂停/恢复、产物传递和 trace 记录。；Do not use when 不直接生成阶段文档；不绕过子 skill contract。",
+  "routing": {
+    "intent_tags": [
+      "orchestrator",
+      "trace",
+      "workflow",
+      "workflow-orchestrator",
+      "workflow_orchestration",
+      "workflow_skill",
+      "产物传递和",
+      "全链路",
+      "审批暂停/恢复",
+      "支持阶段选择",
+      "状态机",
+      "记录。"
+    ],
+    "positive_triggers": [
+      "workflow-orchestrator",
+      "Workflow Orchestrator",
+      "支持阶段选择、全链路 workflow、状态机、错误处理、审批暂停/恢复、产物传递和 trace 记录。"
+    ],
+    "negative_triggers": [
+      "只解释 Workflow Orchestrator 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "workflow.yaml",
+      "stage node registry",
+      "StageRunRequest",
+      "approval_context"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "节点 contract 匹配",
+      "前置条件满足",
+      "产物 schema 合规",
+      "高风险动作进入审批"
+    ],
+    "allow_implicit_invocation": false
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

@@ -19,3 +19,19 @@ metadata:
   stage: "mq_design"
   type: "stage_skill"
   trigger_description: "Use when the request is about 设计 MQ 主题、消息体、生产消费链路、幂等、重试、死信和回放策略。；Do not use when 不未经审批删除或重命名 topic；不隐藏重复消费风险。"
+routing:
+  intent_tags:
+    - "MQ"
+    - "design"
+    - "mq"
+    - "mq-design"
+    - "mq_design"
+    - "stage_skill"
+    - "主题"
+    - "幂等"
+    - "死信和回放策略。"
+    - "消息体"
+    - "生产消费链路"
+    - "设计"
+  allow_implicit_invocation: true
+  cost_class: "medium"

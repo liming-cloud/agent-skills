@@ -1,0 +1,105 @@
+{
+  "skill_id": "skill-quality-auditor",
+  "version": "1.0.0",
+  "stage": "skill_quality",
+  "type": "audit_skill",
+  "prompt_pack": {
+    "display_name": "Skill Quality Auditor",
+    "short_description": "审计 skills 质量，防止空泛 prompt，阻断不合格 skill 入库。",
+    "default_prompt": "使用 skill-quality-auditor，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 审计 skills 质量，防止空泛 prompt，阻断不合格 skill 入库。；Do not use when 不执行业务研发阶段；不替代 eval 执行。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "skills",
+    "engineering-assistant/registry/skills.yaml",
+    "skill-contract.schema.json"
+  ],
+  "outputs": [
+    "skill-quality-report.md",
+    "skill-quality-report.json",
+    "skill-fix-suggestions.md",
+    "skill-gate-decision.json"
+  ],
+  "routing": {
+    "intent_tags": [
+      "audit_skill",
+      "auditor",
+      "prompt",
+      "quality",
+      "skill",
+      "skill-quality-auditor",
+      "skill_quality",
+      "skills",
+      "入库。",
+      "审计",
+      "质量",
+      "防止空泛"
+    ],
+    "positive_triggers": [
+      "skill-quality-auditor",
+      "Skill Quality Auditor",
+      "审计 skills 质量，防止空泛 prompt，阻断不合格 skill 入库。"
+    ],
+    "negative_triggers": [
+      "只解释 Skill Quality Auditor 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "skills",
+      "engineering-assistant/registry/skills.yaml",
+      "skill-contract.schema.json"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "SKILL.md 存在",
+      "description 清楚",
+      "contract 完整",
+      "schema 存在",
+      "eval 覆盖",
+      "workflow node 存在"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "高风险 skill 入库",
+      "修改高风险质量门禁",
+      "skill gate 豁免"
+    ]
+  },
+  "quality_gates": [
+    "SKILL.md 存在",
+    "description 清楚",
+    "contract 完整",
+    "schema 存在",
+    "eval 覆盖",
+    "workflow node 存在"
+  ],
+  "workflow": {
+    "node_id": "skill-quality-auditor",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/skill-quality-auditor/SKILL.md",
+    "skills/skill-quality-auditor/contract.yaml",
+    "skills/skill-quality-auditor/workflow/node.yaml",
+    "skills/skill-quality-auditor/agents/openai.yaml"
+  ]
+}

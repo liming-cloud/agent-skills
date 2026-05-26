@@ -11,6 +11,47 @@
     "不在未确认技术栈时生成前端实现"
   ],
   "trigger_description": "Use when the request is about 将需求和接口契约转化为可实现的前端设计，明确页面、组件、状态、交互、接口联调和验证策略。；Do not use when 不替代产品原型评审；不直接修改后端接口。",
+  "routing": {
+    "intent_tags": [
+      "design",
+      "frontend",
+      "frontend-design",
+      "frontend_design",
+      "stage_skill",
+      "交互",
+      "将需求和接口契约转化为可实现的前端设计",
+      "接口联调和验证策略。",
+      "明确页面",
+      "状态",
+      "组件"
+    ],
+    "positive_triggers": [
+      "frontend-design",
+      "Frontend Design",
+      "将需求和接口契约转化为可实现的前端设计，明确页面、组件、状态、交互、接口联调和验证策略。"
+    ],
+    "negative_triggers": [
+      "只解释 Frontend Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "requirement-contract.json",
+      "high-level-design.md",
+      "interface-contracts.yaml",
+      "repo_context"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "页面和组件边界明确",
+      "接口联调契约明确",
+      "加载/空态/错误态完整",
+      "技术栈和组件库已确认"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

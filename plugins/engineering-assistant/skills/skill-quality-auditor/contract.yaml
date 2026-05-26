@@ -11,6 +11,49 @@
     "不放行缺少 gate 的高风险 skill"
   ],
   "trigger_description": "Use when the request is about 审计 skills 质量，防止空泛 prompt，阻断不合格 skill 入库。；Do not use when 不执行业务研发阶段；不替代 eval 执行。",
+  "routing": {
+    "intent_tags": [
+      "audit_skill",
+      "auditor",
+      "prompt",
+      "quality",
+      "skill",
+      "skill-quality-auditor",
+      "skill_quality",
+      "skills",
+      "入库。",
+      "审计",
+      "质量",
+      "防止空泛"
+    ],
+    "positive_triggers": [
+      "skill-quality-auditor",
+      "Skill Quality Auditor",
+      "审计 skills 质量，防止空泛 prompt，阻断不合格 skill 入库。"
+    ],
+    "negative_triggers": [
+      "只解释 Skill Quality Auditor 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "skills",
+      "engineering-assistant/registry/skills.yaml",
+      "skill-contract.schema.json"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "SKILL.md 存在",
+      "description 清楚",
+      "contract 完整",
+      "schema 存在",
+      "eval 覆盖",
+      "workflow node 存在"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

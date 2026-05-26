@@ -19,3 +19,14 @@ metadata:
   stage: "design_review"
   type: "stage_skill"
   trigger_description: "Use when the request is about 评审设计产物，判断是否可以进入代码研发。；Do not use when 不代替审批人签字；不修正文档内容。"
+routing:
+  intent_tags:
+    - "design"
+    - "design-review"
+    - "design_review"
+    - "review"
+    - "stage_skill"
+    - "判断是否可以进入代码研发。"
+    - "评审设计产物"
+  allow_implicit_invocation: true
+  cost_class: "medium"

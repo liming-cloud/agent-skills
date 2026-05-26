@@ -11,6 +11,48 @@
     "不替代知识治理审批"
   ],
   "trigger_description": "Use when the request is about 复盘发布过程，沉淀发布问题、测试遗漏、设计遗漏、规范改进候选和 skill 改进候选。；Do not use when 不将候选规范直接发布；不隐藏发布问题。",
+  "routing": {
+    "intent_tags": [
+      "release",
+      "release-retrospective",
+      "release_retrospective",
+      "retrospective",
+      "skill",
+      "stage_skill",
+      "复盘发布过程",
+      "改进候选。",
+      "沉淀发布问题",
+      "测试遗漏",
+      "规范改进候选和",
+      "设计遗漏"
+    ],
+    "positive_triggers": [
+      "release-retrospective",
+      "Release Retrospective",
+      "复盘发布过程，沉淀发布问题、测试遗漏、设计遗漏、规范改进候选和 skill 改进候选。"
+    ],
+    "negative_triggers": [
+      "只解释 Release Retrospective 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "release-verification-report.md",
+      "code-quality-report.json",
+      "incident reports",
+      "release logs"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "问题有证据",
+      "行动项有 owner",
+      "规范候选状态为 candidate",
+      "skill 改进候选明确"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

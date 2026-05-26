@@ -11,6 +11,44 @@
     "不直接批准高风险需求进入设计"
   ],
   "trigger_description": "Use when the request is about 判断需求是否具备进入设计阶段的条件，并输出可复用需求契约。；Do not use when 不替代产品决策；不生成代码。",
+  "routing": {
+    "intent_tags": [
+      "intake",
+      "requirement",
+      "requirement-intake",
+      "requirement_intake",
+      "stage_skill",
+      "判断需求是否具备进入设计阶段的条件",
+      "并输出可复用需求契约。"
+    ],
+    "positive_triggers": [
+      "requirement-intake",
+      "Requirement Intake",
+      "判断需求是否具备进入设计阶段的条件，并输出可复用需求契约。"
+    ],
+    "negative_triggers": [
+      "只解释 Requirement Intake 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "organization_context",
+      "current_process",
+      "requirement_materials",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "业务目标存在",
+      "验收标准存在",
+      "范围清晰",
+      "高风险事项有 owner",
+      "重大依赖已确认"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

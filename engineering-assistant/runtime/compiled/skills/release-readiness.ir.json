@@ -1,0 +1,104 @@
+{
+  "skill_id": "release-readiness",
+  "version": "1.0.0",
+  "stage": "release_readiness",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "Release Readiness",
+    "short_description": "判断是否具备发布条件，并输出发布计划、检查清单、回滚计划和 gate 决策。",
+    "default_prompt": "使用 release-readiness，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 判断是否具备发布条件，并输出发布计划、检查清单、回滚计划和 gate 决策。；Do not use when 不执行生产发布；不绕过高风险发布审批。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "code-quality-report.json",
+    "code-review-report.md",
+    "release-standard.md",
+    "risk_policy"
+  ],
+  "outputs": [
+    "release-plan.md",
+    "release-checklist.md",
+    "rollback-plan.md",
+    "release-risk-report.json",
+    "release-gate-decision.json"
+  ],
+  "routing": {
+    "intent_tags": [
+      "gate",
+      "readiness",
+      "release",
+      "release-readiness",
+      "release_readiness",
+      "stage_skill",
+      "决策。",
+      "判断是否具备发布条件",
+      "回滚计划和",
+      "并输出发布计划",
+      "检查清单"
+    ],
+    "positive_triggers": [
+      "release-readiness",
+      "Release Readiness",
+      "判断是否具备发布条件，并输出发布计划、检查清单、回滚计划和 gate 决策。"
+    ],
+    "negative_triggers": [
+      "只解释 Release Readiness 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "code-quality-report.json",
+      "code-review-report.md",
+      "release-standard.md",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "high",
+    "cost_class": "high",
+    "evidence_required": [
+      "发布窗口明确",
+      "回滚方案存在",
+      "监控告警存在",
+      "审批状态有效"
+    ],
+    "allow_implicit_invocation": false
+  },
+  "risk": {
+    "risk_level": "high",
+    "allow_implicit_invocation": false,
+    "human_approval_required": [
+      "生产发布",
+      "生产配置变更",
+      "高风险发布",
+      "回滚操作"
+    ]
+  },
+  "quality_gates": [
+    "发布窗口明确",
+    "回滚方案存在",
+    "监控告警存在",
+    "审批状态有效"
+  ],
+  "workflow": {
+    "node_id": "release-readiness",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/release-readiness/SKILL.md",
+    "skills/release-readiness/contract.yaml",
+    "skills/release-readiness/workflow/node.yaml",
+    "skills/release-readiness/agents/openai.yaml"
+  ]
+}

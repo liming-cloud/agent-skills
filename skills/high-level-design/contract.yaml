@@ -11,6 +11,46 @@
     "不替代设计评审审批"
   ],
   "trigger_description": "Use when the request is about 从需求契约生成概要设计，明确架构边界、数据流、异常流和发布影响。；Do not use when 不深入代码实现细节；不跳过架构风险。",
+  "routing": {
+    "intent_tags": [
+      "design",
+      "high",
+      "high-level-design",
+      "high_level_design",
+      "level",
+      "stage_skill",
+      "从需求契约生成概要设计",
+      "异常流和发布影响。",
+      "数据流",
+      "明确架构边界"
+    ],
+    "positive_triggers": [
+      "high-level-design",
+      "High Level Design",
+      "从需求契约生成概要设计，明确架构边界、数据流、异常流和发布影响。"
+    ],
+    "negative_triggers": [
+      "只解释 High Level Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "requirement-contract.json",
+      "team_standards",
+      "repo_context",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "需求契约已准入",
+      "模块边界明确",
+      "核心数据流完整",
+      "架构风险有缓解方案"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

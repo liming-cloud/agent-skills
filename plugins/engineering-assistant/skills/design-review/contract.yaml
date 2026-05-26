@@ -11,6 +11,44 @@
     "不放行 blocker"
   ],
   "trigger_description": "Use when the request is about 评审设计产物，判断是否可以进入代码研发。；Do not use when 不代替审批人签字；不修正文档内容。",
+  "routing": {
+    "intent_tags": [
+      "design",
+      "design-review",
+      "design_review",
+      "review",
+      "stage_skill",
+      "判断是否可以进入代码研发。",
+      "评审设计产物"
+    ],
+    "positive_triggers": [
+      "design-review",
+      "Design Review",
+      "评审设计产物，判断是否可以进入代码研发。"
+    ],
+    "negative_triggers": [
+      "只解释 Design Review 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "high-level-design.md",
+      "detailed-design.md",
+      "database-design.md",
+      "redis-design.md",
+      "mq-design.md"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "无未关闭 blocker",
+      "关键专项设计齐全",
+      "测试策略存在",
+      "高风险审批齐全"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

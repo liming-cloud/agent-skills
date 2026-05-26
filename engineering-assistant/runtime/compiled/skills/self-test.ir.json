@@ -1,0 +1,100 @@
+{
+  "skill_id": "self-test",
+  "version": "1.0.0",
+  "stage": "self_test",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "Self Test",
+    "short_description": "生成并执行自测方案，输出失败原因、影响范围和阻断判断。",
+    "default_prompt": "使用 self-test，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 生成并执行自测方案，输出失败原因、影响范围和阻断判断。；Do not use when 不伪造测试结果；不忽略失败测试。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "implementation-summary.md",
+    "changed-files-report.json",
+    "test-strategy.md",
+    "repo_context"
+  ],
+  "outputs": [
+    "self-test-report.md",
+    "test-commands.log",
+    "coverage-summary.md",
+    "failed-tests.md",
+    "test-risk-report.json"
+  ],
+  "routing": {
+    "intent_tags": [
+      "self",
+      "self-test",
+      "self_test",
+      "stage_skill",
+      "test",
+      "影响范围和阻断判断。",
+      "生成并执行自测方案",
+      "输出失败原因"
+    ],
+    "positive_triggers": [
+      "self-test",
+      "Self Test",
+      "生成并执行自测方案，输出失败原因、影响范围和阻断判断。"
+    ],
+    "negative_triggers": [
+      "只解释 Self Test 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "implementation-summary.md",
+      "changed-files-report.json",
+      "test-strategy.md",
+      "repo_context"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "测试命令实际执行",
+      "失败测试明确阻断",
+      "覆盖主干/边界/异常/幂等",
+      "覆盖率变化有解释"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "高风险测试豁免",
+      "无法执行关键测试",
+      "发布前置测试缺失"
+    ]
+  },
+  "quality_gates": [
+    "测试命令实际执行",
+    "失败测试明确阻断",
+    "覆盖主干/边界/异常/幂等",
+    "覆盖率变化有解释"
+  ],
+  "workflow": {
+    "node_id": "self-test",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/self-test/SKILL.md",
+    "skills/self-test/contract.yaml",
+    "skills/self-test/workflow/node.yaml",
+    "skills/self-test/agents/openai.yaml"
+  ]
+}

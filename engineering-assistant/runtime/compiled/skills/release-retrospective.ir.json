@@ -1,0 +1,102 @@
+{
+  "skill_id": "release-retrospective",
+  "version": "1.0.0",
+  "stage": "release_retrospective",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "Release Retrospective",
+    "short_description": "复盘发布过程，沉淀发布问题、测试遗漏、设计遗漏、规范改进候选和 skill 改进候选。",
+    "default_prompt": "使用 release-retrospective，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 复盘发布过程，沉淀发布问题、测试遗漏、设计遗漏、规范改进候选和 skill 改进候选。；Do not use when 不将候选规范直接发布；不隐藏发布问题。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "release-verification-report.md",
+    "code-quality-report.json",
+    "incident reports",
+    "release logs"
+  ],
+  "outputs": [
+    "release-retrospective.md",
+    "release-lessons.yaml",
+    "follow-up-actions.md"
+  ],
+  "routing": {
+    "intent_tags": [
+      "release",
+      "release-retrospective",
+      "release_retrospective",
+      "retrospective",
+      "skill",
+      "stage_skill",
+      "复盘发布过程",
+      "改进候选。",
+      "沉淀发布问题",
+      "测试遗漏",
+      "规范改进候选和",
+      "设计遗漏"
+    ],
+    "positive_triggers": [
+      "release-retrospective",
+      "Release Retrospective",
+      "复盘发布过程，沉淀发布问题、测试遗漏、设计遗漏、规范改进候选和 skill 改进候选。"
+    ],
+    "negative_triggers": [
+      "只解释 Release Retrospective 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "release-verification-report.md",
+      "code-quality-report.json",
+      "incident reports",
+      "release logs"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "问题有证据",
+      "行动项有 owner",
+      "规范候选状态为 candidate",
+      "skill 改进候选明确"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "行动项关闭",
+      "规范候选批准",
+      "高风险复盘结论发布"
+    ]
+  },
+  "quality_gates": [
+    "问题有证据",
+    "行动项有 owner",
+    "规范候选状态为 candidate",
+    "skill 改进候选明确"
+  ],
+  "workflow": {
+    "node_id": "release-retrospective",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/release-retrospective/SKILL.md",
+    "skills/release-retrospective/contract.yaml",
+    "skills/release-retrospective/workflow/node.yaml",
+    "skills/release-retrospective/agents/openai.yaml"
+  ]
+}

@@ -1,0 +1,317 @@
+{
+  "status": "pass",
+  "metrics": {
+    "checks_total": 7,
+    "checks_passed": 7,
+    "route_accuracy": 1.0,
+    "schema_pass": 1.0,
+    "control_plane_pass": 1.0,
+    "context_source_validity": 1.0,
+    "plugin_sync_status": 1.0
+  },
+  "checks": [
+    {
+      "id": "route-explicit",
+      "status": "pass",
+      "detail": {
+        "status": "selected",
+        "decision": "repo-context-miner",
+        "confidence": 1.0,
+        "reason": "命中确定性路由规则",
+        "candidates": [
+          {
+            "skill_id": "repo-context-miner",
+            "score": 115,
+            "risk_level": "medium",
+            "allow_implicit_invocation": true
+          },
+          {
+            "skill_id": "workflow-orchestrator",
+            "score": 10,
+            "risk_level": "high",
+            "allow_implicit_invocation": false
+          },
+          {
+            "skill_id": "engineering-knowledge-miner",
+            "score": 5,
+            "risk_level": "high",
+            "allow_implicit_invocation": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-negative",
+      "status": "pass",
+      "detail": {
+        "status": "rejected",
+        "decision": null,
+        "confidence": 1.0,
+        "reason": "咨询说明类请求不执行 skill",
+        "candidates": []
+      }
+    },
+    {
+      "id": "route-ai-platform-next-action",
+      "status": "pass",
+      "detail": {
+        "status": "waiting_for_input",
+        "decision": null,
+        "confidence": 0.12,
+        "reason": "高风险 skill 必须 explicit-only",
+        "candidates": [
+          {
+            "skill_id": "code-development",
+            "score": 12,
+            "risk_level": "high",
+            "allow_implicit_invocation": false
+          },
+          {
+            "skill_id": "workflow-orchestrator",
+            "score": 10,
+            "risk_level": "high",
+            "allow_implicit_invocation": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "canary-required-files",
+      "status": "pass",
+      "detail": {
+        "missing": []
+      }
+    },
+    {
+      "id": "canary-context-pack",
+      "status": "pass",
+      "detail": {
+        "root": "/Users/sunliming/work/project/personal/ai-platform-v1",
+        "skill_id": "workflow-orchestrator",
+        "task_id": "complete_identity_access_rbac_and_model_usage_policy_projection_before_rag_runtime",
+        "status": "pass",
+        "sources": [
+          {
+            "path": "artifacts/workflow-orchestrator/artifact-index.json",
+            "kind": "workflow_artifact_index",
+            "bytes": 3023
+          },
+          {
+            "path": "artifacts/workflow-orchestrator/workflow-summary.md",
+            "kind": "workflow_summary",
+            "bytes": 13072
+          },
+          {
+            "path": "artifacts/_control/architecture-baseline.json",
+            "kind": "architecture_baseline",
+            "bytes": 5792
+          },
+          {
+            "path": "Makefile",
+            "kind": "validation_entrypoint",
+            "bytes": 2300
+          },
+          {
+            "path": "artifacts/requirement-intake/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3582
+          },
+          {
+            "path": "artifacts/repo-context-miner/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2719
+          },
+          {
+            "path": "artifacts/high-level-design/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2413
+          },
+          {
+            "path": "artifacts/design-review/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2472
+          },
+          {
+            "path": "artifacts/detailed-design/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2444
+          },
+          {
+            "path": "artifacts/database-design/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3359
+          },
+          {
+            "path": "artifacts/redis-design/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 1892
+          },
+          {
+            "path": "artifacts/mq-design/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 1812
+          },
+          {
+            "path": "artifacts/frontend-design/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3969
+          },
+          {
+            "path": "artifacts/design-review/code-readiness-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2401
+          },
+          {
+            "path": "artifacts/code-development/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 1824
+          },
+          {
+            "path": "artifacts/code-development/p1-ddd-domain-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3009
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-persistence-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 1958
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-login-application-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 1864
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-satoken-adapter-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 1866
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-password-credential-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2058
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-login-controller-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2010
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-session-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2600
+          },
+          {
+            "path": "artifacts/code-development/p1-identity-rbac-authorization-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3267
+          },
+          {
+            "path": "artifacts/code-development/p1-model-provider-persistence-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2364
+          },
+          {
+            "path": "artifacts/code-development/p1-model-provider-configuration-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3720
+          },
+          {
+            "path": "artifacts/code-development/p1-knowledge-base-create-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2373
+          },
+          {
+            "path": "artifacts/code-development/p1-knowledge-document-upload-stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3961
+          },
+          {
+            "path": "artifacts/frontend-development/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 3957
+          },
+          {
+            "path": "artifacts/self-test/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 7173
+          },
+          {
+            "path": "artifacts/code-review/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 4948
+          },
+          {
+            "path": "artifacts/product-acceptance/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 11012
+          },
+          {
+            "path": "artifacts/document-control-plane/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2495
+          },
+          {
+            "path": "artifacts/spring-ai-architecture/stage-run-result.json",
+            "kind": "stage_run_result",
+            "bytes": 2977
+          },
+          {
+            "path": "artifacts/00-audit-index.md",
+            "kind": "document_control",
+            "bytes": 2752
+          },
+          {
+            "path": "artifacts/01-document-system.md",
+            "kind": "document_control",
+            "bytes": 2562
+          },
+          {
+            "path": "artifacts/02-product-completion-system.md",
+            "kind": "document_control",
+            "bytes": 2497
+          },
+          {
+            "path": "artifacts/audit-manifest.yaml",
+            "kind": "document_control",
+            "bytes": 2348
+          },
+          {
+            "path": "artifacts/identity-access/rbac-permission-code-standard.md",
+            "kind": "document_control",
+            "bytes": 1574
+          },
+          {
+            "path": "artifacts/model-hub/model-usage-policy-port-design.md",
+            "kind": "document_control",
+            "bytes": 2213
+          },
+          {
+            "path": "artifacts/eventing/spring-cloud-stream-eventing-plan.md",
+            "kind": "document_control",
+            "bytes": 2013
+          }
+        ],
+        "forbidden_sources": [
+          "docs/human-review/REQ-AIP-20260521-001-human-confirmation.html",
+          "docs/human-review/DBD-AIP-20260521-002-human-confirmation.html"
+        ],
+        "missing_required_sources": []
+      }
+    },
+    {
+      "id": "plugin-sync-skills",
+      "left": "skills",
+      "right": "plugins/engineering-assistant/skills",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "plugin-sync-engineering-assistant",
+      "left": "engineering-assistant",
+      "right": "plugins/engineering-assistant/engineering-assistant",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}

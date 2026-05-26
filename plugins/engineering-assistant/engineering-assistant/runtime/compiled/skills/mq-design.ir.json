@@ -1,0 +1,103 @@
+{
+  "skill_id": "mq-design",
+  "version": "1.0.0",
+  "stage": "mq_design",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "MQ Design",
+    "short_description": "设计 MQ 主题、消息体、生产消费链路、幂等、重试、死信和回放策略。",
+    "default_prompt": "使用 mq-design，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 设计 MQ 主题、消息体、生产消费链路、幂等、重试、死信和回放策略。；Do not use when 不未经审批删除或重命名 topic；不隐藏重复消费风险。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "detailed-design.md",
+    "mq-standard.md",
+    "repo_context",
+    "risk_policy"
+  ],
+  "outputs": [
+    "mq-design.md",
+    "mq-topic-contract.yaml",
+    "message-schema.json",
+    "mq-risk-report.json"
+  ],
+  "routing": {
+    "intent_tags": [
+      "MQ",
+      "design",
+      "mq",
+      "mq-design",
+      "mq_design",
+      "stage_skill",
+      "主题",
+      "幂等",
+      "死信和回放策略。",
+      "消息体",
+      "生产消费链路",
+      "设计"
+    ],
+    "positive_triggers": [
+      "mq-design",
+      "MQ Design",
+      "设计 MQ 主题、消息体、生产消费链路、幂等、重试、死信和回放策略。"
+    ],
+    "negative_triggers": [
+      "只解释 MQ Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "detailed-design.md",
+      "mq-standard.md",
+      "repo_context",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "消息 schema 完整",
+      "幂等策略明确",
+      "重试/死信策略明确",
+      "监控告警明确"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "MQ topic 删除或重命名",
+      "核心消息链路变化",
+      "生产消息回放"
+    ]
+  },
+  "quality_gates": [
+    "消息 schema 完整",
+    "幂等策略明确",
+    "重试/死信策略明确",
+    "监控告警明确"
+  ],
+  "workflow": {
+    "node_id": "mq-design",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/mq-design/SKILL.md",
+    "skills/mq-design/contract.yaml",
+    "skills/mq-design/workflow/node.yaml",
+    "skills/mq-design/agents/openai.yaml"
+  ]
+}

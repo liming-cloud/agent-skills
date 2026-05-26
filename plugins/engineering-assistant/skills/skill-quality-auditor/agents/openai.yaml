@@ -19,3 +19,19 @@ metadata:
   stage: "skill_quality"
   type: "audit_skill"
   trigger_description: "Use when the request is about 审计 skills 质量，防止空泛 prompt，阻断不合格 skill 入库。；Do not use when 不执行业务研发阶段；不替代 eval 执行。"
+routing:
+  intent_tags:
+    - "audit_skill"
+    - "auditor"
+    - "prompt"
+    - "quality"
+    - "skill"
+    - "skill-quality-auditor"
+    - "skill_quality"
+    - "skills"
+    - "入库。"
+    - "审计"
+    - "质量"
+    - "防止空泛"
+  allow_implicit_invocation: true
+  cost_class: "medium"

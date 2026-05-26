@@ -5,6 +5,7 @@
 ## 文件
 - `config.toml`：推荐的 Codex 沙箱、审批和 profile 配置。
 - `rules/default.rules`：高风险命令规则模板。
+- `policies/tool-policy.yaml`：工具调用 policy-as-code，采用 JSON/YAML 子集格式，便于脚本稳定解析。
 - `hooks/pre_tool_use_policy.py`：PreToolUse 命令守卫模板。
 
 ## 使用方式

@@ -1,0 +1,105 @@
+{
+  "skill_id": "database-design",
+  "version": "1.0.0",
+  "stage": "database_design",
+  "type": "stage_skill",
+  "prompt_pack": {
+    "display_name": "Database Design",
+    "short_description": "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。",
+    "default_prompt": "使用 database-design，先确认语言和必填输入，再输出声明产物与 gate decision。",
+    "trigger_description": "Use when the request is about 设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。；Do not use when 不执行生产 DDL；不做无用途字段和索引。",
+    "language_policy": {
+      "supported": [
+        "zh-CN",
+        "en"
+      ],
+      "when_unspecified": "ask_user"
+    }
+  },
+  "inputs": [
+    "detailed-design.md",
+    "database-standard.md",
+    "repo_context",
+    "risk_policy"
+  ],
+  "outputs": [
+    "database-design.md",
+    "schema-change-plan.sql",
+    "migration-plan.md",
+    "rollback-plan.md",
+    "database-risk-report.json"
+  ],
+  "routing": {
+    "intent_tags": [
+      "database",
+      "database-design",
+      "database_design",
+      "design",
+      "stage_skill",
+      "并标记生产变更审批点。",
+      "灰度和回滚方案",
+      "索引",
+      "设计数据库表结构",
+      "迁移"
+    ],
+    "positive_triggers": [
+      "database-design",
+      "Database Design",
+      "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。"
+    ],
+    "negative_triggers": [
+      "只解释 Database Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "detailed-design.md",
+      "database-standard.md",
+      "repo_context",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "字段和索引均有查询/约束用途",
+      "迁移步骤可回滚",
+      "容量和查询模式已评估",
+      "生产变更审批明确"
+    ],
+    "allow_implicit_invocation": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "allow_implicit_invocation": true,
+    "human_approval_required": [
+      "DDL",
+      "数据订正",
+      "删除字段",
+      "删除索引",
+      "生产库变更",
+      "影响核心链路的索引调整"
+    ]
+  },
+  "quality_gates": [
+    "字段和索引均有查询/约束用途",
+    "迁移步骤可回滚",
+    "容量和查询模式已评估",
+    "生产变更审批明确"
+  ],
+  "workflow": {
+    "node_id": "database-design",
+    "entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "next_nodes": []
+  },
+  "source_files": [
+    "skills/database-design/SKILL.md",
+    "skills/database-design/contract.yaml",
+    "skills/database-design/workflow/node.yaml",
+    "skills/database-design/agents/openai.yaml"
+  ]
+}

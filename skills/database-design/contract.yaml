@@ -11,6 +11,46 @@
     "不省略回滚方案"
   ],
   "trigger_description": "Use when the request is about 设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。；Do not use when 不执行生产 DDL；不做无用途字段和索引。",
+  "routing": {
+    "intent_tags": [
+      "database",
+      "database-design",
+      "database_design",
+      "design",
+      "stage_skill",
+      "并标记生产变更审批点。",
+      "灰度和回滚方案",
+      "索引",
+      "设计数据库表结构",
+      "迁移"
+    ],
+    "positive_triggers": [
+      "database-design",
+      "Database Design",
+      "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。"
+    ],
+    "negative_triggers": [
+      "只解释 Database Design 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "detailed-design.md",
+      "database-standard.md",
+      "repo_context",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "字段和索引均有查询/约束用途",
+      "迁移步骤可回滚",
+      "容量和查询模式已评估",
+      "生产变更审批明确"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

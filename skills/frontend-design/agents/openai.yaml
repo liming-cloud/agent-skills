@@ -19,3 +19,18 @@ metadata:
   stage: "frontend_design"
   type: "stage_skill"
   trigger_description: "Use when the request is about 将需求和接口契约转化为可实现的前端设计，明确页面、组件、状态、交互、接口联调和验证策略。；Do not use when 不替代产品原型评审；不直接修改后端接口。"
+routing:
+  intent_tags:
+    - "design"
+    - "frontend"
+    - "frontend-design"
+    - "frontend_design"
+    - "stage_skill"
+    - "交互"
+    - "将需求和接口契约转化为可实现的前端设计"
+    - "接口联调和验证策略。"
+    - "明确页面"
+    - "状态"
+    - "组件"
+  allow_implicit_invocation: true
+  cost_class: "medium"

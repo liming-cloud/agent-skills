@@ -19,3 +19,15 @@ metadata:
   stage: "frontend_development"
   type: "stage_skill"
   trigger_description: "Use when the request is about 基于前端设计和接口契约实施页面、组件、状态和接口联调变更。；Do not use when 不修改无关页面；不绕过前端设计。"
+routing:
+  intent_tags:
+    - "development"
+    - "frontend"
+    - "frontend-development"
+    - "frontend_development"
+    - "stage_skill"
+    - "基于前端设计和接口契约实施页面"
+    - "状态和接口联调变更。"
+    - "组件"
+  allow_implicit_invocation: true
+  cost_class: "medium"

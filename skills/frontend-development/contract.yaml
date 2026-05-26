@@ -11,6 +11,44 @@
     "不凭空选择未确认前端技术栈"
   ],
   "trigger_description": "Use when the request is about 基于前端设计和接口契约实施页面、组件、状态和接口联调变更。；Do not use when 不修改无关页面；不绕过前端设计。",
+  "routing": {
+    "intent_tags": [
+      "development",
+      "frontend",
+      "frontend-development",
+      "frontend_development",
+      "stage_skill",
+      "基于前端设计和接口契约实施页面",
+      "状态和接口联调变更。",
+      "组件"
+    ],
+    "positive_triggers": [
+      "frontend-development",
+      "Frontend Development",
+      "基于前端设计和接口契约实施页面、组件、状态和接口联调变更。"
+    ],
+    "negative_triggers": [
+      "只解释 Frontend Development 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "frontend-design.md",
+      "component-contracts.yaml",
+      "interface-contracts.yaml",
+      "repo_context"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "每个 UI 变更映射到前端设计",
+      "组件和状态边界符合现有项目",
+      "接口联调风险已标记",
+      "前端验证方式已列出"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

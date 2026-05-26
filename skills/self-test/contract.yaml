@@ -11,6 +11,44 @@
     "不替代发布验证"
   ],
   "trigger_description": "Use when the request is about 生成并执行自测方案，输出失败原因、影响范围和阻断判断。；Do not use when 不伪造测试结果；不忽略失败测试。",
+  "routing": {
+    "intent_tags": [
+      "self",
+      "self-test",
+      "self_test",
+      "stage_skill",
+      "test",
+      "影响范围和阻断判断。",
+      "生成并执行自测方案",
+      "输出失败原因"
+    ],
+    "positive_triggers": [
+      "self-test",
+      "Self Test",
+      "生成并执行自测方案，输出失败原因、影响范围和阻断判断。"
+    ],
+    "negative_triggers": [
+      "只解释 Self Test 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "implementation-summary.md",
+      "changed-files-report.json",
+      "test-strategy.md",
+      "repo_context"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "测试命令实际执行",
+      "失败测试明确阻断",
+      "覆盖主干/边界/异常/幂等",
+      "覆盖率变化有解释"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {

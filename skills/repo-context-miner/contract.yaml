@@ -11,6 +11,45 @@
     "不在缺少证据时推断实现细节"
   ],
   "trigger_description": "Use when the request is about 从现有仓库中提取设计和研发所需的代码上下文，形成模块地图、接口/数据/中间件使用清单和影响范围。；Do not use when 不直接修改代码；不替代业务设计。",
+  "routing": {
+    "intent_tags": [
+      "context",
+      "miner",
+      "repo",
+      "repo-context-miner",
+      "repo_context",
+      "stage_skill",
+      "从现有仓库中提取设计和研发所需的代码上下文",
+      "形成模块地图",
+      "接口/数据/中间件使用清单和影响范围。"
+    ],
+    "positive_triggers": [
+      "repo-context-miner",
+      "Repo Context Miner",
+      "从现有仓库中提取设计和研发所需的代码上下文，形成模块地图、接口/数据/中间件使用清单和影响范围。"
+    ],
+    "negative_triggers": [
+      "只解释 Repo Context Miner 的用途，不执行任务",
+      "只咨询说明",
+      "不生成产物"
+    ],
+    "requires": [
+      "repository_path",
+      "requirement-contract.json",
+      "team_standards",
+      "risk_policy"
+    ],
+    "conflicts_with": [],
+    "risk_level": "medium",
+    "cost_class": "medium",
+    "evidence_required": [
+      "仓库路径可访问",
+      "模块边界有证据",
+      "影响范围明确",
+      "可复用能力已登记"
+    ],
+    "allow_implicit_invocation": true
+  },
   "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
   "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
   "language_policy": {
