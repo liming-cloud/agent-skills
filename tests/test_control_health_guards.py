@@ -30,7 +30,7 @@ class ControlHealthGuardTests(unittest.TestCase):
                     "--publish-root",
                     str(publish_root),
                     "--marketplace-path",
-                    str(publish_root / "marketplace.json"),
+                    str(publish_root / ".agents" / "plugins" / "marketplace.json"),
                 ],
                 cwd=ROOT,
                 text=True,

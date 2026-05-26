@@ -22,7 +22,7 @@ def publish_to_temp(test_case: unittest.TestCase) -> Path:
         "--publish-root",
         str(publish_root),
         "--marketplace-path",
-        str(publish_root / "marketplace.json"),
+        str(publish_root / ".agents" / "plugins" / "marketplace.json"),
     )
     test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
     return publish_root / "plugins" / "engineering-assistant"
@@ -71,7 +71,7 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
         self.assertFalse((ROOT / "plugins").exists())
         self.assertTrue((ROOT / ".agent" / "plugins" / "publish-config.json").exists())
         self.assertFalse((ROOT / ".agent" / "plugins" / "marketplace.json").exists())
-        self.assertIn("plugins/", (ROOT / ".gitignore").read_text(encoding="utf-8"))
+        self.assertIn("/plugins/", (ROOT / ".gitignore").read_text(encoding="utf-8"))
 
     def test_skill_runtime_ir_is_generated_and_can_be_recompiled(self) -> None:
         index = json.loads((ROOT / "engineering-assistant" / "runtime" / "compiled" / "skill-runtime-index.json").read_text(encoding="utf-8"))

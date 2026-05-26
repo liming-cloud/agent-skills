@@ -2702,7 +2702,7 @@ def marketplace_payload(config: dict) -> dict:
 def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None) -> dict:
     plugin_name = config.get("plugin_name", "engineering-assistant")
     publish_root = publish_root or expand(config["publish_root"])
-    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / "marketplace.json")))
+    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / ".agents" / "plugins" / "marketplace.json")))
     plugin_relative = Path(config.get("plugin_relative_path", f"plugins/{plugin_name}"))
     plugin_root = publish_root / plugin_relative
     ensure_not_repo_path(repo_root, publish_root)
@@ -2724,6 +2724,9 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
 
     marketplace_path.parent.mkdir(parents=True, exist_ok=True)
     marketplace_path.write_text(json.dumps(marketplace_payload(config), ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    legacy_marketplace = publish_root / "marketplace.json"
+    if legacy_marketplace != marketplace_path and legacy_marketplace.exists():
+        legacy_marketplace.unlink()
     return {
         "status": "published",
         "plugin_root": str(plugin_root),
@@ -3517,7 +3520,7 @@ def run_scored_evals() -> dict:
     plugin_sync = []
     with tempfile.TemporaryDirectory() as temp_dir:
         publish_root = Path(temp_dir) / "publish"
-        marketplace_path = publish_root / "marketplace.json"
+        marketplace_path = publish_root / ".agents" / "plugins" / "marketplace.json"
         publish_result = subprocess.run(
             [
                 sys.executable,
@@ -4941,7 +4944,7 @@ def generate_plugin_publish_config() -> None:
         },
         "plugin_name": PLUGIN_NAME,
         "publish_root": "~/.codex/local-plugins/local-engineering",
-        "marketplace_path": "~/.codex/local-plugins/local-engineering/marketplace.json",
+        "marketplace_path": "~/.codex/local-plugins/local-engineering/.agents/plugins/marketplace.json",
         "plugin_relative_path": f"plugins/{PLUGIN_NAME}",
         "policy": {
             "installation": "AVAILABLE",
@@ -5177,7 +5180,7 @@ python3 engineering-assistant/scripts/publish_plugin.py
 - `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/.codex-plugin/plugin.json`
 - `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/skills/`
 - `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/engineering-assistant/`
-- `~/.codex/local-plugins/local-engineering/marketplace.json`
+- `~/.codex/local-plugins/local-engineering/.agents/plugins/marketplace.json`
 
 Codex 使用该 marketplace 后即可识别 `engineering-assistant` 插件。
 
@@ -5191,7 +5194,7 @@ python3 engineering-assistant/scripts/run_skill_evals.py
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored --no-write-report
 python3 engineering-assistant/scripts/validate_skill_metadata.py
-python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/marketplace.json
+python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/.agents/plugins/marketplace.json
 diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills
 diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant
 ```
@@ -5220,7 +5223,7 @@ def generate_root_ci() -> None:
                 {"name": "Validate skill evals", "run": "python3 engineering-assistant/scripts/run_skill_evals.py"},
                 {"name": "Validate scored evals", "run": "python3 engineering-assistant/scripts/run_skill_evals.py --mode scored"},
                 {"name": "Validate metadata", "run": "python3 engineering-assistant/scripts/validate_skill_metadata.py"},
-                {"name": "Publish plugin package", "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/marketplace.json"},
+                {"name": "Publish plugin package", "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/.agents/plugins/marketplace.json"},
                 {"name": "Check published skill sync", "run": "diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills"},
                 {"name": "Check published governance sync", "run": "diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant"},
             ]}},

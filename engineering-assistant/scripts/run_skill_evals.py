@@ -70,7 +70,7 @@ def run_scored_evals() -> dict:
     plugin_sync = []
     with tempfile.TemporaryDirectory() as temp_dir:
         publish_root = Path(temp_dir) / "publish"
-        marketplace_path = publish_root / "marketplace.json"
+        marketplace_path = publish_root / ".agents" / "plugins" / "marketplace.json"
         publish_result = subprocess.run(
             [
                 sys.executable,

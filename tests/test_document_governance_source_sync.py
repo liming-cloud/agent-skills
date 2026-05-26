@@ -24,7 +24,7 @@ def publish_to_temp(test_case: unittest.TestCase) -> Path:
             "--publish-root",
             str(publish_root),
             "--marketplace-path",
-            str(publish_root / "marketplace.json"),
+            str(publish_root / ".agents" / "plugins" / "marketplace.json"),
         ],
         cwd=ROOT,
         text=True,

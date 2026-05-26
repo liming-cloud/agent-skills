@@ -55,7 +55,7 @@ def marketplace_payload(config: dict) -> dict:
 def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None) -> dict:
     plugin_name = config.get("plugin_name", "engineering-assistant")
     publish_root = publish_root or expand(config["publish_root"])
-    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / "marketplace.json")))
+    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / ".agents" / "plugins" / "marketplace.json")))
     plugin_relative = Path(config.get("plugin_relative_path", f"plugins/{plugin_name}"))
     plugin_root = publish_root / plugin_relative
     ensure_not_repo_path(repo_root, publish_root)
@@ -77,6 +77,9 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
 
     marketplace_path.parent.mkdir(parents=True, exist_ok=True)
     marketplace_path.write_text(json.dumps(marketplace_payload(config), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    legacy_marketplace = publish_root / "marketplace.json"
+    if legacy_marketplace != marketplace_path and legacy_marketplace.exists():
+        legacy_marketplace.unlink()
     return {
         "status": "published",
         "plugin_root": str(plugin_root),

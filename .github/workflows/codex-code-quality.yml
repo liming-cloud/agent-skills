@@ -48,7 +48,7 @@
         },
         {
           "name": "Publish plugin package",
-          "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/marketplace.json"
+          "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/.agents/plugins/marketplace.json"
         },
         {
           "name": "Check published skill sync",
