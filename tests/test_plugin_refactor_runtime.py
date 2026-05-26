@@ -5,12 +5,34 @@ from __future__ import annotations
 
 import json
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_ROOT = ROOT / "plugins" / "engineering-assistant"
+
+
+def publish_to_temp(test_case: unittest.TestCase) -> Path:
+    temp_dir = tempfile.TemporaryDirectory()
+    test_case.addCleanup(temp_dir.cleanup)
+    publish_root = Path(temp_dir.name) / "publish"
+    result = subprocess.run(
+        [
+            "python3",
+            str(ROOT / "engineering-assistant" / "scripts" / "publish_plugin.py"),
+            "--publish-root",
+            str(publish_root),
+            "--marketplace-path",
+            str(publish_root / "marketplace.json"),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
+    return publish_root / "plugins" / "engineering-assistant"
 
 
 class PluginRuntimeRefactorTests(unittest.TestCase):
@@ -21,7 +43,8 @@ class PluginRuntimeRefactorTests(unittest.TestCase):
         self.assertIn('"init_task.py"', generator)
         self.assertIn('"run_quality_commands.py"', generator)
 
-        for root in [ROOT, PLUGIN_ROOT]:
+        plugin_root = publish_to_temp(self)
+        for root in [ROOT, plugin_root]:
             skill = root / "skills" / "implementation-controller"
             self.assertTrue((skill / "SKILL.md").exists(), f"{skill} missing SKILL.md")
             self.assertTrue((skill / "contract.yaml").exists(), f"{skill} missing contract")
@@ -52,16 +75,18 @@ class PluginRuntimeRefactorTests(unittest.TestCase):
         for rel in required:
             self.assertTrue((ROOT / rel).exists(), f"missing source runtime policy file {rel}")
             if rel != "AGENTS.md":
-                self.assertTrue((PLUGIN_ROOT / rel).exists(), f"missing packaged runtime policy file {rel}")
+                plugin_root = publish_to_temp(self)
+                self.assertTrue((plugin_root / rel).exists(), f"missing packaged runtime policy file {rel}")
 
         agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         self.assertLess(len(agents.splitlines()), 90, "AGENTS.md should stay concise")
         self.assertIn("artifacts/_control", agents)
 
     def test_source_and_plugin_trees_are_synchronized(self) -> None:
+        plugin_root = publish_to_temp(self)
         for left, right in [
-            (ROOT / "skills", PLUGIN_ROOT / "skills"),
-            (ROOT / "engineering-assistant", PLUGIN_ROOT / "engineering-assistant"),
+            (ROOT / "skills", plugin_root / "skills"),
+            (ROOT / "engineering-assistant", plugin_root / "engineering-assistant"),
         ]:
             result = subprocess.run(
                 ["diff", "-qr", str(left), str(right)],

@@ -1,8 +1,8 @@
 {
   "status": "pass",
   "metrics": {
-    "checks_total": 7,
-    "checks_passed": 7,
+    "checks_total": 8,
+    "checks_passed": 8,
     "route_accuracy": 1.0,
     "schema_pass": 1.0,
     "control_plane_pass": 1.0,
@@ -244,7 +244,7 @@
           {
             "path": "artifacts/product-acceptance/stage-run-result.json",
             "kind": "stage_run_result",
-            "bytes": 11012
+            "bytes": 12537
           },
           {
             "path": "artifacts/document-control-plane/stage-run-result.json",
@@ -302,16 +302,23 @@
     {
       "id": "plugin-sync-skills",
       "left": "skills",
-      "right": "plugins/engineering-assistant/skills",
+      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmp2xrcylrw/publish/plugins/engineering-assistant/skills",
       "status": "pass",
       "detail": ""
     },
     {
       "id": "plugin-sync-engineering-assistant",
       "left": "engineering-assistant",
-      "right": "plugins/engineering-assistant/engineering-assistant",
+      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmp2xrcylrw/publish/plugins/engineering-assistant/engineering-assistant",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "id": "plugin-sync-plugin-manifest",
+      "left": "plugin-manifest",
+      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmp2xrcylrw/publish/plugins/engineering-assistant",
+      "status": "pass",
+      "detail": "{\n  \"status\": \"published\",\n  \"plugin_root\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmp2xrcylrw/publish/plugins/engineering-assistant\",\n  \"marketplace_path\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmp2xrcylrw/publish/marketplace.json\",\n  \"plugin_manifest\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmp2xrcylrw/publish/plugins/engineering-assistant/.codex-plugin/plugin.json\"\n}\n"
     }
   ]
 }

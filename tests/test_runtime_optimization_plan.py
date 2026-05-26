@@ -11,7 +11,21 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_ROOT = ROOT / "plugins" / "engineering-assistant"
+
+
+def publish_to_temp(test_case: unittest.TestCase) -> Path:
+    temp_dir = tempfile.TemporaryDirectory()
+    test_case.addCleanup(temp_dir.cleanup)
+    publish_root = Path(temp_dir.name) / "publish"
+    result = run_script(
+        "publish_plugin.py",
+        "--publish-root",
+        str(publish_root),
+        "--marketplace-path",
+        str(publish_root / "marketplace.json"),
+    )
+    test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
+    return publish_root / "plugins" / "engineering-assistant"
 
 
 def run_script(script: str, *args: str) -> subprocess.CompletedProcess[str]:
@@ -39,17 +53,25 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             "validate_workflow.py",
             "run_skill_evals.py --mode scored",
             "validate_skill_metadata.py",
-            "diff -qr skills plugins/engineering-assistant/skills",
-            "diff -qr engineering-assistant plugins/engineering-assistant/engineering-assistant",
+            "publish_plugin.py",
+            "diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills",
+            "diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant",
         ]:
             self.assertIn(required, quality)
 
     def test_readme_documents_generator_first_and_canary(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("generate_engineering_assistant_assets.py", text)
-        self.assertIn("plugins/engineering-assistant", text)
+        self.assertIn("publish_plugin.py", text)
+        self.assertIn(".agent/plugins/publish-config.json", text)
         self.assertIn("/Users/sunliming/work/project/personal/ai-platform-v1", text)
         self.assertIn("run_skill_evals.py --mode scored", text)
+
+    def test_repository_does_not_keep_temporary_plugin_publish_dir(self) -> None:
+        self.assertFalse((ROOT / "plugins").exists())
+        self.assertTrue((ROOT / ".agent" / "plugins" / "publish-config.json").exists())
+        self.assertFalse((ROOT / ".agent" / "plugins" / "marketplace.json").exists())
+        self.assertIn("plugins/", (ROOT / ".gitignore").read_text(encoding="utf-8"))
 
     def test_skill_runtime_ir_is_generated_and_can_be_recompiled(self) -> None:
         index = json.loads((ROOT / "engineering-assistant" / "runtime" / "compiled" / "skill-runtime-index.json").read_text(encoding="utf-8"))
@@ -176,6 +198,7 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             self.assertEqual("deny", json.loads(result.stdout)["hookSpecificOutput"]["permissionDecision"])
 
     def test_generated_runtime_assets_are_mirrored_to_plugin(self) -> None:
+        plugin_root = publish_to_temp(self)
         for rel in [
             "engineering-assistant/runtime/compiled/skill-runtime-index.json",
             "engineering-assistant/evals/fixtures/ai-platform-v1.json",
@@ -184,7 +207,8 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             "engineering-assistant/runtime/codex/policies/tool-policy.yaml",
         ]:
             self.assertTrue((ROOT / rel).exists(), f"missing source {rel}")
-            self.assertTrue((PLUGIN_ROOT / rel).exists(), f"missing plugin mirror {rel}")
+            self.assertTrue((plugin_root / rel).exists(), f"missing published plugin asset {rel}")
+        self.assertTrue((plugin_root / ".codex-plugin" / "plugin.json").exists())
 
 
 if __name__ == "__main__":

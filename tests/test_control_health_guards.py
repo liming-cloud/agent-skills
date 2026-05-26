@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_SCRIPTS = ROOT / "plugins" / "engineering-assistant" / "engineering-assistant" / "scripts"
+PLUGIN_SCRIPTS = ROOT / "engineering-assistant" / "scripts"
 
 
 def write_json(path: Path, payload: dict) -> None:
@@ -21,10 +21,28 @@ def write_json(path: Path, payload: dict) -> None:
 
 class ControlHealthGuardTests(unittest.TestCase):
     def test_control_health_script_is_generated_and_packaged(self) -> None:
-        for base in [ROOT, ROOT / "plugins" / "engineering-assistant"]:
-            script = base / "engineering-assistant" / "scripts" / "validate_control_health.py"
-            self.assertTrue(script.exists(), f"missing {script}")
-            self.assertIn("control-health-report.json", script.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            publish_root = Path(temp_dir) / "publish"
+            result = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "engineering-assistant" / "scripts" / "publish_plugin.py"),
+                    "--publish-root",
+                    str(publish_root),
+                    "--marketplace-path",
+                    str(publish_root / "marketplace.json"),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(0, result.returncode, result.stderr + result.stdout)
+            bases = [ROOT, publish_root / "plugins" / "engineering-assistant"]
+            for base in bases:
+                script = base / "engineering-assistant" / "scripts" / "validate_control_health.py"
+                self.assertTrue(script.exists(), f"missing {script}")
+                self.assertIn("control-health-report.json", script.read_text(encoding="utf-8"))
 
     def test_control_health_blocks_missing_rule_pack_and_open_blocker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

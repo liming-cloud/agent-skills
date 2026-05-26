@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Regression checks for flexible workflow composition and entry modes."""
 import json
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -47,16 +49,33 @@ class FlexibleWorkflowCompositionTests(unittest.TestCase):
 
     def test_plugin_tree_receives_same_workflow_assets(self) -> None:
         source = self.load_workflow("full-feature-development")
-        plugin = json.loads(
-            (
-                ROOT
-                / "plugins"
-                / "engineering-assistant"
-                / "engineering-assistant"
-                / "workflows"
-                / "full-feature-development.yaml"
-            ).read_text(encoding="utf-8")
-        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            publish_root = Path(temp_dir) / "publish"
+            result = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "engineering-assistant" / "scripts" / "publish_plugin.py"),
+                    "--publish-root",
+                    str(publish_root),
+                    "--marketplace-path",
+                    str(publish_root / "marketplace.json"),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(0, result.returncode, result.stderr + result.stdout)
+            plugin = json.loads(
+                (
+                    publish_root
+                    / "plugins"
+                    / "engineering-assistant"
+                    / "engineering-assistant"
+                    / "workflows"
+                    / "full-feature-development.yaml"
+                ).read_text(encoding="utf-8")
+            )
         self.assertEqual(source["supported_entry_modes"], plugin["supported_entry_modes"])
         self.assertEqual(source["nodes"][0]["next_nodes"], plugin["nodes"][0]["next_nodes"])
 

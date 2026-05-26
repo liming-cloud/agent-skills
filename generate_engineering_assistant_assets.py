@@ -1810,18 +1810,18 @@ def agents_doc() -> str:
     return """# AGENTS.md
 
 ## 仓库目标
-- 本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布镜像。
-- `skills/` 是可触发能力源树，`engineering-assistant/` 是治理与运行时资产，`plugins/engineering-assistant/` 是发布镜像。
+- 本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布配置。
+- `skills/` 是可触发能力源树，`engineering-assistant/` 是治理与运行时资产，发布包由 `publish_plugin.py` 写入配置目录。
 
 ## 修改规则
-- 优先修改 `generate_engineering_assistant_assets.py` 和回归测试，再运行生成器刷新源树与插件镜像。
-- 不直接手补 `plugins/engineering-assistant/`，除非同一变更也进入生成器或源树。
+- 优先修改 `generate_engineering_assistant_assets.py` 和回归测试，再运行生成器刷新源树与发布脚本输入。
+- 仓库内不保留 `plugins/engineering-assistant/` 临时发布目录；需要给 Codex 使用时运行发布脚本生成到配置目录。
 - 所有任务控制产物写入目标项目 `artifacts/_control/`，不得写入插件目录。
 
 ## 验证要求
 - 变更后运行 `python3 -m unittest discover -s tests -v`。
 - 运行 `validate_skill_contract.py`、`validate_workflow.py`、`run_skill_evals.py` 和 `validate_skill_metadata.py`。
-- 源树和插件镜像必须保持同步，除根级 `AGENTS.md` 外不得出现未解释差异。
+- 发布脚本必须能把源树发布为 Codex 可识别插件，并通过 scored eval 的发布包同步检查。
 
 ## 风险边界
 - 高风险动作、生产动作、发布、删除历史和范围外实现必须人工确认。
@@ -1883,7 +1883,7 @@ prefix_rule(
 prefix_rule(
     pattern = ["python3", "generate_engineering_assistant_assets.py"],
     decision = "allow",
-    justification = "插件源码和发布镜像必须通过生成器同步。"
+    justification = "插件源码和发布输入必须通过生成器同步。"
 )
 
 prefix_rule(
@@ -1899,7 +1899,7 @@ prefix_rule(
             {"id": "deny-git-push", "match": {"regex": r"\bgit\s+push\b"}, "decision": "deny", "reason": "git push 前必须完成自动校验、评审和人工确认。"},
             {"id": "deny-git-commit", "match": {"regex": r"\bgit\s+commit\b"}, "decision": "deny", "reason": "git commit 前必须完成自动校验、评审和人工确认。"},
             {"id": "deny-curl-pipe-shell", "match": {"regex": r"\bcurl\b.*\|\s*sh\b"}, "decision": "deny", "reason": "禁止 curl | sh 形式的不可审计安装。"},
-            {"id": "deny-plugin-mirror-write", "match": {"regex": r"(plugins/engineering-assistant/.*(apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s))|((apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s).*plugins/engineering-assistant/)"}, "decision": "deny", "reason": "禁止直接修改插件镜像；请修改生成器或源树后运行生成器同步。"},
+            {"id": "deny-repo-plugin-publish-dir-write", "match": {"regex": r"(plugins/engineering-assistant/.*(apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s))|((apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s).*plugins/engineering-assistant/)"}, "decision": "deny", "reason": "禁止在仓库内直接写插件发布目录；请修改生成器或源树后运行 publish_plugin.py 发布。"},
             {"id": "context-controlled-task", "match": {"contains": "run_controlled_task.py"}, "decision": "allow", "reason": "受控自动化会串联控制面健康、技术采用度、规则消费和质量命令；失败必须写入 repair-attempts.json。"},
         ],
     }, ensure_ascii=False, indent=2))
@@ -2645,6 +2645,109 @@ def main():
 if __name__ == "__main__":
     main()
 """,
+        "publish_plugin.py": """#!/usr/bin/env python3
+import argparse
+import json
+import shutil
+from pathlib import Path
+
+DEFAULT_CONFIG = Path(".agent/plugins/publish-config.json")
+
+
+def load_config(path: Path) -> dict:
+    if not path.exists():
+        raise SystemExit(f"missing publish config: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def expand(path_value: str) -> Path:
+    return Path(path_value).expanduser().resolve()
+
+
+def ensure_not_repo_path(repo_root: Path, path: Path) -> None:
+    try:
+        path.resolve().relative_to(repo_root.resolve())
+    except ValueError:
+        return
+    raise SystemExit(f"refuse to publish into repository workspace: {path}")
+
+
+def copy_tree(source: Path, target: Path) -> None:
+    if not source.exists():
+        raise SystemExit(f"missing source tree: {source}")
+    if target.exists():
+        shutil.rmtree(target)
+    shutil.copytree(source, target)
+
+
+def marketplace_payload(config: dict) -> dict:
+    plugin_name = config.get("plugin_name", "engineering-assistant")
+    return {
+        "name": config.get("name", "local-engineering"),
+        "interface": config.get("interface", {"displayName": "Local Engineering Plugins"}),
+        "plugins": [
+            {
+                "name": plugin_name,
+                "source": {
+                    "source": "local",
+                    "path": "./" + config.get("plugin_relative_path", f"plugins/{plugin_name}").strip("/"),
+                },
+                "policy": config.get("policy", {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}),
+                "category": config.get("category", "Productivity"),
+            }
+        ],
+    }
+
+
+def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None) -> dict:
+    plugin_name = config.get("plugin_name", "engineering-assistant")
+    publish_root = publish_root or expand(config["publish_root"])
+    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / "marketplace.json")))
+    plugin_relative = Path(config.get("plugin_relative_path", f"plugins/{plugin_name}"))
+    plugin_root = publish_root / plugin_relative
+    ensure_not_repo_path(repo_root, publish_root)
+    ensure_not_repo_path(repo_root, marketplace_path)
+
+    manifest = repo_root / "engineering-assistant" / "plugin" / "plugin.json"
+    skills = repo_root / "skills"
+    runtime = repo_root / "engineering-assistant"
+    if not manifest.exists():
+        raise SystemExit(f"missing plugin manifest source: {manifest}")
+
+    plugin_root.parent.mkdir(parents=True, exist_ok=True)
+    if plugin_root.exists():
+        shutil.rmtree(plugin_root)
+    (plugin_root / ".codex-plugin").mkdir(parents=True, exist_ok=True)
+    shutil.copy2(manifest, plugin_root / ".codex-plugin" / "plugin.json")
+    copy_tree(skills, plugin_root / "skills")
+    copy_tree(runtime, plugin_root / "engineering-assistant")
+
+    marketplace_path.parent.mkdir(parents=True, exist_ok=True)
+    marketplace_path.write_text(json.dumps(marketplace_payload(config), ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    return {
+        "status": "published",
+        "plugin_root": str(plugin_root),
+        "marketplace_path": str(marketplace_path),
+        "plugin_manifest": str(plugin_root / ".codex-plugin" / "plugin.json"),
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Publish engineering-assistant as a Codex-recognizable local plugin.")
+    parser.add_argument("--config", default=str(DEFAULT_CONFIG))
+    parser.add_argument("--publish-root")
+    parser.add_argument("--marketplace-path")
+    args = parser.parse_args()
+    repo_root = Path(__file__).resolve().parents[2]
+    config = load_config(repo_root / args.config if not Path(args.config).is_absolute() else Path(args.config))
+    publish_root = expand(args.publish_root) if args.publish_root else None
+    marketplace_path = expand(args.marketplace_path) if args.marketplace_path else None
+    print(json.dumps(publish(repo_root, config, publish_root, marketplace_path), ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()
+""",
         "recommend_context.py": """#!/usr/bin/env python3
 import argparse
 import json
@@ -3347,6 +3450,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 CASES = ["happy_path", "missing_required_input", "ambiguous_input", "policy_conflict", "edge_case", "regression_case", "technology_demo_adoption", "control_plane_drift", "rule_consumption_gap", "context_noise_overload", "low_quality_automation"]
@@ -3411,9 +3515,31 @@ def run_scored_evals() -> dict:
             required_ok = not context.get("missing_required_sources")
             checks.append({"id": "canary-context-pack", "status": "pass" if context.get("status") == "pass" and forbidden_ok and required_ok else "block", "detail": context})
     plugin_sync = []
-    for left, right in [("skills", "plugins/engineering-assistant/skills"), ("engineering-assistant", "plugins/engineering-assistant/engineering-assistant")]:
-        result = subprocess.run(["diff", "-qr", left, right], text=True, capture_output=True, check=False)
-        plugin_sync.append({"left": left, "right": right, "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
+    with tempfile.TemporaryDirectory() as temp_dir:
+        publish_root = Path(temp_dir) / "publish"
+        marketplace_path = publish_root / "marketplace.json"
+        publish_result = subprocess.run(
+            [
+                sys.executable,
+                "engineering-assistant/scripts/publish_plugin.py",
+                "--publish-root",
+                str(publish_root),
+                "--marketplace-path",
+                str(marketplace_path),
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if publish_result.returncode != 0:
+            plugin_sync.append({"left": "source", "right": str(publish_root), "status": "block", "detail": publish_result.stdout + publish_result.stderr})
+        else:
+            plugin_root = publish_root / "plugins" / "engineering-assistant"
+            for left, right in [("skills", plugin_root / "skills"), ("engineering-assistant", plugin_root / "engineering-assistant")]:
+                result = subprocess.run(["diff", "-qr", left, str(right)], text=True, capture_output=True, check=False)
+                plugin_sync.append({"left": left, "right": str(right), "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
+            manifest_ok = (plugin_root / ".codex-plugin" / "plugin.json").exists() and marketplace_path.exists()
+            plugin_sync.append({"left": "plugin-manifest", "right": str(plugin_root), "status": "pass" if manifest_ok else "block", "detail": publish_result.stdout + publish_result.stderr})
     checks.extend({"id": f"plugin-sync-{Path(item['left']).name}", **item} for item in plugin_sync)
     passed = sum(1 for check in checks if check["status"] == "pass")
     report = {
@@ -3432,11 +3558,9 @@ def run_scored_evals() -> dict:
     if not args.no_write_report:
         for path in [
             Path("engineering-assistant/evals/reports/eval-report.json"),
-            Path("plugins/engineering-assistant/engineering-assistant/evals/reports/eval-report.json"),
         ]:
-            if path.parent.exists() or "plugins/" not in str(path):
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
     return report
 
 for required_eval in [
@@ -4766,13 +4890,13 @@ print("CI 产物目录已准备")
     })
     write_text(base / "evals" / "reports" / "README.md", "# Eval Reports\n\n`run_skill_evals.py --mode scored` writes deterministic scored eval results here and mirrors the report into the plugin package when present.")
     write_json(base / "evals" / "reports" / "eval-report.json", {"status": "pass", "metrics": {}, "checks": []})
+    write_json(base / "plugin" / "plugin.json", plugin_manifest())
     write_text(base / "artifacts" / "README.md", "# 运行产物\n\nWorkflow 输出、trace 日志、审批请求和审计证据按 run id 存放在这里。")
     generate_runtime_policy_pack(base)
 
 
-def generate_plugin_package() -> None:
-    plugin_root = ROOT / "plugins" / PLUGIN_NAME
-    write_json(plugin_root / ".codex-plugin" / "plugin.json", {
+def plugin_manifest() -> dict:
+    return {
         "name": PLUGIN_NAME,
         "version": "1.0.0",
         "description": "团队研发助手插件，提供需求准入、主动信息补全、技术/框架选型评审、前端设计研发、代码上下文分析、概要/详细设计、DB/Redis/MQ 设计、设计评审、实现控制、文档治理、代码质量治理和经验沉淀能力。",
@@ -4806,9 +4930,25 @@ def generate_plugin_package() -> None:
             ],
             "brandColor": "#2563EB",
         },
+    }
+
+
+def generate_plugin_publish_config() -> None:
+    write_json(ROOT / ".agent" / "plugins" / "publish-config.json", {
+        "name": "local-engineering",
+        "interface": {
+            "displayName": "Local Engineering Plugins",
+        },
+        "plugin_name": PLUGIN_NAME,
+        "publish_root": "~/.codex/local-plugins/local-engineering",
+        "marketplace_path": "~/.codex/local-plugins/local-engineering/marketplace.json",
+        "plugin_relative_path": f"plugins/{PLUGIN_NAME}",
+        "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL",
+        },
+        "category": "Productivity",
     })
-    copy_generated_tree(ROOT / SKILLS_ROOT, plugin_root / "skills")
-    copy_generated_tree(ROOT / "engineering-assistant", plugin_root / "engineering-assistant")
 
 
 def delivery_doc() -> str:
@@ -5007,13 +5147,14 @@ python3 engineering-assistant/scripts/run_skill_evals.py
 def root_readme() -> str:
     return f"""# agent-skills
 
-本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布镜像。
+本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布配置。仓库不保留临时发布目录，Codex 可识别插件由发布脚本生成到配置目录。
 
 ## 目录边界
 
 - `skills/`：可触发 skill 源树，包含 `SKILL.md`、`contract.yaml`、`output.schema.json`、eval 和 workflow node。
 - `engineering-assistant/`：治理与运行时资产，包含 standards、schemas、scripts、workflows、registry、runtime policy、compiled skill IR 和 eval fixtures。
-- `plugins/engineering-assistant/`：Codex 插件发布镜像，由生成器同步生成，禁止直接手补。
+- `.agent/plugins/publish-config.json`：本地发布配置，指定发布根目录和 marketplace 输出路径。
+- 发布目录：默认 `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/`，由 `publish_plugin.py` 生成，不能手补回仓库。
 
 ## 修改方式
 
@@ -5023,7 +5164,22 @@ def root_readme() -> str:
 python3 generate_engineering_assistant_assets.py
 ```
 
-生成器会刷新 `skills/`、`engineering-assistant/` 和 `plugins/engineering-assistant/`。新增运行时能力也必须进入生成器、schema、测试和插件镜像。
+生成器会刷新 `skills/`、`engineering-assistant/`、发布脚本输入和本地发布配置。新增运行时能力也必须进入生成器、schema、测试，并通过发布脚本进入 Codex 插件包。
+
+## 发布给 Codex 使用
+
+```bash
+python3 engineering-assistant/scripts/publish_plugin.py
+```
+
+发布脚本会读取 `.agent/plugins/publish-config.json`，生成：
+
+- `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/.codex-plugin/plugin.json`
+- `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/skills/`
+- `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/engineering-assistant/`
+- `~/.codex/local-plugins/local-engineering/marketplace.json`
+
+Codex 使用该 marketplace 后即可识别 `engineering-assistant` 插件。
 
 ## 验证命令
 
@@ -5035,8 +5191,9 @@ python3 engineering-assistant/scripts/run_skill_evals.py
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored --no-write-report
 python3 engineering-assistant/scripts/validate_skill_metadata.py
-diff -qr skills plugins/engineering-assistant/skills
-diff -qr engineering-assistant plugins/engineering-assistant/engineering-assistant
+python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/marketplace.json
+diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills
+diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant
 ```
 
 ## 下游 canary
@@ -5045,7 +5202,7 @@ diff -qr engineering-assistant plugins/engineering-assistant/engineering-assista
 
 `{DOWNSTREAM_CANARY_ROOT}`
 
-`engineering-assistant/evals/fixtures/ai-platform-v1.json` 记录允许读取的 workflow/control-plane 入口。`run_skill_evals.py --mode scored` 会验证 router、context pack 和插件镜像同步，不写入下游仓库。
+`engineering-assistant/evals/fixtures/ai-platform-v1.json` 记录允许读取的 workflow/control-plane 入口。`run_skill_evals.py --mode scored` 会验证 router、context pack 和发布包同步，不写入下游仓库。
 """
 
 
@@ -5063,8 +5220,9 @@ def generate_root_ci() -> None:
                 {"name": "Validate skill evals", "run": "python3 engineering-assistant/scripts/run_skill_evals.py"},
                 {"name": "Validate scored evals", "run": "python3 engineering-assistant/scripts/run_skill_evals.py --mode scored"},
                 {"name": "Validate metadata", "run": "python3 engineering-assistant/scripts/validate_skill_metadata.py"},
-                {"name": "Check skill mirror sync", "run": "diff -qr skills plugins/engineering-assistant/skills"},
-                {"name": "Check governance mirror sync", "run": "diff -qr engineering-assistant plugins/engineering-assistant/engineering-assistant"},
+                {"name": "Publish plugin package", "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/marketplace.json"},
+                {"name": "Check published skill sync", "run": "diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills"},
+                {"name": "Check published governance sync", "run": "diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant"},
             ]}},
         },
         "codex-skill-eval.yml": {
@@ -5098,10 +5256,10 @@ def generate_root_ci() -> None:
 def main() -> None:
     write_text(ROOT / "AGENTS.md", agents_doc())
     write_text(ROOT / "README.md", root_readme())
+    generate_plugin_publish_config()
     generate_root_ci()
     generate_skills()
     generate_engineering_assistant()
-    generate_plugin_package()
     write_text(ROOT / "engineering-assistant-delivery.md", delivery_doc())
 
 

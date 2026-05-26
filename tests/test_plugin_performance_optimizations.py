@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_SCRIPTS = ROOT / "plugins" / "engineering-assistant" / "engineering-assistant" / "scripts"
+PLUGIN_SCRIPTS = ROOT / "engineering-assistant" / "scripts"
 
 
 def write_json(path: Path, payload: dict) -> None:

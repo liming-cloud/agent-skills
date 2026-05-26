@@ -4,12 +4,35 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_ROOT = ROOT / "plugins" / "engineering-assistant"
+
+
+def publish_to_temp(test_case: unittest.TestCase) -> Path:
+    temp_dir = tempfile.TemporaryDirectory()
+    test_case.addCleanup(temp_dir.cleanup)
+    publish_root = Path(temp_dir.name) / "publish"
+    result = subprocess.run(
+        [
+            "python3",
+            str(ROOT / "engineering-assistant" / "scripts" / "publish_plugin.py"),
+            "--publish-root",
+            str(publish_root),
+            "--marketplace-path",
+            str(publish_root / "marketplace.json"),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
+    return publish_root / "plugins" / "engineering-assistant"
 
 
 class FrameworkFrontendCapabilitiesTest(unittest.TestCase):
@@ -57,9 +80,10 @@ class FrameworkFrontendCapabilitiesTest(unittest.TestCase):
         self.assertIn("主动询问", skill_md)
 
     def test_frontend_skills_and_workflows_exist(self) -> None:
+        plugin_root = publish_to_temp(self)
         for skill_id in ["frontend-design", "frontend-development"]:
             self.assertTrue((ROOT / "skills" / skill_id / "SKILL.md").exists(), f"missing {skill_id} source skill")
-            self.assertTrue((PLUGIN_ROOT / "skills" / skill_id / "SKILL.md").exists(), f"missing {skill_id} plugin skill")
+            self.assertTrue((plugin_root / "skills" / skill_id / "SKILL.md").exists(), f"missing {skill_id} plugin skill")
 
         registry = json.loads((ROOT / "engineering-assistant" / "registry" / "skills.yaml").read_text(encoding="utf-8"))
         skill_ids = {item["skill_id"] for item in registry["skills"]}

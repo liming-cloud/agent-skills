@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-HOOK = ROOT / "plugins" / "engineering-assistant" / "engineering-assistant" / "runtime" / "codex" / "hooks" / "pre_tool_use_policy.py"
+HOOK = ROOT / "engineering-assistant" / "runtime" / "codex" / "hooks" / "pre_tool_use_policy.py"
 
 
 class PluginRuntimeHooksRulesTests(unittest.TestCase):
@@ -30,7 +30,7 @@ class PluginRuntimeHooksRulesTests(unittest.TestCase):
         output = self.run_hook("python3 - <<'PY'\nopen('plugins/engineering-assistant/skills/x','w').write('bad')\nPY")
         decision = output["hookSpecificOutput"]
         self.assertEqual("deny", decision["permissionDecision"])
-        self.assertIn("插件镜像", decision["permissionDecisionReason"])
+        self.assertIn("插件发布目录", decision["permissionDecisionReason"])
 
     def test_hook_adds_context_for_controlled_task_scripts(self) -> None:
         output = self.run_hook("python3 engineering-assistant/scripts/run_controlled_task.py --root /tmp/project")

@@ -11,7 +11,28 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_ROOT = ROOT / "plugins" / "engineering-assistant"
+
+
+def publish_to_temp(test_case: unittest.TestCase) -> Path:
+    temp_dir = tempfile.TemporaryDirectory()
+    test_case.addCleanup(temp_dir.cleanup)
+    publish_root = Path(temp_dir.name) / "publish"
+    result = subprocess.run(
+        [
+            "python3",
+            str(ROOT / "engineering-assistant" / "scripts" / "publish_plugin.py"),
+            "--publish-root",
+            str(publish_root),
+            "--marketplace-path",
+            str(publish_root / "marketplace.json"),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
+    return publish_root / "plugins" / "engineering-assistant"
 
 
 class DocumentGovernanceSourceSyncTest(unittest.TestCase):
@@ -92,8 +113,9 @@ class DocumentGovernanceSourceSyncTest(unittest.TestCase):
 
     def test_generator_preserves_standard_plugin_layout(self) -> None:
         generator = (ROOT / "generate_engineering_assistant_assets.py").read_text(encoding="utf-8")
-        self.assertIn('copy_generated_tree(ROOT / SKILLS_ROOT, plugin_root / "skills")', generator)
-        self.assertIn('copy_generated_tree(ROOT / "engineering-assistant", plugin_root / "engineering-assistant")', generator)
+        self.assertIn('"publish_plugin.py"', generator)
+        self.assertIn('copy_tree(skills, plugin_root / "skills")', generator)
+        self.assertIn('copy_tree(runtime, plugin_root / "engineering-assistant")', generator)
         self.assertNotIn('plugin_root / "standards"', generator)
         self.assertNotIn('plugin_root / "schemas"', generator)
         self.assertNotIn('plugin_root / "renderers"', generator)
@@ -101,6 +123,7 @@ class DocumentGovernanceSourceSyncTest(unittest.TestCase):
         self.assertNotIn('plugin_root / "marketplace.example.json"', generator)
 
     def test_plugin_has_no_root_level_source_mirrors(self) -> None:
+        plugin_root = publish_to_temp(self)
         forbidden = [
             "checklists",
             "evals",
@@ -115,7 +138,7 @@ class DocumentGovernanceSourceSyncTest(unittest.TestCase):
             "marketplace.example.json",
             "README.md",
         ]
-        existing = [item for item in forbidden if (PLUGIN_ROOT / item).exists()]
+        existing = [item for item in forbidden if (plugin_root / item).exists()]
         self.assertEqual([], existing)
 
     def test_lifecycle_validator_blocks_intermediate_persisted_docs(self) -> None:

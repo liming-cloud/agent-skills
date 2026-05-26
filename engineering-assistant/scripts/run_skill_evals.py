@@ -3,6 +3,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 CASES = ["happy_path", "missing_required_input", "ambiguous_input", "policy_conflict", "edge_case", "regression_case", "technology_demo_adoption", "control_plane_drift", "rule_consumption_gap", "context_noise_overload", "low_quality_automation"]
@@ -67,9 +68,31 @@ def run_scored_evals() -> dict:
             required_ok = not context.get("missing_required_sources")
             checks.append({"id": "canary-context-pack", "status": "pass" if context.get("status") == "pass" and forbidden_ok and required_ok else "block", "detail": context})
     plugin_sync = []
-    for left, right in [("skills", "plugins/engineering-assistant/skills"), ("engineering-assistant", "plugins/engineering-assistant/engineering-assistant")]:
-        result = subprocess.run(["diff", "-qr", left, right], text=True, capture_output=True, check=False)
-        plugin_sync.append({"left": left, "right": right, "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
+    with tempfile.TemporaryDirectory() as temp_dir:
+        publish_root = Path(temp_dir) / "publish"
+        marketplace_path = publish_root / "marketplace.json"
+        publish_result = subprocess.run(
+            [
+                sys.executable,
+                "engineering-assistant/scripts/publish_plugin.py",
+                "--publish-root",
+                str(publish_root),
+                "--marketplace-path",
+                str(marketplace_path),
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if publish_result.returncode != 0:
+            plugin_sync.append({"left": "source", "right": str(publish_root), "status": "block", "detail": publish_result.stdout + publish_result.stderr})
+        else:
+            plugin_root = publish_root / "plugins" / "engineering-assistant"
+            for left, right in [("skills", plugin_root / "skills"), ("engineering-assistant", plugin_root / "engineering-assistant")]:
+                result = subprocess.run(["diff", "-qr", left, str(right)], text=True, capture_output=True, check=False)
+                plugin_sync.append({"left": left, "right": str(right), "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
+            manifest_ok = (plugin_root / ".codex-plugin" / "plugin.json").exists() and marketplace_path.exists()
+            plugin_sync.append({"left": "plugin-manifest", "right": str(plugin_root), "status": "pass" if manifest_ok else "block", "detail": publish_result.stdout + publish_result.stderr})
     checks.extend({"id": f"plugin-sync-{Path(item['left']).name}", **item} for item in plugin_sync)
     passed = sum(1 for check in checks if check["status"] == "pass")
     report = {
@@ -88,11 +111,9 @@ def run_scored_evals() -> dict:
     if not args.no_write_report:
         for path in [
             Path("engineering-assistant/evals/reports/eval-report.json"),
-            Path("plugins/engineering-assistant/engineering-assistant/evals/reports/eval-report.json"),
         ]:
-            if path.parent.exists() or "plugins/" not in str(path):
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return report
 
 for required_eval in [
