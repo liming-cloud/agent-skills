@@ -64,6 +64,8 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
         self.assertIn("generate_engineering_assistant_assets.py", text)
         self.assertIn("publish_plugin.py", text)
         self.assertIn(".agent/plugins/publish-config.json", text)
+        self.assertIn("--layout personal", text)
+        self.assertIn("~/.agents/plugins/marketplace.json", text)
         self.assertIn("/Users/sunliming/work/project/personal/ai-platform-v1", text)
         self.assertIn("run_skill_evals.py --mode scored", text)
 
@@ -209,6 +211,25 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             self.assertTrue((ROOT / rel).exists(), f"missing source {rel}")
             self.assertTrue((plugin_root / rel).exists(), f"missing published plugin asset {rel}")
         self.assertTrue((plugin_root / ".codex-plugin" / "plugin.json").exists())
+
+    def test_publish_plugin_supports_canonical_personal_marketplace_layout(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            personal_root = Path(temp_dir) / "home"
+            result = run_script("publish_plugin.py", "--layout", "personal", "--publish-root", str(personal_root))
+            self.assertEqual(0, result.returncode, result.stderr + result.stdout)
+
+            plugin_root = personal_root / "plugins" / "engineering-assistant"
+            marketplace_path = personal_root / ".agents" / "plugins" / "marketplace.json"
+            self.assertTrue((plugin_root / ".codex-plugin" / "plugin.json").exists())
+            self.assertTrue((plugin_root / "skills").exists())
+            self.assertTrue((plugin_root / "engineering-assistant").exists())
+            marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+            self.assertEqual("personal", marketplace["name"])
+            self.assertEqual("Personal", marketplace["interface"]["displayName"])
+            self.assertEqual("./plugins/engineering-assistant", marketplace["plugins"][0]["source"]["path"])
+            payload = json.loads(result.stdout)
+            self.assertEqual("personal", payload["layout"])
+            self.assertEqual(str(marketplace_path.resolve()), payload["marketplace_path"])
 
 
 if __name__ == "__main__":

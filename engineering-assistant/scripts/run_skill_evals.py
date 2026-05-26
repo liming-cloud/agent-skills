@@ -93,6 +93,34 @@ def run_scored_evals() -> dict:
                 plugin_sync.append({"left": left, "right": str(right), "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
             manifest_ok = (plugin_root / ".codex-plugin" / "plugin.json").exists() and marketplace_path.exists()
             plugin_sync.append({"left": "plugin-manifest", "right": str(plugin_root), "status": "pass" if manifest_ok else "block", "detail": publish_result.stdout + publish_result.stderr})
+        personal_root = Path(temp_dir) / "personal"
+        personal_result = subprocess.run(
+            [
+                sys.executable,
+                "engineering-assistant/scripts/publish_plugin.py",
+                "--layout",
+                "personal",
+                "--publish-root",
+                str(personal_root),
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        personal_plugin_root = personal_root / "plugins" / "engineering-assistant"
+        personal_marketplace = personal_root / ".agents" / "plugins" / "marketplace.json"
+        personal_manifest_ok = personal_result.returncode == 0 and (personal_plugin_root / ".codex-plugin" / "plugin.json").exists() and personal_marketplace.exists()
+        if personal_manifest_ok:
+            try:
+                marketplace = json.loads(personal_marketplace.read_text(encoding="utf-8"))
+                personal_manifest_ok = (
+                    marketplace.get("name") == "personal"
+                    and marketplace.get("interface", {}).get("displayName") == "Personal"
+                    and marketplace.get("plugins", [{}])[0].get("source", {}).get("path") == "./plugins/engineering-assistant"
+                )
+            except (json.JSONDecodeError, IndexError):
+                personal_manifest_ok = False
+        plugin_sync.append({"left": "personal-marketplace", "right": str(personal_marketplace), "status": "pass" if personal_manifest_ok else "block", "detail": personal_result.stdout + personal_result.stderr})
     checks.extend({"id": f"plugin-sync-{Path(item['left']).name}", **item} for item in plugin_sync)
     passed = sum(1 for check in checks if check["status"] == "pass")
     report = {

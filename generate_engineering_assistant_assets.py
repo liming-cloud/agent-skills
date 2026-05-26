@@ -2699,10 +2699,27 @@ def marketplace_payload(config: dict) -> dict:
     }
 
 
-def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None) -> dict:
+def apply_layout(config: dict, layout: str) -> dict:
+    resolved = dict(config)
+    if layout == "local-root":
+        return resolved
+    if layout == "personal":
+        resolved["name"] = "personal"
+        resolved["interface"] = {"displayName": "Personal"}
+        resolved["publish_root"] = "~"
+        resolved["marketplace_path"] = "~/.agents/plugins/marketplace.json"
+        resolved["plugin_relative_path"] = f"plugins/{resolved.get('plugin_name', 'engineering-assistant')}"
+        return resolved
+    raise SystemExit(f"unsupported publish layout: {layout}")
+
+
+def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None, layout="local-root") -> dict:
+    config = apply_layout(config, layout)
     plugin_name = config.get("plugin_name", "engineering-assistant")
+    publish_root_override = publish_root is not None
     publish_root = publish_root or expand(config["publish_root"])
-    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / ".agents" / "plugins" / "marketplace.json")))
+    if marketplace_path is None:
+        marketplace_path = publish_root / ".agents" / "plugins" / "marketplace.json" if publish_root_override else expand(config.get("marketplace_path", str(publish_root / ".agents" / "plugins" / "marketplace.json")))
     plugin_relative = Path(config.get("plugin_relative_path", f"plugins/{plugin_name}"))
     plugin_root = publish_root / plugin_relative
     ensure_not_repo_path(repo_root, publish_root)
@@ -2729,6 +2746,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
         legacy_marketplace.unlink()
     return {
         "status": "published",
+        "layout": layout,
         "plugin_root": str(plugin_root),
         "marketplace_path": str(marketplace_path),
         "plugin_manifest": str(plugin_root / ".codex-plugin" / "plugin.json"),
@@ -2738,6 +2756,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
 def main():
     parser = argparse.ArgumentParser(description="Publish engineering-assistant as a Codex-recognizable local plugin.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
+    parser.add_argument("--layout", choices=["local-root", "personal"], default="local-root", help="local-root uses configured publish_root; personal writes the canonical Codex personal marketplace under ~/.agents/plugins.")
     parser.add_argument("--publish-root")
     parser.add_argument("--marketplace-path")
     args = parser.parse_args()
@@ -2745,7 +2764,7 @@ def main():
     config = load_config(repo_root / args.config if not Path(args.config).is_absolute() else Path(args.config))
     publish_root = expand(args.publish_root) if args.publish_root else None
     marketplace_path = expand(args.marketplace_path) if args.marketplace_path else None
-    print(json.dumps(publish(repo_root, config, publish_root, marketplace_path), ensure_ascii=False, indent=2))
+    print(json.dumps(publish(repo_root, config, publish_root, marketplace_path, args.layout), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
@@ -3543,6 +3562,34 @@ def run_scored_evals() -> dict:
                 plugin_sync.append({"left": left, "right": str(right), "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
             manifest_ok = (plugin_root / ".codex-plugin" / "plugin.json").exists() and marketplace_path.exists()
             plugin_sync.append({"left": "plugin-manifest", "right": str(plugin_root), "status": "pass" if manifest_ok else "block", "detail": publish_result.stdout + publish_result.stderr})
+        personal_root = Path(temp_dir) / "personal"
+        personal_result = subprocess.run(
+            [
+                sys.executable,
+                "engineering-assistant/scripts/publish_plugin.py",
+                "--layout",
+                "personal",
+                "--publish-root",
+                str(personal_root),
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        personal_plugin_root = personal_root / "plugins" / "engineering-assistant"
+        personal_marketplace = personal_root / ".agents" / "plugins" / "marketplace.json"
+        personal_manifest_ok = personal_result.returncode == 0 and (personal_plugin_root / ".codex-plugin" / "plugin.json").exists() and personal_marketplace.exists()
+        if personal_manifest_ok:
+            try:
+                marketplace = json.loads(personal_marketplace.read_text(encoding="utf-8"))
+                personal_manifest_ok = (
+                    marketplace.get("name") == "personal"
+                    and marketplace.get("interface", {}).get("displayName") == "Personal"
+                    and marketplace.get("plugins", [{}])[0].get("source", {}).get("path") == "./plugins/engineering-assistant"
+                )
+            except (json.JSONDecodeError, IndexError):
+                personal_manifest_ok = False
+        plugin_sync.append({"left": "personal-marketplace", "right": str(personal_marketplace), "status": "pass" if personal_manifest_ok else "block", "detail": personal_result.stdout + personal_result.stderr})
     checks.extend({"id": f"plugin-sync-{Path(item['left']).name}", **item} for item in plugin_sync)
     passed = sum(1 for check in checks if check["status"] == "pass")
     report = {
@@ -5156,8 +5203,8 @@ def root_readme() -> str:
 
 - `skills/`：可触发 skill 源树，包含 `SKILL.md`、`contract.yaml`、`output.schema.json`、eval 和 workflow node。
 - `engineering-assistant/`：治理与运行时资产，包含 standards、schemas、scripts、workflows、registry、runtime policy、compiled skill IR 和 eval fixtures。
-- `.agent/plugins/publish-config.json`：本地发布配置，指定发布根目录和 marketplace 输出路径。
-- 发布目录：默认 `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/`，由 `publish_plugin.py` 生成，不能手补回仓库。
+- `.agent/plugins/publish-config.json`：本地发布配置，指定默认发布根目录和 marketplace 输出路径。
+- 发布目录：由 `publish_plugin.py` 生成，不能手补回仓库；默认 local-root 发布到 `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/`。
 
 ## 修改方式
 
@@ -5171,18 +5218,35 @@ python3 generate_engineering_assistant_assets.py
 
 ## 发布给 Codex 使用
 
+推荐使用 Codex 官方个人 marketplace 布局：
+
+```bash
+python3 engineering-assistant/scripts/publish_plugin.py --layout personal
+```
+
+该方式生成：
+
+- `~/plugins/engineering-assistant/.codex-plugin/plugin.json`
+- `~/plugins/engineering-assistant/skills/`
+- `~/plugins/engineering-assistant/engineering-assistant/`
+- `~/.agents/plugins/marketplace.json`
+
+如果 Codex App 的插件安装页不接受自定义 marketplace 根目录，优先使用该 personal 布局。
+
+保留配置化 local-root 布局用于隔离验证：
+
 ```bash
 python3 engineering-assistant/scripts/publish_plugin.py
 ```
 
-发布脚本会读取 `.agent/plugins/publish-config.json`，生成：
+local-root 会读取 `.agent/plugins/publish-config.json`，生成：
 
 - `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/.codex-plugin/plugin.json`
 - `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/skills/`
 - `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/engineering-assistant/`
 - `~/.codex/local-plugins/local-engineering/.agents/plugins/marketplace.json`
 
-Codex 使用该 marketplace 后即可识别 `engineering-assistant` 插件。
+Codex 使用对应 marketplace 后即可识别 `engineering-assistant` 插件。仓库内仍不保留 `plugins/` 临时发布目录。
 
 ## 验证命令
 
@@ -5194,6 +5258,7 @@ python3 engineering-assistant/scripts/run_skill_evals.py
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored --no-write-report
 python3 engineering-assistant/scripts/validate_skill_metadata.py
+python3 engineering-assistant/scripts/publish_plugin.py --layout personal --publish-root /tmp/engineering-assistant-personal
 python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/.agents/plugins/marketplace.json
 diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills
 diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant

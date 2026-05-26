@@ -52,10 +52,27 @@ def marketplace_payload(config: dict) -> dict:
     }
 
 
-def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None) -> dict:
+def apply_layout(config: dict, layout: str) -> dict:
+    resolved = dict(config)
+    if layout == "local-root":
+        return resolved
+    if layout == "personal":
+        resolved["name"] = "personal"
+        resolved["interface"] = {"displayName": "Personal"}
+        resolved["publish_root"] = "~"
+        resolved["marketplace_path"] = "~/.agents/plugins/marketplace.json"
+        resolved["plugin_relative_path"] = f"plugins/{resolved.get('plugin_name', 'engineering-assistant')}"
+        return resolved
+    raise SystemExit(f"unsupported publish layout: {layout}")
+
+
+def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None, layout="local-root") -> dict:
+    config = apply_layout(config, layout)
     plugin_name = config.get("plugin_name", "engineering-assistant")
+    publish_root_override = publish_root is not None
     publish_root = publish_root or expand(config["publish_root"])
-    marketplace_path = marketplace_path or expand(config.get("marketplace_path", str(publish_root / ".agents" / "plugins" / "marketplace.json")))
+    if marketplace_path is None:
+        marketplace_path = publish_root / ".agents" / "plugins" / "marketplace.json" if publish_root_override else expand(config.get("marketplace_path", str(publish_root / ".agents" / "plugins" / "marketplace.json")))
     plugin_relative = Path(config.get("plugin_relative_path", f"plugins/{plugin_name}"))
     plugin_root = publish_root / plugin_relative
     ensure_not_repo_path(repo_root, publish_root)
@@ -82,6 +99,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
         legacy_marketplace.unlink()
     return {
         "status": "published",
+        "layout": layout,
         "plugin_root": str(plugin_root),
         "marketplace_path": str(marketplace_path),
         "plugin_manifest": str(plugin_root / ".codex-plugin" / "plugin.json"),
@@ -91,6 +109,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
 def main():
     parser = argparse.ArgumentParser(description="Publish engineering-assistant as a Codex-recognizable local plugin.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
+    parser.add_argument("--layout", choices=["local-root", "personal"], default="local-root", help="local-root uses configured publish_root; personal writes the canonical Codex personal marketplace under ~/.agents/plugins.")
     parser.add_argument("--publish-root")
     parser.add_argument("--marketplace-path")
     args = parser.parse_args()
@@ -98,7 +117,7 @@ def main():
     config = load_config(repo_root / args.config if not Path(args.config).is_absolute() else Path(args.config))
     publish_root = expand(args.publish_root) if args.publish_root else None
     marketplace_path = expand(args.marketplace_path) if args.marketplace_path else None
-    print(json.dumps(publish(repo_root, config, publish_root, marketplace_path), ensure_ascii=False, indent=2))
+    print(json.dumps(publish(repo_root, config, publish_root, marketplace_path, args.layout), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
