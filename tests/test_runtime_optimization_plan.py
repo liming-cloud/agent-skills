@@ -82,6 +82,21 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
         self.assertIn("explicit-only", payload["reason"])
         self.assertTrue(payload["candidates"])
 
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8") as context_file:
+            context_file.write("runtime fact source: engineering-assistant/workflow-orchestrator")
+            context_file.flush()
+            context_route = run_script(
+                "route_skill.py",
+                "--prompt",
+                "继续推进任务 complete_identity_access_rbac_and_model_usage_policy_projection_before_rag_runtime",
+                "--context",
+                context_file.name,
+            )
+        self.assertEqual(0, context_route.returncode, context_route.stderr + context_route.stdout)
+        context_payload = json.loads(context_route.stdout)
+        self.assertEqual("waiting_for_input", context_payload["status"])
+        self.assertIn("explicit-only", context_payload["reason"])
+
     def test_context_pack_uses_only_allowed_ai_platform_sources(self) -> None:
         fixture = json.loads((ROOT / "engineering-assistant" / "evals" / "fixtures" / "ai-platform-v1.json").read_text(encoding="utf-8"))
         result = run_script(

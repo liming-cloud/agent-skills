@@ -2579,11 +2579,15 @@ def load_registry(root: Path) -> list[dict]:
     return json.loads(registry.read_text(encoding="utf-8")).get("skills", [])
 
 
-def score_skill(prompt: str, skill: dict) -> int:
+def explicit_skill_mention(prompt: str, skill_id: str) -> bool:
+    return re.search(rf"(^|\\s|使用|use\\s+){re.escape(skill_id)}($|\\s|，|,)", prompt.lower()) is not None
+
+
+def score_skill(prompt: str, skill: dict, explicit_prompt: str) -> int:
     text = prompt.lower()
     skill_id = skill["skill_id"]
     score = 0
-    if re.search(rf"(^|\\s|使用|use\\s+){re.escape(skill_id)}($|\\s|，|,)", text):
+    if explicit_skill_mention(explicit_prompt, skill_id):
         score += 100
     for token in skill_id.split("-"):
         if token and token in text:
@@ -2606,16 +2610,17 @@ def score_skill(prompt: str, skill: dict) -> int:
     return score
 
 
-def route(prompt: str, root: Path) -> dict:
-    if any(token in prompt for token in EXPLAIN_ONLY):
+def route(prompt: str, root: Path, explicit_prompt=None) -> dict:
+    explicit_prompt = explicit_prompt if explicit_prompt is not None else prompt
+    if any(token in explicit_prompt for token in EXPLAIN_ONLY):
         return {"status": "rejected", "decision": None, "confidence": 1.0, "reason": "咨询说明类请求不执行 skill", "candidates": []}
     skills = load_registry(root)
-    scored = sorted(({"skill_id": skill["skill_id"], "score": score_skill(prompt, skill), "risk_level": skill.get("risk_level", "medium"), "allow_implicit_invocation": skill.get("allow_implicit_invocation", True)} for skill in skills), key=lambda item: item["score"], reverse=True)
+    scored = sorted(({"skill_id": skill["skill_id"], "score": score_skill(prompt, skill, explicit_prompt), "risk_level": skill.get("risk_level", "medium"), "allow_implicit_invocation": skill.get("allow_implicit_invocation", True)} for skill in skills), key=lambda item: item["score"], reverse=True)
     candidates = [item for item in scored if item["score"] > 0][:5]
     if not candidates:
         return {"status": "waiting_for_input", "decision": None, "confidence": 0.0, "reason": "无法确定最小足够 skill", "candidates": []}
     top = candidates[0]
-    explicit = re.search(rf"(^|\\s|使用|use\\s+){re.escape(top['skill_id'])}($|\\s|，|,)", prompt.lower()) is not None
+    explicit = explicit_skill_mention(explicit_prompt, top["skill_id"])
     if top["skill_id"] in HIGH_RISK and not explicit:
         return {"status": "waiting_for_input", "decision": None, "confidence": min(top["score"] / 100, 0.89), "reason": "高风险 skill 必须 explicit-only", "candidates": candidates}
     second_score = candidates[1]["score"] if len(candidates) > 1 else 0
@@ -2630,10 +2635,11 @@ def main():
     parser.add_argument("--root", default=".")
     parser.add_argument("--context")
     args = parser.parse_args()
-    prompt = args.prompt
+    explicit_prompt = args.prompt
+    prompt = explicit_prompt
     if args.context and Path(args.context).exists():
         prompt += "\\n" + Path(args.context).read_text(encoding="utf-8")[:4000]
-    print(json.dumps(route(prompt, Path(args.root)), ensure_ascii=False, indent=2))
+    print(json.dumps(route(prompt, Path(args.root), explicit_prompt=explicit_prompt), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
