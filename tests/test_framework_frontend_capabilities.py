@@ -32,7 +32,7 @@ def publish_to_temp(test_case: unittest.TestCase) -> Path:
         check=False,
     )
     test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
-    return publish_root / "plugins" / "engineering-assistant"
+    return publish_root / "plugins" / "teamwork-engineering-assistant"
 
 
 class FrameworkFrontendCapabilitiesTest(unittest.TestCase):

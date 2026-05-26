@@ -98,6 +98,22 @@
     ],
     "writeback": "StageRunRequest.context.technology_selection"
   },
+  "team_adaptation_policy": {
+    "profile_id": "rrq-yq-team",
+    "profile_path": "engineering-assistant/profiles/rrq-yq-team.yaml",
+    "source_catalog": "engineering-assistant/registry/team-standard-sources.yaml",
+    "rule_prefixes": [
+      "RRQ",
+      "YAPI",
+      "YQ"
+    ],
+    "must_load_before_work": [
+      "team-rule-catalog.yaml",
+      "team-standard-sources.yaml",
+      "rrq-yq-team.yaml"
+    ],
+    "fallback": "如果目标项目 profile 与团队默认 profile 冲突，优先使用目标项目 profile，并把冲突作为 finding 或 required_information_requests 输出。"
+  },
   "inputs": [
     {
       "name": "release-verification-report.md",

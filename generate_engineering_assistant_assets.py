@@ -10,8 +10,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SKILLS_ROOT = "skills"
-PLUGIN_NAME = "engineering-assistant"
+PLUGIN_NAME = "teamwork-engineering-assistant"
+PLUGIN_DISPLAY_NAME = "团队研发助手"
+PLUGIN_MARKETPLACE_NAME = "local-teamwork-engineering"
+PLUGIN_MARKETPLACE_DISPLAY_NAME = "Local Teamwork Engineering Plugins"
 DOWNSTREAM_CANARY_ROOT = "/Users/sunliming/work/project/personal/ai-platform-v1"
+TEAM_STANDARDS_INPUT_ROOT = "/Users/sunliming/Desktop/snbc/hermes/tl-capability-optimization/inputs"
 
 EVAL_CASES = [
     "happy_path",
@@ -65,6 +69,12 @@ TEAM_RULE_PREFIXES = {
     "implementation-controller": ["A", "D", "I", "E", "P", "DB", "R", "M", "FW", "FE", "QIN"],
 }
 
+TEAM_ADAPTATION_RULE_PREFIXES = ["RRQ", "YAPI", "YQ"]
+for prefixes in TEAM_RULE_PREFIXES.values():
+    for prefix in TEAM_ADAPTATION_RULE_PREFIXES:
+        if prefix not in prefixes:
+            prefixes.append(prefix)
+
 HIGH_RISK_SKILLS = {
     "workflow-orchestrator",
     "code-development",
@@ -84,13 +94,74 @@ CONTROL_CONSUMER_SKILLS = {
 }
 
 DEFAULT_PROFILE = {
-    "profile_id": "generic-platform",
-    "display_name": "通用研发平台",
-    "system_scope": ["目标业务系统", "目标客户端系统"],
-    "service_code_policy": "由项目 profile 或 repo_context 注入，不在通用 skill 中硬编码。",
-    "interface_doc_tool": "接口文档平台",
-    "redis_runtime": "由项目 profile 或 repo_context 注入。",
+    "profile_id": "rrq-yq-team",
+    "display_name": "人人取/萤启团队研发平台",
+    "system_scope": ["人人取 SaaS 平台", "萤启服务商系统", "目标业务系统", "目标客户端系统"],
+    "service_code_policy": "优先从萤启服务商系统 profile、概要设计或 repo_context 注入；缺失时必须主动询问，不得自造服务编码。",
+    "interface_doc_tool": "YApi",
+    "redis_runtime": "遵循部门 Redis 设计规范；具体版本、拓扑、库、持久化、淘汰策略由项目 profile 或 repo_context 注入。",
+    "architecture_policy": "默认按人人取 2.0 技术架构规范评审系统边界、逻辑视图、事件协作、幂等和最终一致性。",
+    "plugin_name": PLUGIN_NAME,
 }
+
+TEAM_STANDARD_SOURCE_DOCUMENTS = [
+    {
+        "id": "rrq-common-tech",
+        "title": "人人取----通用技术需求",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/人人取----通用技术需求 - 人人取平台总体设计 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/doc/238/",
+        "topics": ["日志", "性能", "稳定性", "幂等", "异常", "安全", "业务监控"],
+    },
+    {
+        "id": "rrq-yapi-standard",
+        "title": "人人取----Yapi使用规范",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/人人取----Yapi使用规范 - 人人取平台总体设计 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/doc/",
+        "topics": ["YApi", "接口分组", "接口路径", "字段命名", "响应结构", "JSR303"],
+    },
+    {
+        "id": "rrq-redis-standard",
+        "title": "人人取----缓存Redis设计规范",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/人人取----缓存Redis设计规范 - 人人取平台总体设计 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/doc/135/",
+        "topics": ["Redis", "key", "value", "TTL", "命中率", "一致性", "运维安全"],
+    },
+    {
+        "id": "rrq-redis-template",
+        "title": "Redis详细设计模板",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/Redis详细设计模板 - 人人取平台总体设计 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/doc/497/",
+        "topics": ["Redis设计文档", "公共配置", "存储设计", "预估数据", "多团队协同", "监控"],
+    },
+    {
+        "id": "rrq-idempotency",
+        "title": "人人取----幂等性方案",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/人人取----幂等性方案 - 人人取平台总体设计 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/doc/482/",
+        "topics": ["幂等", "请求去重", "MQ去重", "乐观锁", "悲观锁", "最终一致性"],
+    },
+    {
+        "id": "rrq-architecture",
+        "title": "人人取----整体架构设计",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/人人取----整体架构设计 - 人人取平台总体设计 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/doc/134/",
+        "topics": ["微服务", "事件驱动", "DDD", "多租户", "最终一致性", "系统边界"],
+    },
+    {
+        "id": "yq-overview",
+        "title": "萤启运营系统概要设计",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/萤启运营系统概要设计 - 萤启服务商系统 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/project/",
+        "topics": ["萤启服务商系统", "异常编码", "系统交互", "性能", "YApi", "Redis"],
+    },
+    {
+        "id": "yq-vems-franchisee",
+        "title": "合作加盟服务(vems-franchisee)",
+        "source_path": f"{TEAM_STANDARDS_INPUT_ROOT}/合作加盟服务(vems-franchisee) - 萤启服务商系统 - 站点标题.html",
+        "source_url": "http://mrdoc.xtjc.net/project/",
+        "topics": ["vems-franchisee", "售货机管理", "加盟商", "MQ", "库存同步", "YApi"],
+    },
+]
 
 TEAM_RULE_CATALOG = [
     {"id": "A1", "category": "架构", "rule": "不强制平台采用微服务 + 事件驱动 + DDD，但是设计文档必须体现系统边界、业务域、事件协作和最终一致性。"},
@@ -161,6 +232,25 @@ TEAM_RULE_CATALOG = [
     {"id": "DG20", "category": "文档治理", "rule": "规则包必须保留 rule_id、强度、标签、规则文本、来源路径和行号。"},
     {"id": "DG21", "category": "文档治理", "rule": "重复规范必须先生成 duplicate report，再由文档治理任务合并、归档或标记替代关系。"},
     {"id": "DG22", "category": "文档治理", "rule": "审核 finding 必须引用适用 rule_id；没有读取任务规则包的审核结论无效。"},
+    {"id": "RRQ-ARCH1", "category": "人人取架构", "rule": "人人取 SaaS 平台设计默认按微服务架构、事件驱动和领域驱动设计评审；设计必须说明系统边界、业务域划分、事件协作和最终一致性。"},
+    {"id": "RRQ-TECH1", "category": "人人取通用技术", "rule": "核心业务接口需要声明性能目标、调用链压测方式、耗时监控和超时告警；没有性能目标或证据时不得直接放行。"},
+    {"id": "RRQ-TECH2", "category": "人人取通用技术", "rule": "性能优化方案使用缓存、限流、预处理或减少外部依赖时，必须给出缓存命中率、数据库查询频率、外部依赖失败的熔断降级策略。"},
+    {"id": "RRQ-LOG1", "category": "人人取日志", "rule": "团队日志必须包含 traceId、userId、requestId 等上下文；日志级别、采集平台和敏感信息脱敏策略必须明确。"},
+    {"id": "RRQ-SEC1", "category": "人人取安全", "rule": "日志和异常消息禁止输出完整手机号、银行账号、信用卡、邮箱、密码、公钥、私钥、完整签名等敏感信息。"},
+    {"id": "RRQ-OBS1", "category": "人人取监控", "rule": "核心业务必须覆盖关键路径埋点、异常告警、处理日志、TPS、响应时间、异常比率等系统级业务监控。"},
+    {"id": "RRQ-IDEMP1", "category": "人人取幂等", "rule": "支付、订单创建、库存更新、外部回调、MQ 消费、用户表单提交等修改核心数据场景必须进行幂等性设计。"},
+    {"id": "RRQ-IDEMP2", "category": "人人取幂等", "rule": "请求或消息去重可基于全量请求体 hash、关键字段排序 hash、messageId 或业务唯一键；必须说明去重窗口、存储介质、TTL 和重复处理结果。"},
+    {"id": "RRQ-IDEMP3", "category": "人人取幂等", "rule": "MQ 多节点消费存在乱序风险时，必须使用时间戳或版本号只处理最新消息，旧消息丢弃或补偿。"},
+    {"id": "YAPI1", "category": "YApi", "rule": "YApi group 按产品线划分，新增 group 需要架构师确认并评审；Project 命名必须为中文名称 + 英文名称，英文名与 Jenkins 构建名称一致。"},
+    {"id": "YAPI2", "category": "YApi", "rule": "模块名称格式为【资源】【动作】，接口名称格式为【动作】【资源】，必须清晰描述接口用途并符合逻辑视图分层。"},
+    {"id": "YAPI3", "category": "YApi", "rule": "应用层只提供 api/tapi/mapi/console，业务层和平台共享层只提供 service；禁止跨层暴露错误接口类型。"},
+    {"id": "YAPI4", "category": "YApi", "rule": "接口路径遵循 /api/v1、/service/v1、/console、/tapi/v1、/mapi 约定；路径使用小写英文，多个单词用短横线连接。"},
+    {"id": "YAPI5", "category": "YApi", "rule": "请求和响应字段使用小写驼峰，禁止拼音或无意义缩写；响应结构必须包含 header.code、header.message 和 body。"},
+    {"id": "YAPI6", "category": "YApi", "rule": "接口文档必须包含接口用途、适用场景、权限要求、注意事项和错误码；入参和返回参数必须补充注解，必填字段使用 JSR303 约束并写正确错误码。"},
+    {"id": "YQ1", "category": "萤启服务商系统", "rule": "萤启服务商系统异常编码结构为 [系统]-[服务]-[模块]-[错误码]，服务编码必须从 profile 或概要设计读取，例如 FRCH、TMGE、TCER、FRME、FRST。"},
+    {"id": "YQ2", "category": "萤启服务商系统", "rule": "萤启服务商系统错误码段必须按类型划分：1000 业务、2000 参数、3000 数据库、4000 第三方、5000 权限、6000 状态、7000 网络、8000 系统、9000 未知。"},
+    {"id": "YQ3", "category": "萤启服务商系统", "rule": "系统交互流向遵循客户端到网关到系统应用到领域服务；禁止跨系统直接使用 Feign 调用未开放能力。"},
+    {"id": "YQ4", "category": "萤启服务商系统", "rule": "合作加盟服务涉及售货机激活、性质变更、库存盘点同步等 MQ 场景时，必须说明 queue.franchisee、exchange、routingKey、消息体、幂等和租户/服务商路由。"},
 ]
 
 TEAM_EVAL_SCENARIOS = {
@@ -1234,6 +1324,14 @@ def contract(skill: dict) -> dict:
             "requires_review": ["JDBC", "框架替换", "绕过现有 mapper/repository 模式", "前端技术栈或组件库变更", "测试框架替换", "构建工具替换", "中间件替换"],
             "writeback": "StageRunRequest.context.technology_selection",
         },
+        "team_adaptation_policy": {
+            "profile_id": DEFAULT_PROFILE["profile_id"],
+            "profile_path": "engineering-assistant/profiles/rrq-yq-team.yaml",
+            "source_catalog": "engineering-assistant/registry/team-standard-sources.yaml",
+            "rule_prefixes": TEAM_ADAPTATION_RULE_PREFIXES,
+            "must_load_before_work": ["team-rule-catalog.yaml", "team-standard-sources.yaml", "rrq-yq-team.yaml"],
+            "fallback": "如果目标项目 profile 与团队默认 profile 冲突，优先使用目标项目 profile，并把冲突作为 finding 或 required_information_requests 输出。",
+        },
         "inputs": [
             {"name": item, "type": "artifact|string|object", "required": index == 0, "source": "user|workflow|repo|ci", "validation": "必填输入必须存在，选填输入必须可追溯来源", "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"}
             for index, item in enumerate(skill["inputs"])
@@ -1497,7 +1595,8 @@ description: {skill_trigger_description(skill)}
 {inputs}
 
 # 前置条件
-- 加载适用的团队规范和风险策略。
+- 加载适用的团队规范、`engineering-assistant/profiles/rrq-yq-team.yaml`、`engineering-assistant/registry/team-rule-catalog.yaml` 和风险策略。
+- 若目标项目提供更具体的 profile，以目标项目 profile 为准，并记录与团队默认 profile 的冲突。
 - 确认目标范围和运行模式。
 - 如果必填输入缺失或关键边界无法确认，必须主动询问用户；不得跨越未知边界猜测。
 
@@ -1810,12 +1909,12 @@ def agents_doc() -> str:
     return """# AGENTS.md
 
 ## 仓库目标
-- 本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布配置。
+- 本仓库维护 `teamwork-engineering-assistant` 插件的源码、治理资产、skills 和发布配置；治理资产目录仍为 `engineering-assistant/`。
 - `skills/` 是可触发能力源树，`engineering-assistant/` 是治理与运行时资产，发布包由 `publish_plugin.py` 写入配置目录。
 
 ## 修改规则
 - 优先修改 `generate_engineering_assistant_assets.py` 和回归测试，再运行生成器刷新源树与发布脚本输入。
-- 仓库内不保留 `plugins/engineering-assistant/` 临时发布目录；需要给 Codex 使用时运行发布脚本生成到配置目录。
+- 仓库内不保留 `plugins/teamwork-engineering-assistant/` 临时发布目录；需要给 Codex 使用时运行发布脚本生成到配置目录。
 - 所有任务控制产物写入目标项目 `artifacts/_control/`，不得写入插件目录。
 
 ## 验证要求
@@ -1899,7 +1998,7 @@ prefix_rule(
             {"id": "deny-git-push", "match": {"regex": r"\bgit\s+push\b"}, "decision": "deny", "reason": "git push 前必须完成自动校验、评审和人工确认。"},
             {"id": "deny-git-commit", "match": {"regex": r"\bgit\s+commit\b"}, "decision": "deny", "reason": "git commit 前必须完成自动校验、评审和人工确认。"},
             {"id": "deny-curl-pipe-shell", "match": {"regex": r"\bcurl\b.*\|\s*sh\b"}, "decision": "deny", "reason": "禁止 curl | sh 形式的不可审计安装。"},
-            {"id": "deny-repo-plugin-publish-dir-write", "match": {"regex": r"(plugins/engineering-assistant/.*(apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s))|((apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s).*plugins/engineering-assistant/)"}, "decision": "deny", "reason": "禁止在仓库内直接写插件发布目录；请修改生成器或源树后运行 publish_plugin.py 发布。"},
+            {"id": "deny-repo-plugin-publish-dir-write", "match": {"regex": r"(plugins/(engineering-assistant|teamwork-engineering-assistant)/.*(apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s))|((apply_patch|>\s*|>>\s*|write_text|open\(|sed\s+-i|perl\s+-pi|cp\s|mv\s|rsync\s|touch\s|tee\s).*plugins/(engineering-assistant|teamwork-engineering-assistant)/)"}, "decision": "deny", "reason": "禁止在仓库内直接写插件发布目录；请修改生成器或源树后运行 publish_plugin.py 发布。"},
             {"id": "context-controlled-task", "match": {"contains": "run_controlled_task.py"}, "decision": "allow", "reason": "受控自动化会串联控制面健康、技术采用度、规则消费和质量命令；失败必须写入 repair-attempts.json。"},
         ],
     }, ensure_ascii=False, indent=2))
@@ -1974,6 +2073,24 @@ def generate_engineering_assistant() -> None:
         write_text(base / "workflows" / f"{name}.yaml", json.dumps(workflow(name, nodes), ensure_ascii=False, indent=2))
 
     standards = {
+        "team-adaptation-standard.md": """## 团队适配边界
+- TA1 本插件是人人取/萤启团队适配插件，默认 profile 为 `rrq-yq-team`，插件包名为 `teamwork-engineering-assistant`，不得与通用 `engineering-assistant` 发布包混用。
+- TA2 执行任何阶段前必须加载 `engineering-assistant/registry/team-rule-catalog.yaml`、`engineering-assistant/registry/team-standard-sources.yaml` 和项目 profile；缺失时必须作为运行阻断或待补充信息处理。
+- TA3 规范结论必须引用稳定 `rule_id`，优先使用 RRQ、YAPI、YQ、R、M、DB、E、P、A、H、D、I、FE、FW 前缀规则。
+- TA4 MrDoc 导出的 HTML 只作为本插件规则内化的来源记录，不作为目标项目 workflow 的 agent 事实输入；目标项目运行时应读取 Markdown、JSON、YAML、代码和 control-plane 产物。
+
+## 人人取/萤启必读规范
+- RRQ-ARCH1 概要设计和详细设计必须明确人人取 SaaS/萤启服务商系统的系统边界、领域边界、事件协作、最终一致性和异常流。
+- YAPI1-YAPI6 接口设计必须遵守 YApi 分组、Project 命名、模块/接口命名、路径、字段、响应结构、错误码、JSR303 注解和接口描述规范。
+- RRQ-IDEMP1-RRQ-IDEMP3 核心写场景、外部回调、MQ 消费和表单提交必须说明幂等标识、去重窗口、存储介质、TTL、乱序处理和重复处理结果。
+- RRQ-LOG1、RRQ-SEC1、RRQ-OBS1 要求日志上下文、敏感信息脱敏、关键路径埋点和系统级业务监控进入设计与自测证据。
+- YQ1-YQ4 要求萤启服务商系统错误编码、错误码段、系统交互流向和合作加盟服务 MQ 场景按照 profile/repo_context 落地。
+
+## Codex App 发布
+- CAP1 发布脚本必须支持 `.codex-plugin/plugin.json`、`skills/`、`engineering-assistant/` 三段式插件包。
+- CAP2 personal marketplace 布局必须发布到 `~/plugins/teamwork-engineering-assistant` 并写入 `~/.agents/plugins/marketplace.json`，marketplace entry 的 `source.path` 为 `./plugins/teamwork-engineering-assistant`。
+- CAP3 local-root 布局默认发布到 `~/.codex/local-plugins/local-teamwork-engineering/plugins/teamwork-engineering-assistant`，不得写入仓库内 `plugins/` 目录。
+""",
         "architecture-standard.md": """## 适用范围
 适用于目标业务系统、目标客户端系统及相关后台服务的需求准入、概要设计、详细设计和设计评审；具体系统名称由项目 profile 或 repo_context 注入。
 
@@ -2222,6 +2339,18 @@ def generate_engineering_assistant() -> None:
         write_text(base / "standards" / file_name, f"# {Path(file_name).stem}\n\n{body}\n")
 
     checklists = {
+        "team-adaptation-checklist.md": [
+            "TA1 插件 manifest name、发布目录、marketplace entry 均为 teamwork-engineering-assistant",
+            "TA2 执行前已加载 rrq-yq-team profile、team-rule-catalog 和 team-standard-sources",
+            "TA3 设计、评审、实现和自测结论引用稳定 rule_id",
+            "TA4 MrDoc HTML 仅作为插件规则内化来源记录，不作为目标项目 agent 事实输入",
+            "RRQ-ARCH1 系统边界、领域边界、事件协作、最终一致性和异常流明确",
+            "YAPI1-YAPI6 接口分组、命名、路径、字段、响应结构、错误码和 JSR303 注解合规",
+            "RRQ-IDEMP1-RRQ-IDEMP3 幂等标识、去重窗口、存储介质、TTL、乱序处理和重复处理结果明确",
+            "RRQ-LOG1/RRQ-SEC1/RRQ-OBS1 日志上下文、脱敏、埋点和业务监控明确",
+            "YQ1-YQ4 萤启服务商系统错误编码、交互流向和 MQ 场景合规",
+            "CAP1-CAP3 Codex App 插件包、personal marketplace 和 local-root 发布路径验证通过",
+        ],
         "requirement-intake-checklist.md": ["业务目标", "用户场景", "范围与非目标", "验收标准", "依赖系统", "影响范围", "风险等级", "接口人", "排期约束"],
         "design-review-checklist.md": [
             "A1 设计文档体现系统边界、业务域、事件协作、最终一致性；不强制微服务 + 事件驱动 + DDD 技术路线",
@@ -2681,10 +2810,10 @@ def copy_tree(source: Path, target: Path) -> None:
 
 
 def marketplace_payload(config: dict) -> dict:
-    plugin_name = config.get("plugin_name", "engineering-assistant")
+    plugin_name = config.get("plugin_name", "teamwork-engineering-assistant")
     return {
-        "name": config.get("name", "local-engineering"),
-        "interface": config.get("interface", {"displayName": "Local Engineering Plugins"}),
+        "name": config.get("name", "local-teamwork-engineering"),
+        "interface": config.get("interface", {"displayName": "Local Teamwork Engineering Plugins"}),
         "plugins": [
             {
                 "name": plugin_name,
@@ -2708,14 +2837,14 @@ def apply_layout(config: dict, layout: str) -> dict:
         resolved["interface"] = {"displayName": "Personal"}
         resolved["publish_root"] = "~"
         resolved["marketplace_path"] = "~/.agents/plugins/marketplace.json"
-        resolved["plugin_relative_path"] = f"plugins/{resolved.get('plugin_name', 'engineering-assistant')}"
+        resolved["plugin_relative_path"] = f"plugins/{resolved.get('plugin_name', 'teamwork-engineering-assistant')}"
         return resolved
     raise SystemExit(f"unsupported publish layout: {layout}")
 
 
 def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None, layout="local-root") -> dict:
     config = apply_layout(config, layout)
-    plugin_name = config.get("plugin_name", "engineering-assistant")
+    plugin_name = config.get("plugin_name", "teamwork-engineering-assistant")
     publish_root_override = publish_root is not None
     publish_root = publish_root or expand(config["publish_root"])
     if marketplace_path is None:
@@ -2754,7 +2883,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Publish engineering-assistant as a Codex-recognizable local plugin.")
+    parser = argparse.ArgumentParser(description="Publish teamwork-engineering-assistant as a Codex-recognizable local plugin.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--layout", choices=["local-root", "personal"], default="local-root", help="local-root uses configured publish_root; personal writes the canonical Codex personal marketplace under ~/.agents/plugins.")
     parser.add_argument("--publish-root")
@@ -3538,6 +3667,9 @@ def run_scored_evals() -> dict:
             checks.append({"id": "canary-context-pack", "status": "pass" if context.get("status") == "pass" and forbidden_ok and required_ok else "block", "detail": context})
     plugin_sync = []
     with tempfile.TemporaryDirectory() as temp_dir:
+        def stable_temp_text(value) -> str:
+            return str(value).replace(str(Path(temp_dir).resolve()), "$EVAL_TEMP").replace(str(Path(temp_dir)), "$EVAL_TEMP")
+
         publish_root = Path(temp_dir) / "publish"
         marketplace_path = publish_root / ".agents" / "plugins" / "marketplace.json"
         publish_result = subprocess.run(
@@ -3556,7 +3688,7 @@ def run_scored_evals() -> dict:
         if publish_result.returncode != 0:
             plugin_sync.append({"left": "source", "right": str(publish_root), "status": "block", "detail": publish_result.stdout + publish_result.stderr})
         else:
-            plugin_root = publish_root / "plugins" / "engineering-assistant"
+            plugin_root = publish_root / "plugins" / "teamwork-engineering-assistant"
             for left, right in [("skills", plugin_root / "skills"), ("engineering-assistant", plugin_root / "engineering-assistant")]:
                 result = subprocess.run(["diff", "-qr", left, str(right)], text=True, capture_output=True, check=False)
                 plugin_sync.append({"left": left, "right": str(right), "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
@@ -3576,7 +3708,7 @@ def run_scored_evals() -> dict:
             capture_output=True,
             check=False,
         )
-        personal_plugin_root = personal_root / "plugins" / "engineering-assistant"
+        personal_plugin_root = personal_root / "plugins" / "teamwork-engineering-assistant"
         personal_marketplace = personal_root / ".agents" / "plugins" / "marketplace.json"
         personal_manifest_ok = personal_result.returncode == 0 and (personal_plugin_root / ".codex-plugin" / "plugin.json").exists() and personal_marketplace.exists()
         if personal_manifest_ok:
@@ -3585,11 +3717,14 @@ def run_scored_evals() -> dict:
                 personal_manifest_ok = (
                     marketplace.get("name") == "personal"
                     and marketplace.get("interface", {}).get("displayName") == "Personal"
-                    and marketplace.get("plugins", [{}])[0].get("source", {}).get("path") == "./plugins/engineering-assistant"
+                    and marketplace.get("plugins", [{}])[0].get("source", {}).get("path") == "./plugins/teamwork-engineering-assistant"
                 )
             except (json.JSONDecodeError, IndexError):
                 personal_manifest_ok = False
         plugin_sync.append({"left": "personal-marketplace", "right": str(personal_marketplace), "status": "pass" if personal_manifest_ok else "block", "detail": personal_result.stdout + personal_result.stderr})
+        for item in plugin_sync:
+            item["right"] = stable_temp_text(item.get("right", ""))
+            item["detail"] = stable_temp_text(item.get("detail", ""))
     checks.extend({"id": f"plugin-sync-{Path(item['left']).name}", **item} for item in plugin_sync)
     passed = sum(1 for check in checks if check["status"] == "pass")
     report = {
@@ -4849,17 +4984,18 @@ print("CI 产物目录已准备")
     write_text(base / "evals" / "trigger" / "trigger-cases.jsonl", "\n".join(json.dumps(item, ensure_ascii=False) for item in trigger_cases))
     write_text(base / "evals" / "safety" / "safety-cases.jsonl", "\n".join(json.dumps(item, ensure_ascii=False) for item in safety_cases))
 
-    write_text(base / "profiles" / "generic-platform.yaml", json.dumps(DEFAULT_PROFILE, ensure_ascii=False, indent=2))
+    write_text(base / "profiles" / "rrq-yq-team.yaml", json.dumps(DEFAULT_PROFILE, ensure_ascii=False, indent=2))
+    (base / "profiles" / "generic-platform.yaml").unlink(missing_ok=True)
     write_text(base / "profiles" / "project-profile-template.yaml", json.dumps({
         "profile_id": "your-project-profile",
         "display_name": "项目名称",
-        "system_scope": ["目标业务系统", "目标客户端系统"],
-        "service_code_policy": "填写本项目系统编码、服务编码和错误码归属规则。",
-        "interface_doc_tool": "填写本项目接口文档平台。",
-        "redis_runtime": "填写本项目 Redis 版本、拓扑、持久化和淘汰策略。",
+        "system_scope": ["人人取/萤启目标业务系统", "目标客户端系统"],
+        "service_code_policy": "填写本项目系统编码、服务编码和错误码归属规则；萤启服务商系统参考 FRCH/TMGE/TCER/FRME/FRST。",
+        "interface_doc_tool": "YApi 或本项目确认的接口文档平台。",
+        "redis_runtime": "填写本项目 Redis 版本、拓扑、持久化、淘汰策略、库、key 命名和运维监控。",
         "backend_frameworks": {"web": "填写 Spring MVC/Spring Boot 等后端框架", "persistence": "mybatis-plus", "test": "填写单元测试和集成测试框架"},
         "frontend_frameworks": {"stack": "填写 Vue/React/移动端客户端等技术栈", "component_library": "填写组件库", "state_management": "填写状态管理方案"},
-        "usage": "复制本模板创建项目 profile。仅在用户明确指定 profile 时注入；通用 skill 和默认输出不得硬编码项目名。",
+        "usage": "复制本模板创建项目 profile。项目 profile 优先级高于 rrq-yq-team 默认 profile；冲突必须记录为 finding 或 required_information_requests。",
     }, ensure_ascii=False, indent=2))
 
     actions = {
@@ -4909,6 +5045,7 @@ print("CI 产物目录已准备")
     write_text(base / "registry" / "workflows.yaml", json.dumps({"workflows": [{"workflow_id": name, "path": f"engineering-assistant/workflows/{name}.yaml"} for name in workflows]}, ensure_ascii=False, indent=2))
     write_text(base / "registry" / "standards.yaml", json.dumps({"standards": [{"id": Path(name).stem, "path": f"engineering-assistant/standards/{name}", "status": "published", "owner": "规范 owner"} for name in standards]}, ensure_ascii=False, indent=2))
     write_text(base / "registry" / "team-rule-catalog.yaml", json.dumps({"rules": TEAM_RULE_CATALOG, "eval_rule_prefixes": TEAM_RULE_PREFIXES}, ensure_ascii=False, indent=2))
+    write_text(base / "registry" / "team-standard-sources.yaml", json.dumps({"source_root": TEAM_STANDARDS_INPUT_ROOT, "profile_id": DEFAULT_PROFILE["profile_id"], "documents": TEAM_STANDARD_SOURCE_DOCUMENTS}, ensure_ascii=False, indent=2))
     write_text(base / "registry" / "owners.yaml", json.dumps({"owners": [{"role": s["owner"], "skills": [x["id"] for x in SKILLS if x["owner"] == s["owner"]]} for s in SKILLS]}, ensure_ascii=False, indent=2))
     for skill in SKILLS:
         write_json(base / "runtime" / "compiled" / "skills" / f"{skill['id']}.ir.json", runtime_ir(skill))
@@ -4949,27 +5086,29 @@ def plugin_manifest() -> dict:
     return {
         "name": PLUGIN_NAME,
         "version": "1.0.0",
-        "description": "团队研发助手插件，提供需求准入、主动信息补全、技术/框架选型评审、前端设计研发、代码上下文分析、概要/详细设计、DB/Redis/MQ 设计、设计评审、实现控制、文档治理、代码质量治理和经验沉淀能力。",
+        "description": "人人取/萤启团队研发助手插件，内置部门和团队规范，提供需求准入、主动信息补全、技术/框架选型评审、前端设计研发、代码上下文分析、概要/详细设计、DB/Redis/MQ 设计、设计评审、实现控制、文档治理、代码质量治理和经验沉淀能力。",
         "author": {
-            "name": "Engineering Team",
-            "email": "engineering@example.com",
-            "url": "https://example.internal/engineering-assistant",
+            "name": "Teamwork Engineering Team",
+            "email": "teamwork-engineering@example.com",
+            "url": "https://example.internal/teamwork-engineering-assistant",
         },
-        "homepage": "https://example.internal/engineering-assistant",
-        "repository": "https://example.internal/engineering-assistant/repo",
+        "homepage": "https://example.internal/teamwork-engineering-assistant",
+        "repository": "https://example.internal/teamwork-engineering-assistant/repo",
         "license": "UNLICENSED",
-        "keywords": ["engineering", "design", "framework-selection", "frontend", "required-information", "implementation-control", "document-governance", "code-quality", "workflow", "skills"],
+        "keywords": ["teamwork", "rrq", "yingqi", "engineering", "design", "framework-selection", "frontend", "required-information", "implementation-control", "document-governance", "code-quality", "workflow", "skills"],
         "skills": "./skills/",
         "interface": {
-            "displayName": "研发助手",
-            "shortDescription": "按团队规范完成设计、研发、评审和质量治理。",
-            "longDescription": "面向个人和团队的研发流程插件，内置阶段化 skills、团队规范、语言确认、主动信息补全、技术/框架选型评审、前端设计研发流程、HTML 已审设计到 machine contract 的实现控制、文档编号与生命周期治理、工作流、eval、CI 校验和 profile 注入机制。",
-            "developerName": "Engineering Team",
+            "displayName": PLUGIN_DISPLAY_NAME,
+            "shortDescription": "按人人取/萤启团队规范完成设计、研发、评审和质量治理。",
+            "longDescription": "面向人人取/萤启团队的研发流程插件，内置部门和团队规范、阶段化 skills、语言确认、主动信息补全、YApi/Redis/幂等/异常/服务商系统规则、技术/框架选型评审、前端设计研发流程、HTML 已审设计到 machine contract 的实现控制、文档编号与生命周期治理、工作流、eval、CI 校验和 profile 注入机制。",
+            "developerName": "Teamwork Engineering Team",
             "category": "Productivity",
             "capabilities": ["Interactive", "Write"],
             "defaultPrompt": [
-                "使用研发助手走 design-only 流程",
+                "使用团队研发助手走 design-only 流程",
+                "加载人人取/萤启团队规范后生成概要设计",
                 "基于当前仓库生成详细设计",
+                "按 YApi、Redis、幂等、异常和服务商系统规范评审设计",
                 "检查技术/框架选型，覆盖后端、持久化、前端、测试和构建工具",
                 "使用 frontend-only 流程完成前端设计和研发",
                 "基于已审 HTML 设计自动推进实现和质量门禁",
@@ -4985,13 +5124,13 @@ def plugin_manifest() -> dict:
 
 def generate_plugin_publish_config() -> None:
     write_json(ROOT / ".agent" / "plugins" / "publish-config.json", {
-        "name": "local-engineering",
+        "name": PLUGIN_MARKETPLACE_NAME,
         "interface": {
-            "displayName": "Local Engineering Plugins",
+            "displayName": PLUGIN_MARKETPLACE_DISPLAY_NAME,
         },
         "plugin_name": PLUGIN_NAME,
-        "publish_root": "~/.codex/local-plugins/local-engineering",
-        "marketplace_path": "~/.codex/local-plugins/local-engineering/.agents/plugins/marketplace.json",
+        "publish_root": f"~/.codex/local-plugins/{PLUGIN_MARKETPLACE_NAME}",
+        "marketplace_path": f"~/.codex/local-plugins/{PLUGIN_MARKETPLACE_NAME}/.agents/plugins/marketplace.json",
         "plugin_relative_path": f"plugins/{PLUGIN_NAME}",
         "policy": {
             "installation": "AVAILABLE",
@@ -5197,14 +5336,14 @@ python3 engineering-assistant/scripts/run_skill_evals.py
 def root_readme() -> str:
     return f"""# agent-skills
 
-本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布配置。仓库不保留临时发布目录，Codex 可识别插件由发布脚本生成到配置目录。
+本仓库维护 `teamwork-engineering-assistant` 插件的源码、治理资产、skills 和发布配置。仓库不保留临时发布目录，Codex 可识别插件由发布脚本生成到配置目录；治理资产目录仍为 `engineering-assistant/`。
 
 ## 目录边界
 
 - `skills/`：可触发 skill 源树，包含 `SKILL.md`、`contract.yaml`、`output.schema.json`、eval 和 workflow node。
 - `engineering-assistant/`：治理与运行时资产，包含 standards、schemas、scripts、workflows、registry、runtime policy、compiled skill IR 和 eval fixtures。
 - `.agent/plugins/publish-config.json`：本地发布配置，指定默认发布根目录和 marketplace 输出路径。
-- 发布目录：由 `publish_plugin.py` 生成，不能手补回仓库；默认 local-root 发布到 `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/`。
+- 发布目录：由 `publish_plugin.py` 生成，不能手补回仓库；默认 local-root 发布到 `~/.codex/local-plugins/local-teamwork-engineering/plugins/teamwork-engineering-assistant/`。
 
 ## 修改方式
 
@@ -5226,9 +5365,9 @@ python3 engineering-assistant/scripts/publish_plugin.py --layout personal
 
 该方式生成：
 
-- `~/plugins/engineering-assistant/.codex-plugin/plugin.json`
-- `~/plugins/engineering-assistant/skills/`
-- `~/plugins/engineering-assistant/engineering-assistant/`
+- `~/plugins/teamwork-engineering-assistant/.codex-plugin/plugin.json`
+- `~/plugins/teamwork-engineering-assistant/skills/`
+- `~/plugins/teamwork-engineering-assistant/engineering-assistant/`
 - `~/.agents/plugins/marketplace.json`
 
 如果 Codex App 的插件安装页不接受自定义 marketplace 根目录，优先使用该 personal 布局。
@@ -5241,12 +5380,12 @@ python3 engineering-assistant/scripts/publish_plugin.py
 
 local-root 会读取 `.agent/plugins/publish-config.json`，生成：
 
-- `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/.codex-plugin/plugin.json`
-- `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/skills/`
-- `~/.codex/local-plugins/local-engineering/plugins/engineering-assistant/engineering-assistant/`
-- `~/.codex/local-plugins/local-engineering/.agents/plugins/marketplace.json`
+- `~/.codex/local-plugins/local-teamwork-engineering/plugins/teamwork-engineering-assistant/.codex-plugin/plugin.json`
+- `~/.codex/local-plugins/local-teamwork-engineering/plugins/teamwork-engineering-assistant/skills/`
+- `~/.codex/local-plugins/local-teamwork-engineering/plugins/teamwork-engineering-assistant/engineering-assistant/`
+- `~/.codex/local-plugins/local-teamwork-engineering/.agents/plugins/marketplace.json`
 
-Codex 使用对应 marketplace 后即可识别 `engineering-assistant` 插件。仓库内仍不保留 `plugins/` 临时发布目录。
+Codex 使用对应 marketplace 后即可识别 `teamwork-engineering-assistant` 插件。仓库内仍不保留 `plugins/` 临时发布目录。
 
 ## 验证命令
 
@@ -5258,10 +5397,10 @@ python3 engineering-assistant/scripts/run_skill_evals.py
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored
 python3 engineering-assistant/scripts/run_skill_evals.py --mode scored --no-write-report
 python3 engineering-assistant/scripts/validate_skill_metadata.py
-python3 engineering-assistant/scripts/publish_plugin.py --layout personal --publish-root /tmp/engineering-assistant-personal
-python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/.agents/plugins/marketplace.json
-diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills
-diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant
+python3 engineering-assistant/scripts/publish_plugin.py --layout personal --publish-root /tmp/teamwork-engineering-assistant-personal
+python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/teamwork-engineering-assistant-plugin --marketplace-path /tmp/teamwork-engineering-assistant-plugin/.agents/plugins/marketplace.json
+diff -qr skills /tmp/teamwork-engineering-assistant-plugin/plugins/teamwork-engineering-assistant/skills
+diff -qr engineering-assistant /tmp/teamwork-engineering-assistant-plugin/plugins/teamwork-engineering-assistant/engineering-assistant
 ```
 
 ## 下游 canary
@@ -5288,9 +5427,9 @@ def generate_root_ci() -> None:
                 {"name": "Validate skill evals", "run": "python3 engineering-assistant/scripts/run_skill_evals.py"},
                 {"name": "Validate scored evals", "run": "python3 engineering-assistant/scripts/run_skill_evals.py --mode scored"},
                 {"name": "Validate metadata", "run": "python3 engineering-assistant/scripts/validate_skill_metadata.py"},
-                {"name": "Publish plugin package", "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/engineering-assistant-plugin --marketplace-path /tmp/engineering-assistant-plugin/.agents/plugins/marketplace.json"},
-                {"name": "Check published skill sync", "run": "diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills"},
-                {"name": "Check published governance sync", "run": "diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant"},
+                {"name": "Publish plugin package", "run": "python3 engineering-assistant/scripts/publish_plugin.py --publish-root /tmp/teamwork-engineering-assistant-plugin --marketplace-path /tmp/teamwork-engineering-assistant-plugin/.agents/plugins/marketplace.json"},
+                {"name": "Check published skill sync", "run": "diff -qr skills /tmp/teamwork-engineering-assistant-plugin/plugins/teamwork-engineering-assistant/skills"},
+                {"name": "Check published governance sync", "run": "diff -qr engineering-assistant /tmp/teamwork-engineering-assistant-plugin/plugins/teamwork-engineering-assistant/engineering-assistant"},
             ]}},
         },
         "codex-skill-eval.yml": {

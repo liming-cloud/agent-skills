@@ -339,13 +339,111 @@
       "id": "DG22",
       "category": "文档治理",
       "rule": "审核 finding 必须引用适用 rule_id；没有读取任务规则包的审核结论无效。"
+    },
+    {
+      "id": "RRQ-ARCH1",
+      "category": "人人取架构",
+      "rule": "人人取 SaaS 平台设计默认按微服务架构、事件驱动和领域驱动设计评审；设计必须说明系统边界、业务域划分、事件协作和最终一致性。"
+    },
+    {
+      "id": "RRQ-TECH1",
+      "category": "人人取通用技术",
+      "rule": "核心业务接口需要声明性能目标、调用链压测方式、耗时监控和超时告警；没有性能目标或证据时不得直接放行。"
+    },
+    {
+      "id": "RRQ-TECH2",
+      "category": "人人取通用技术",
+      "rule": "性能优化方案使用缓存、限流、预处理或减少外部依赖时，必须给出缓存命中率、数据库查询频率、外部依赖失败的熔断降级策略。"
+    },
+    {
+      "id": "RRQ-LOG1",
+      "category": "人人取日志",
+      "rule": "团队日志必须包含 traceId、userId、requestId 等上下文；日志级别、采集平台和敏感信息脱敏策略必须明确。"
+    },
+    {
+      "id": "RRQ-SEC1",
+      "category": "人人取安全",
+      "rule": "日志和异常消息禁止输出完整手机号、银行账号、信用卡、邮箱、密码、公钥、私钥、完整签名等敏感信息。"
+    },
+    {
+      "id": "RRQ-OBS1",
+      "category": "人人取监控",
+      "rule": "核心业务必须覆盖关键路径埋点、异常告警、处理日志、TPS、响应时间、异常比率等系统级业务监控。"
+    },
+    {
+      "id": "RRQ-IDEMP1",
+      "category": "人人取幂等",
+      "rule": "支付、订单创建、库存更新、外部回调、MQ 消费、用户表单提交等修改核心数据场景必须进行幂等性设计。"
+    },
+    {
+      "id": "RRQ-IDEMP2",
+      "category": "人人取幂等",
+      "rule": "请求或消息去重可基于全量请求体 hash、关键字段排序 hash、messageId 或业务唯一键；必须说明去重窗口、存储介质、TTL 和重复处理结果。"
+    },
+    {
+      "id": "RRQ-IDEMP3",
+      "category": "人人取幂等",
+      "rule": "MQ 多节点消费存在乱序风险时，必须使用时间戳或版本号只处理最新消息，旧消息丢弃或补偿。"
+    },
+    {
+      "id": "YAPI1",
+      "category": "YApi",
+      "rule": "YApi group 按产品线划分，新增 group 需要架构师确认并评审；Project 命名必须为中文名称 + 英文名称，英文名与 Jenkins 构建名称一致。"
+    },
+    {
+      "id": "YAPI2",
+      "category": "YApi",
+      "rule": "模块名称格式为【资源】【动作】，接口名称格式为【动作】【资源】，必须清晰描述接口用途并符合逻辑视图分层。"
+    },
+    {
+      "id": "YAPI3",
+      "category": "YApi",
+      "rule": "应用层只提供 api/tapi/mapi/console，业务层和平台共享层只提供 service；禁止跨层暴露错误接口类型。"
+    },
+    {
+      "id": "YAPI4",
+      "category": "YApi",
+      "rule": "接口路径遵循 /api/v1、/service/v1、/console、/tapi/v1、/mapi 约定；路径使用小写英文，多个单词用短横线连接。"
+    },
+    {
+      "id": "YAPI5",
+      "category": "YApi",
+      "rule": "请求和响应字段使用小写驼峰，禁止拼音或无意义缩写；响应结构必须包含 header.code、header.message 和 body。"
+    },
+    {
+      "id": "YAPI6",
+      "category": "YApi",
+      "rule": "接口文档必须包含接口用途、适用场景、权限要求、注意事项和错误码；入参和返回参数必须补充注解，必填字段使用 JSR303 约束并写正确错误码。"
+    },
+    {
+      "id": "YQ1",
+      "category": "萤启服务商系统",
+      "rule": "萤启服务商系统异常编码结构为 [系统]-[服务]-[模块]-[错误码]，服务编码必须从 profile 或概要设计读取，例如 FRCH、TMGE、TCER、FRME、FRST。"
+    },
+    {
+      "id": "YQ2",
+      "category": "萤启服务商系统",
+      "rule": "萤启服务商系统错误码段必须按类型划分：1000 业务、2000 参数、3000 数据库、4000 第三方、5000 权限、6000 状态、7000 网络、8000 系统、9000 未知。"
+    },
+    {
+      "id": "YQ3",
+      "category": "萤启服务商系统",
+      "rule": "系统交互流向遵循客户端到网关到系统应用到领域服务；禁止跨系统直接使用 Feign 调用未开放能力。"
+    },
+    {
+      "id": "YQ4",
+      "category": "萤启服务商系统",
+      "rule": "合作加盟服务涉及售货机激活、性质变更、库存盘点同步等 MQ 场景时，必须说明 queue.franchisee、exchange、routingKey、消息体、幂等和租户/服务商路由。"
     }
   ],
   "eval_rule_prefixes": {
     "requirement-intake": [
       "A",
       "H",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "repo-context-miner": [
       "A",
@@ -359,14 +457,20 @@
       "DB",
       "FW",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "high-level-design": [
       "A",
       "H",
       "FW",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "detailed-design": [
       "D",
@@ -374,22 +478,34 @@
       "E",
       "P",
       "FW",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "redis-design": [
       "R",
       "P",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "mq-design": [
       "M",
       "P",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "database-design": [
       "DB",
       "P",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "design-review": [
       "A",
@@ -403,12 +519,18 @@
       "DB",
       "FW",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "frontend-design": [
       "FE",
       "I",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "code-development": [
       "D",
@@ -419,14 +541,20 @@
       "R",
       "M",
       "FW",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "frontend-development": [
       "FE",
       "I",
       "E",
       "P",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "self-test": [
       "D",
@@ -435,7 +563,10 @@
       "M",
       "DB",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "code-quality-governor": [
       "D",
@@ -447,7 +578,10 @@
       "DB",
       "FW",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "code-review": [
       "I",
@@ -458,24 +592,36 @@
       "M",
       "FW",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "release-readiness": [
       "DB",
       "R",
       "M",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "release-verification": [
       "E",
       "P",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "release-retrospective": [
       "A",
       "D",
       "P",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "engineering-knowledge-miner": [
       "A",
@@ -486,7 +632,10 @@
       "R",
       "M",
       "DB",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "skill-quality-auditor": [
       "A",
@@ -497,7 +646,10 @@
       "R",
       "M",
       "DB",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "workflow-orchestrator": [
       "A",
@@ -509,7 +661,10 @@
       "M",
       "DB",
       "DG",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ],
     "implementation-controller": [
       "A",
@@ -522,7 +677,10 @@
       "M",
       "FW",
       "FE",
-      "QIN"
+      "QIN",
+      "RRQ",
+      "YAPI",
+      "YQ"
     ]
   }
 }

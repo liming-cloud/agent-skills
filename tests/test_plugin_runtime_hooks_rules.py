@@ -27,7 +27,7 @@ class PluginRuntimeHooksRulesTests(unittest.TestCase):
         return json.loads(result.stdout)
 
     def test_hook_blocks_direct_plugin_mirror_mutation(self) -> None:
-        output = self.run_hook("python3 - <<'PY'\nopen('plugins/engineering-assistant/skills/x','w').write('bad')\nPY")
+        output = self.run_hook("python3 - <<'PY'\nopen('plugins/teamwork-engineering-assistant/skills/x','w').write('bad')\nPY")
         decision = output["hookSpecificOutput"]
         self.assertEqual("deny", decision["permissionDecision"])
         self.assertIn("插件发布目录", decision["permissionDecisionReason"])

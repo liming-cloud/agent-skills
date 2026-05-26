@@ -69,6 +69,9 @@ def run_scored_evals() -> dict:
             checks.append({"id": "canary-context-pack", "status": "pass" if context.get("status") == "pass" and forbidden_ok and required_ok else "block", "detail": context})
     plugin_sync = []
     with tempfile.TemporaryDirectory() as temp_dir:
+        def stable_temp_text(value) -> str:
+            return str(value).replace(str(Path(temp_dir).resolve()), "$EVAL_TEMP").replace(str(Path(temp_dir)), "$EVAL_TEMP")
+
         publish_root = Path(temp_dir) / "publish"
         marketplace_path = publish_root / ".agents" / "plugins" / "marketplace.json"
         publish_result = subprocess.run(
@@ -87,7 +90,7 @@ def run_scored_evals() -> dict:
         if publish_result.returncode != 0:
             plugin_sync.append({"left": "source", "right": str(publish_root), "status": "block", "detail": publish_result.stdout + publish_result.stderr})
         else:
-            plugin_root = publish_root / "plugins" / "engineering-assistant"
+            plugin_root = publish_root / "plugins" / "teamwork-engineering-assistant"
             for left, right in [("skills", plugin_root / "skills"), ("engineering-assistant", plugin_root / "engineering-assistant")]:
                 result = subprocess.run(["diff", "-qr", left, str(right)], text=True, capture_output=True, check=False)
                 plugin_sync.append({"left": left, "right": str(right), "status": "pass" if result.returncode == 0 else "block", "detail": result.stdout + result.stderr})
@@ -107,7 +110,7 @@ def run_scored_evals() -> dict:
             capture_output=True,
             check=False,
         )
-        personal_plugin_root = personal_root / "plugins" / "engineering-assistant"
+        personal_plugin_root = personal_root / "plugins" / "teamwork-engineering-assistant"
         personal_marketplace = personal_root / ".agents" / "plugins" / "marketplace.json"
         personal_manifest_ok = personal_result.returncode == 0 and (personal_plugin_root / ".codex-plugin" / "plugin.json").exists() and personal_marketplace.exists()
         if personal_manifest_ok:
@@ -116,11 +119,14 @@ def run_scored_evals() -> dict:
                 personal_manifest_ok = (
                     marketplace.get("name") == "personal"
                     and marketplace.get("interface", {}).get("displayName") == "Personal"
-                    and marketplace.get("plugins", [{}])[0].get("source", {}).get("path") == "./plugins/engineering-assistant"
+                    and marketplace.get("plugins", [{}])[0].get("source", {}).get("path") == "./plugins/teamwork-engineering-assistant"
                 )
             except (json.JSONDecodeError, IndexError):
                 personal_manifest_ok = False
         plugin_sync.append({"left": "personal-marketplace", "right": str(personal_marketplace), "status": "pass" if personal_manifest_ok else "block", "detail": personal_result.stdout + personal_result.stderr})
+        for item in plugin_sync:
+            item["right"] = stable_temp_text(item.get("right", ""))
+            item["detail"] = stable_temp_text(item.get("detail", ""))
     checks.extend({"id": f"plugin-sync-{Path(item['left']).name}", **item} for item in plugin_sync)
     passed = sum(1 for check in checks if check["status"] == "pass")
     report = {

@@ -1,6 +1,12 @@
 {
   "standards": [
     {
+      "id": "team-adaptation-standard",
+      "path": "engineering-assistant/standards/team-adaptation-standard.md",
+      "status": "published",
+      "owner": "规范 owner"
+    },
+    {
       "id": "architecture-standard",
       "path": "engineering-assistant/standards/architecture-standard.md",
       "status": "published",

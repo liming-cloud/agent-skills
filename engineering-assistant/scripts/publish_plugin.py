@@ -34,10 +34,10 @@ def copy_tree(source: Path, target: Path) -> None:
 
 
 def marketplace_payload(config: dict) -> dict:
-    plugin_name = config.get("plugin_name", "engineering-assistant")
+    plugin_name = config.get("plugin_name", "teamwork-engineering-assistant")
     return {
-        "name": config.get("name", "local-engineering"),
-        "interface": config.get("interface", {"displayName": "Local Engineering Plugins"}),
+        "name": config.get("name", "local-teamwork-engineering"),
+        "interface": config.get("interface", {"displayName": "Local Teamwork Engineering Plugins"}),
         "plugins": [
             {
                 "name": plugin_name,
@@ -61,14 +61,14 @@ def apply_layout(config: dict, layout: str) -> dict:
         resolved["interface"] = {"displayName": "Personal"}
         resolved["publish_root"] = "~"
         resolved["marketplace_path"] = "~/.agents/plugins/marketplace.json"
-        resolved["plugin_relative_path"] = f"plugins/{resolved.get('plugin_name', 'engineering-assistant')}"
+        resolved["plugin_relative_path"] = f"plugins/{resolved.get('plugin_name', 'teamwork-engineering-assistant')}"
         return resolved
     raise SystemExit(f"unsupported publish layout: {layout}")
 
 
 def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=None, layout="local-root") -> dict:
     config = apply_layout(config, layout)
-    plugin_name = config.get("plugin_name", "engineering-assistant")
+    plugin_name = config.get("plugin_name", "teamwork-engineering-assistant")
     publish_root_override = publish_root is not None
     publish_root = publish_root or expand(config["publish_root"])
     if marketplace_path is None:
@@ -107,7 +107,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Publish engineering-assistant as a Codex-recognizable local plugin.")
+    parser = argparse.ArgumentParser(description="Publish teamwork-engineering-assistant as a Codex-recognizable local plugin.")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--layout", choices=["local-root", "personal"], default="local-root", help="local-root uses configured publish_root; personal writes the canonical Codex personal marketplace under ~/.agents/plugins.")
     parser.add_argument("--publish-root")

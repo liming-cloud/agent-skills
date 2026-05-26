@@ -38,7 +38,7 @@ class ControlHealthGuardTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(0, result.returncode, result.stderr + result.stdout)
-            bases = [ROOT, publish_root / "plugins" / "engineering-assistant"]
+            bases = [ROOT, publish_root / "plugins" / "teamwork-engineering-assistant"]
             for base in bases:
                 script = base / "engineering-assistant" / "scripts" / "validate_control_health.py"
                 self.assertTrue(script.exists(), f"missing {script}")

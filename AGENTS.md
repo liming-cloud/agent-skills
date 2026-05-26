@@ -1,12 +1,12 @@
 # AGENTS.md
 
 ## 仓库目标
-- 本仓库维护 `engineering-assistant` 插件的源码、治理资产、skills 和发布配置。
+- 本仓库维护 `teamwork-engineering-assistant` 插件的源码、治理资产、skills 和发布配置；治理资产目录仍为 `engineering-assistant/`。
 - `skills/` 是可触发能力源树，`engineering-assistant/` 是治理与运行时资产，发布包由 `publish_plugin.py` 写入配置目录。
 
 ## 修改规则
 - 优先修改 `generate_engineering_assistant_assets.py` 和回归测试，再运行生成器刷新源树与发布脚本输入。
-- 仓库内不保留 `plugins/engineering-assistant/` 临时发布目录；需要给 Codex 使用时运行发布脚本生成到配置目录。
+- 仓库内不保留 `plugins/teamwork-engineering-assistant/` 临时发布目录；需要给 Codex 使用时运行发布脚本生成到配置目录。
 - 所有任务控制产物写入目标项目 `artifacts/_control/`，不得写入插件目录。
 
 ## 验证要求

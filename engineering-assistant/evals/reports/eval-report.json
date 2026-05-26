@@ -302,30 +302,30 @@
     {
       "id": "plugin-sync-skills",
       "left": "skills",
-      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/publish/plugins/engineering-assistant/skills",
+      "right": "$EVAL_TEMP/publish/plugins/teamwork-engineering-assistant/skills",
       "status": "pass",
       "detail": ""
     },
     {
       "id": "plugin-sync-engineering-assistant",
       "left": "engineering-assistant",
-      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/publish/plugins/engineering-assistant/engineering-assistant",
+      "right": "$EVAL_TEMP/publish/plugins/teamwork-engineering-assistant/engineering-assistant",
       "status": "pass",
       "detail": ""
     },
     {
       "id": "plugin-sync-plugin-manifest",
       "left": "plugin-manifest",
-      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/publish/plugins/engineering-assistant",
+      "right": "$EVAL_TEMP/publish/plugins/teamwork-engineering-assistant",
       "status": "pass",
-      "detail": "{\n  \"status\": \"published\",\n  \"layout\": \"local-root\",\n  \"plugin_root\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/publish/plugins/engineering-assistant\",\n  \"marketplace_path\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/publish/.agents/plugins/marketplace.json\",\n  \"plugin_manifest\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/publish/plugins/engineering-assistant/.codex-plugin/plugin.json\"\n}\n"
+      "detail": "{\n  \"status\": \"published\",\n  \"layout\": \"local-root\",\n  \"plugin_root\": \"$EVAL_TEMP/publish/plugins/teamwork-engineering-assistant\",\n  \"marketplace_path\": \"$EVAL_TEMP/publish/.agents/plugins/marketplace.json\",\n  \"plugin_manifest\": \"$EVAL_TEMP/publish/plugins/teamwork-engineering-assistant/.codex-plugin/plugin.json\"\n}\n"
     },
     {
       "id": "plugin-sync-personal-marketplace",
       "left": "personal-marketplace",
-      "right": "/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/personal/.agents/plugins/marketplace.json",
+      "right": "$EVAL_TEMP/personal/.agents/plugins/marketplace.json",
       "status": "pass",
-      "detail": "{\n  \"status\": \"published\",\n  \"layout\": \"personal\",\n  \"plugin_root\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/personal/plugins/engineering-assistant\",\n  \"marketplace_path\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/personal/.agents/plugins/marketplace.json\",\n  \"plugin_manifest\": \"/private/var/folders/w9/kh37rmv936qg_mjdqj7qpsp40000gn/T/tmpzkkg1egb/personal/plugins/engineering-assistant/.codex-plugin/plugin.json\"\n}\n"
+      "detail": "{\n  \"status\": \"published\",\n  \"layout\": \"personal\",\n  \"plugin_root\": \"$EVAL_TEMP/personal/plugins/teamwork-engineering-assistant\",\n  \"marketplace_path\": \"$EVAL_TEMP/personal/.agents/plugins/marketplace.json\",\n  \"plugin_manifest\": \"$EVAL_TEMP/personal/plugins/teamwork-engineering-assistant/.codex-plugin/plugin.json\"\n}\n"
     }
   ]
 }

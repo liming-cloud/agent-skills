@@ -25,7 +25,7 @@ def publish_to_temp(test_case: unittest.TestCase) -> Path:
         str(publish_root / ".agents" / "plugins" / "marketplace.json"),
     )
     test_case.assertEqual(0, result.returncode, result.stderr + result.stdout)
-    return publish_root / "plugins" / "engineering-assistant"
+    return publish_root / "plugins" / "teamwork-engineering-assistant"
 
 
 def run_script(script: str, *args: str) -> subprocess.CompletedProcess[str]:
@@ -54,8 +54,8 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             "run_skill_evals.py --mode scored",
             "validate_skill_metadata.py",
             "publish_plugin.py",
-            "diff -qr skills /tmp/engineering-assistant-plugin/plugins/engineering-assistant/skills",
-            "diff -qr engineering-assistant /tmp/engineering-assistant-plugin/plugins/engineering-assistant/engineering-assistant",
+            "diff -qr skills /tmp/teamwork-engineering-assistant-plugin/plugins/teamwork-engineering-assistant/skills",
+            "diff -qr engineering-assistant /tmp/teamwork-engineering-assistant-plugin/plugins/teamwork-engineering-assistant/engineering-assistant",
         ]:
             self.assertIn(required, quality)
 
@@ -184,9 +184,9 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
         for command in [
             "rm -rf /tmp/bad",
             "git push origin main",
-            "python3 - <<'PY'\nopen('plugins/engineering-assistant/skills/x','w').write('bad')\nPY",
-            "cp source plugins/engineering-assistant/skills/x",
-            "touch plugins/engineering-assistant/skills/x",
+            "python3 - <<'PY'\nopen('plugins/teamwork-engineering-assistant/skills/x','w').write('bad')\nPY",
+            "cp source plugins/teamwork-engineering-assistant/skills/x",
+            "touch plugins/teamwork-engineering-assistant/skills/x",
         ]:
             result = subprocess.run(
                 ["python3", str(hook)],
@@ -218,7 +218,7 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             result = run_script("publish_plugin.py", "--layout", "personal", "--publish-root", str(personal_root))
             self.assertEqual(0, result.returncode, result.stderr + result.stdout)
 
-            plugin_root = personal_root / "plugins" / "engineering-assistant"
+            plugin_root = personal_root / "plugins" / "teamwork-engineering-assistant"
             marketplace_path = personal_root / ".agents" / "plugins" / "marketplace.json"
             self.assertTrue((plugin_root / ".codex-plugin" / "plugin.json").exists())
             self.assertTrue((plugin_root / "skills").exists())
@@ -226,7 +226,7 @@ class RuntimeOptimizationPlanTests(unittest.TestCase):
             marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
             self.assertEqual("personal", marketplace["name"])
             self.assertEqual("Personal", marketplace["interface"]["displayName"])
-            self.assertEqual("./plugins/engineering-assistant", marketplace["plugins"][0]["source"]["path"])
+            self.assertEqual("./plugins/teamwork-engineering-assistant", marketplace["plugins"][0]["source"]["path"])
             payload = json.loads(result.stdout)
             self.assertEqual("personal", payload["layout"])
             self.assertEqual(str(marketplace_path.resolve()), payload["marketplace_path"])

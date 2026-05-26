@@ -70,7 +70,7 @@ class FlexibleWorkflowCompositionTests(unittest.TestCase):
                 (
                     publish_root
                     / "plugins"
-                    / "engineering-assistant"
+                    / "teamwork-engineering-assistant"
                     / "engineering-assistant"
                     / "workflows"
                     / "full-feature-development.yaml"

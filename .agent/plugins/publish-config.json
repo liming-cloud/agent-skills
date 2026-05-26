@@ -1,12 +1,12 @@
 {
-  "name": "local-engineering",
+  "name": "local-teamwork-engineering",
   "interface": {
-    "displayName": "Local Engineering Plugins"
+    "displayName": "Local Teamwork Engineering Plugins"
   },
-  "plugin_name": "engineering-assistant",
-  "publish_root": "~/.codex/local-plugins/local-engineering",
-  "marketplace_path": "~/.codex/local-plugins/local-engineering/.agents/plugins/marketplace.json",
-  "plugin_relative_path": "plugins/engineering-assistant",
+  "plugin_name": "teamwork-engineering-assistant",
+  "publish_root": "~/.codex/local-plugins/local-teamwork-engineering",
+  "marketplace_path": "~/.codex/local-plugins/local-teamwork-engineering/.agents/plugins/marketplace.json",
+  "plugin_relative_path": "plugins/teamwork-engineering-assistant",
   "policy": {
     "installation": "AVAILABLE",
     "authentication": "ON_INSTALL"

@@ -21,7 +21,8 @@ description: Use when the request is about 设计 Redis 使用方案，明确 ke
 - `risk_policy`
 
 # 前置条件
-- 加载适用的团队规范和风险策略。
+- 加载适用的团队规范、`engineering-assistant/profiles/rrq-yq-team.yaml`、`engineering-assistant/registry/team-rule-catalog.yaml` 和风险策略。
+- 若目标项目提供更具体的 profile，以目标项目 profile 为准，并记录与团队默认 profile 的冲突。
 - 确认目标范围和运行模式。
 - 如果必填输入缺失或关键边界无法确认，必须主动询问用户；不得跨越未知边界猜测。
 
