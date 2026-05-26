@@ -42,9 +42,10 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
-      "接口定义完整",
-      "事务边界明确",
-      "幂等策略明确",
+      "主详细设计只保留功能实现主线",
+      "专项设计独立成文并在主文档引用",
+      "流程使用 flowchart 且紧跟流程设计说明",
+      "DDD/分层/扩展点方案包含 classDiagram",
       "测试策略覆盖主干和异常路径"
     ],
     "allow_implicit_invocation": true
@@ -172,6 +173,27 @@
       "path": "artifacts/detailed-design/test-strategy.md",
       "schema": "output.schema.json#test-strategy.md",
       "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "database-design.md",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/detailed-design/database-design.md",
+      "schema": "output.schema.json#database-design.md",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "mq-design.md",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/detailed-design/mq-design.md",
+      "schema": "output.schema.json#mq-design.md",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "redis-design.md",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/detailed-design/redis-design.md",
+      "schema": "output.schema.json#redis-design.md",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
     }
   ],
   "preconditions": [
@@ -249,7 +271,10 @@
   "human_approval_required": [
     "核心链路事务边界变化",
     "高并发路径设计",
-    "权限/认证/鉴权设计"
+    "权限/认证/鉴权设计",
+    "DDL",
+    "MQ 新队列或 topic",
+    "Redis 新 Key"
   ],
   "risk_model": {
     "levels": [
@@ -261,34 +286,44 @@
     "upgrade_conditions": [
       "核心链路事务边界变化",
       "高并发路径设计",
-      "权限/认证/鉴权设计"
+      "权限/认证/鉴权设计",
+      "DDL",
+      "MQ 新队列或 topic",
+      "Redis 新 Key"
     ],
     "default_for_unknown": "medium"
   },
   "quality_gates": [
     {
       "gate_id": "detailed-design-gate-1",
-      "name": "接口定义完整",
+      "name": "主详细设计只保留功能实现主线",
       "type": "deterministic",
-      "pass_condition": "接口定义完整 有证据证明已满足",
+      "pass_condition": "主详细设计只保留功能实现主线 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
       "gate_id": "detailed-design-gate-2",
-      "name": "事务边界明确",
+      "name": "专项设计独立成文并在主文档引用",
       "type": "deterministic",
-      "pass_condition": "事务边界明确 有证据证明已满足",
+      "pass_condition": "专项设计独立成文并在主文档引用 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
       "gate_id": "detailed-design-gate-3",
-      "name": "幂等策略明确",
+      "name": "流程使用 flowchart 且紧跟流程设计说明",
       "type": "deterministic",
-      "pass_condition": "幂等策略明确 有证据证明已满足",
+      "pass_condition": "流程使用 flowchart 且紧跟流程设计说明 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
       "gate_id": "detailed-design-gate-4",
+      "name": "DDD/分层/扩展点方案包含 classDiagram",
+      "type": "deterministic",
+      "pass_condition": "DDD/分层/扩展点方案包含 classDiagram 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "detailed-design-gate-5",
       "name": "测试策略覆盖主干和异常路径",
       "type": "deterministic",
       "pass_condition": "测试策略覆盖主干和异常路径 有证据证明已满足",
@@ -357,7 +392,10 @@
       "detailed-design.md",
       "implementation-plan.md",
       "interface-contracts.yaml",
-      "test-strategy.md"
+      "test-strategy.md",
+      "database-design.md",
+      "mq-design.md",
+      "redis-design.md"
     ],
     "document_metadata": {
       "schema": "engineering-assistant/schemas/document-lifecycle.schema.json",
@@ -401,5 +439,106 @@
     "架构师",
     "测试负责人"
   ],
-  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor"
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "team_document_policy": {
+    "scope": "团队详细设计主文档只保留功能实现主线，证据、选型、专项设计和发布灰度内容必须拆出。",
+    "main_document": {
+      "artifact": "detailed-design.md",
+      "allowed_sections": [
+        "文档元数据",
+        "设计规则或设计规范",
+        "关联专项设计文档",
+        "模块边界",
+        "同步/异步或核心策略规则",
+        "流程图与流程设计",
+        "DDD/UML 类图",
+        "状态机",
+        "SDK/服务契约",
+        "接口设计",
+        "兼容策略",
+        "单元测试设计",
+        "人工评审项"
+      ],
+      "forbidden_headings": [
+        "来源证据",
+        "技术选型",
+        "数据库设计",
+        "MQ 设计",
+        "Redis 设计",
+        "业务规则与校验",
+        "幂等与一致性",
+        "异常与日志",
+        "发布",
+        "灰度",
+        "上线"
+      ],
+      "forbidden_mermaid": [
+        "sequenceDiagram"
+      ],
+      "required_mermaid": [
+        "flowchart"
+      ],
+      "flowchart_note_required": true,
+      "flowchart_note_fields": [
+        "业务规则",
+        "校验规则",
+        "事务边界",
+        "幂等与一致性",
+        "异常场景",
+        "日志要求"
+      ],
+      "class_diagram_required_when_terms_present": [
+        "DDD",
+        "聚合根",
+        "领域服务",
+        "ApplicationService",
+        "Repository",
+        "Handler",
+        "Strategy",
+        "Template",
+        "port",
+        "adapter"
+      ],
+      "specialty_reference_only": {
+        "database-design.md": "数据库设计",
+        "mq-design.md": "MQ 设计",
+        "redis-design.md": "Redis 设计",
+        "interface-contracts.yaml": "接口契约",
+        "test-strategy.md": "测试策略"
+      },
+      "evidence_location": [
+        "stage-run-result.json",
+        "repo-context-report.md",
+        "review evidence artifacts"
+      ],
+      "technology_selection_location": [
+        "high-level-design.md",
+        "technology-selection-review.md",
+        "repo-context-report.md"
+      ]
+    },
+    "stage_result": {
+      "must_register_specialty_artifacts": [
+        "database-design.md",
+        "mq-design.md",
+        "redis-design.md",
+        "interface-contracts.yaml",
+        "test-strategy.md"
+      ],
+      "waiting_for_human_review_when": [
+        "DDL",
+        "MQ 新队列",
+        "MQ 新 topic",
+        "Redis 新 Key"
+      ],
+      "blocked_when": [
+        "detailed-design.md 包含禁止标题",
+        "detailed-design.md 包含 sequenceDiagram",
+        "detailed-design.md 缺少 flowchart",
+        "flowchart 后缺少流程设计说明",
+        "DDD/分层/扩展点关键词出现但缺少 classDiagram",
+        "涉及 DB/MQ/Redis 但缺少独立专项文档或 StageRunResult 未登记"
+      ]
+    }
+  }
 }

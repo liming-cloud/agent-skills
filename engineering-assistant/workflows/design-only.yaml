@@ -302,7 +302,10 @@
         "detailed-design.md",
         "implementation-plan.md",
         "interface-contracts.yaml",
-        "test-strategy.md"
+        "test-strategy.md",
+        "database-design.md",
+        "mq-design.md",
+        "redis-design.md"
       ],
       "preconditions": [
         "contract 输入可用",
@@ -313,16 +316,20 @@
         "产物已登记索引"
       ],
       "quality_gates": [
-        "接口定义完整",
-        "事务边界明确",
-        "幂等策略明确",
+        "主详细设计只保留功能实现主线",
+        "专项设计独立成文并在主文档引用",
+        "流程使用 flowchart 且紧跟流程设计说明",
+        "DDD/分层/扩展点方案包含 classDiagram",
         "测试策略覆盖主干和异常路径"
       ],
       "approval_policy": {
         "required_for": [
           "核心链路事务边界变化",
           "高并发路径设计",
-          "权限/认证/鉴权设计"
+          "权限/认证/鉴权设计",
+          "DDL",
+          "MQ 新队列或 topic",
+          "Redis 新 Key"
         ],
         "decision": [
           "pending",
@@ -355,7 +362,10 @@
         "detailed-design.md": "artifacts/detailed-design/detailed-design.md",
         "implementation-plan.md": "artifacts/detailed-design/implementation-plan.md",
         "interface-contracts.yaml": "artifacts/detailed-design/interface-contracts.yaml",
-        "test-strategy.md": "artifacts/detailed-design/test-strategy.md"
+        "test-strategy.md": "artifacts/detailed-design/test-strategy.md",
+        "database-design.md": "artifacts/detailed-design/database-design.md",
+        "mq-design.md": "artifacts/detailed-design/mq-design.md",
+        "redis-design.md": "artifacts/detailed-design/redis-design.md"
       }
     },
     {
@@ -393,16 +403,19 @@
         "产物已登记索引"
       ],
       "quality_gates": [
+        "redis-design.md 使用团队 Redis 模板",
         "key 命名合规",
-        "TTL 或无 TTL 原因明确",
+        "所有 Key 设置 TTL 且单位明确",
         "一致性策略可验证",
-        "穿透/击穿/雪崩有策略"
+        "穿透/击穿/雪崩有策略",
+        "不可用降级策略明确"
       ],
       "approval_policy": {
         "required_for": [
           "Redis key 批量删除",
           "核心链路缓存策略变化",
-          "无 TTL 高风险数据"
+          "Redis 新 Key",
+          "版本/拓扑/持久化/淘汰策略无法确认"
         ],
         "decision": [
           "pending",
@@ -473,16 +486,22 @@
         "产物已登记索引"
       ],
       "quality_gates": [
+        "mq-design.md 使用团队 MQ 模板",
+        "生产者表完整",
+        "消费者表完整",
         "消息 schema 完整",
         "幂等策略明确",
-        "重试/死信策略明确",
+        "重试/死信/回放策略明确",
         "监控告警明确"
       ],
       "approval_policy": {
         "required_for": [
           "MQ topic 删除或重命名",
+          "MQ 新队列或 topic",
           "核心消息链路变化",
-          "生产消息回放"
+          "生产消息回放",
+          "消息体超过 10KB",
+          "非仲裁队列"
         ],
         "decision": [
           "pending",
@@ -554,10 +573,12 @@
         "产物已登记索引"
       ],
       "quality_gates": [
+        "database-design.md 使用 OLTP 或 OLAP 团队模板",
         "字段和索引均有查询/约束用途",
         "迁移步骤可回滚",
         "容量和查询模式已评估",
-        "生产变更审批明确"
+        "生产变更审批明确",
+        "未确认库名/实例/字符集/索引名时不得 final"
       ],
       "approval_policy": {
         "required_for": [
@@ -566,7 +587,8 @@
           "删除字段",
           "删除索引",
           "生产库变更",
-          "影响核心链路的索引调整"
+          "影响核心链路的索引调整",
+          "物理删除在线事实行"
         ],
         "decision": [
           "pending",

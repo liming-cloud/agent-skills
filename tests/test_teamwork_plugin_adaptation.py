@@ -87,6 +87,54 @@ class TeamworkPluginAdaptationTests(unittest.TestCase):
             self.assertEqual(PLUGIN_NAME, marketplace["plugins"][0]["name"])
             self.assertEqual(f"./plugins/{PLUGIN_NAME}", marketplace["plugins"][0]["source"]["path"])
 
+    def test_personal_layout_preserves_existing_marketplace_plugins(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            personal_root = Path(temp_dir) / "home"
+            marketplace_path = personal_root / ".agents" / "plugins" / "marketplace.json"
+            marketplace_path.parent.mkdir(parents=True)
+            marketplace_path.write_text(
+                json.dumps(
+                    {
+                        "name": "personal",
+                        "interface": {"displayName": "Personal"},
+                        "plugins": [
+                            {
+                                "name": "engineering-assistant",
+                                "source": {"source": "local", "path": "./plugins/engineering-assistant"},
+                                "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+                                "category": "Productivity",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "engineering-assistant" / "scripts" / "publish_plugin.py"),
+                    "--layout",
+                    "personal",
+                    "--publish-root",
+                    str(personal_root),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(0, result.returncode, result.stderr + result.stdout)
+
+            marketplace = json.loads(marketplace_path.read_text(encoding="utf-8"))
+            plugin_names = [item["name"] for item in marketplace["plugins"]]
+            self.assertEqual(["engineering-assistant", PLUGIN_NAME], plugin_names)
+            self.assertEqual("./plugins/engineering-assistant", marketplace["plugins"][0]["source"]["path"])
+            self.assertEqual(f"./plugins/{PLUGIN_NAME}", marketplace["plugins"][1]["source"]["path"])
+
 
 if __name__ == "__main__":
     unittest.main()

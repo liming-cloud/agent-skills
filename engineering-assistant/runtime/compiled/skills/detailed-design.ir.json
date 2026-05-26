@@ -26,7 +26,10 @@
     "detailed-design.md",
     "implementation-plan.md",
     "interface-contracts.yaml",
-    "test-strategy.md"
+    "test-strategy.md",
+    "database-design.md",
+    "mq-design.md",
+    "redis-design.md"
   ],
   "routing": {
     "intent_tags": [
@@ -59,9 +62,10 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
-      "接口定义完整",
-      "事务边界明确",
-      "幂等策略明确",
+      "主详细设计只保留功能实现主线",
+      "专项设计独立成文并在主文档引用",
+      "流程使用 flowchart 且紧跟流程设计说明",
+      "DDD/分层/扩展点方案包含 classDiagram",
       "测试策略覆盖主干和异常路径"
     ],
     "allow_implicit_invocation": true
@@ -72,13 +76,17 @@
     "human_approval_required": [
       "核心链路事务边界变化",
       "高并发路径设计",
-      "权限/认证/鉴权设计"
+      "权限/认证/鉴权设计",
+      "DDL",
+      "MQ 新队列或 topic",
+      "Redis 新 Key"
     ]
   },
   "quality_gates": [
-    "接口定义完整",
-    "事务边界明确",
-    "幂等策略明确",
+    "主详细设计只保留功能实现主线",
+    "专项设计独立成文并在主文档引用",
+    "流程使用 flowchart 且紧跟流程设计说明",
+    "DDD/分层/扩展点方案包含 classDiagram",
     "测试策略覆盖主干和异常路径"
   ],
   "workflow": {

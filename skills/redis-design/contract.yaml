@@ -46,10 +46,12 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
+      "redis-design.md 使用团队 Redis 模板",
       "key 命名合规",
-      "TTL 或无 TTL 原因明确",
+      "所有 Key 设置 TTL 且单位明确",
       "一致性策略可验证",
-      "穿透/击穿/雪崩有策略"
+      "穿透/击穿/雪崩有策略",
+      "不可用降级策略明确"
     ],
     "allow_implicit_invocation": true
   },
@@ -253,7 +255,8 @@
   "human_approval_required": [
     "Redis key 批量删除",
     "核心链路缓存策略变化",
-    "无 TTL 高风险数据"
+    "Redis 新 Key",
+    "版本/拓扑/持久化/淘汰策略无法确认"
   ],
   "risk_model": {
     "levels": [
@@ -265,37 +268,52 @@
     "upgrade_conditions": [
       "Redis key 批量删除",
       "核心链路缓存策略变化",
-      "无 TTL 高风险数据"
+      "Redis 新 Key",
+      "版本/拓扑/持久化/淘汰策略无法确认"
     ],
     "default_for_unknown": "medium"
   },
   "quality_gates": [
     {
       "gate_id": "redis-design-gate-1",
+      "name": "redis-design.md 使用团队 Redis 模板",
+      "type": "deterministic",
+      "pass_condition": "redis-design.md 使用团队 Redis 模板 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "redis-design-gate-2",
       "name": "key 命名合规",
       "type": "deterministic",
       "pass_condition": "key 命名合规 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "redis-design-gate-2",
-      "name": "TTL 或无 TTL 原因明确",
+      "gate_id": "redis-design-gate-3",
+      "name": "所有 Key 设置 TTL 且单位明确",
       "type": "deterministic",
-      "pass_condition": "TTL 或无 TTL 原因明确 有证据证明已满足",
+      "pass_condition": "所有 Key 设置 TTL 且单位明确 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "redis-design-gate-3",
+      "gate_id": "redis-design-gate-4",
       "name": "一致性策略可验证",
       "type": "deterministic",
       "pass_condition": "一致性策略可验证 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "redis-design-gate-4",
+      "gate_id": "redis-design-gate-5",
       "name": "穿透/击穿/雪崩有策略",
       "type": "deterministic",
       "pass_condition": "穿透/击穿/雪崩有策略 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "redis-design-gate-6",
+      "name": "不可用降级策略明确",
+      "type": "deterministic",
+      "pass_condition": "不可用降级策略明确 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     }
   ],
@@ -405,5 +423,58 @@
     "架构师",
     "测试负责人"
   ],
-  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor"
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "team_document_policy": {
+    "artifact": "redis-design.md",
+    "required_sections": [
+      "文档头信息",
+      "历史版本信息",
+      "前言",
+      "公共配置",
+      "Redis 版本",
+      "集群配置",
+      "持久化策略",
+      "过期淘汰策略",
+      "设计项",
+      "安全与运维",
+      "人工评审项"
+    ],
+    "design_item_required_fields": [
+      "特性用途",
+      "业务说明",
+      "存储设计",
+      "库",
+      "数据结构",
+      "TTL",
+      "Key 定义",
+      "Value 数据格式",
+      "预估数据和容量",
+      "多团队协同"
+    ],
+    "rules": [
+      "Redis 只做加速层、协调层、短态承载层",
+      "Redis 不做事实库",
+      "Redis 不做消息队列",
+      "所有 Key 必须设置 TTL，最大不超过 30 天",
+      "Redis 不可用必须有降级策略"
+    ],
+    "waiting_for_input_when": [
+      "Redis 版本无法确认",
+      "拓扑无法确认",
+      "持久化策略无法确认",
+      "淘汰策略无法确认"
+    ],
+    "waiting_for_human_review_when": [
+      "Redis 新 Key",
+      "批量 Key",
+      "Key 批量删除",
+      "Value 单 Key 超过 1MB"
+    ],
+    "blocked_when": [
+      "Redis 作为事实库",
+      "RabbitMQ 项目设计 Redis 发布订阅或 Redis 延迟队列",
+      "缺少 TTL 或 TTL 单位",
+      "缺少不可用降级策略"
+    ]
+  }
 }

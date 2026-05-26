@@ -33,22 +33,53 @@ def copy_tree(source: Path, target: Path) -> None:
     shutil.copytree(source, target)
 
 
-def marketplace_payload(config: dict) -> dict:
+def plugin_entry(config: dict) -> dict:
     plugin_name = config.get("plugin_name", "teamwork-engineering-assistant")
     return {
-        "name": config.get("name", "local-teamwork-engineering"),
-        "interface": config.get("interface", {"displayName": "Local Teamwork Engineering Plugins"}),
-        "plugins": [
-            {
-                "name": plugin_name,
-                "source": {
-                    "source": "local",
-                    "path": "./" + config.get("plugin_relative_path", f"plugins/{plugin_name}").strip("/"),
-                },
-                "policy": config.get("policy", {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}),
-                "category": config.get("category", "Productivity"),
-            }
-        ],
+        "name": plugin_name,
+        "source": {
+            "source": "local",
+            "path": "./" + config.get("plugin_relative_path", f"plugins/{plugin_name}").strip("/"),
+        },
+        "policy": config.get("policy", {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}),
+        "category": config.get("category", "Productivity"),
+    }
+
+
+def load_marketplace(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"invalid marketplace json: {path}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise SystemExit(f"marketplace must be a JSON object: {path}")
+    return data
+
+
+def upsert_plugin_entry(existing_plugins, entry: dict) -> list:
+    plugins = existing_plugins if isinstance(existing_plugins, list) else []
+    updated = []
+    replaced = False
+    for item in plugins:
+        if isinstance(item, dict) and item.get("name") == entry["name"]:
+            updated.append(entry)
+            replaced = True
+        else:
+            updated.append(item)
+    if not replaced:
+        updated.append(entry)
+    return updated
+
+
+def marketplace_payload(config: dict, existing=None) -> dict:
+    payload = dict(existing or {})
+    return {
+        **payload,
+        "name": payload.get("name") or config.get("name", "local-teamwork-engineering"),
+        "interface": payload.get("interface") if isinstance(payload.get("interface"), dict) else config.get("interface", {"displayName": "Local Teamwork Engineering Plugins"}),
+        "plugins": upsert_plugin_entry(payload.get("plugins"), plugin_entry(config)),
     }
 
 
@@ -93,7 +124,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
     copy_tree(runtime, plugin_root / "engineering-assistant")
 
     marketplace_path.parent.mkdir(parents=True, exist_ok=True)
-    marketplace_path.write_text(json.dumps(marketplace_payload(config), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    marketplace_path.write_text(json.dumps(marketplace_payload(config, load_marketplace(marketplace_path)), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     legacy_marketplace = publish_root / "marketplace.json"
     if legacy_marketplace != marketplace_path and legacy_marketplace.exists():
         legacy_marketplace.unlink()

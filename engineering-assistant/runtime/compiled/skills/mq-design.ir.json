@@ -63,9 +63,12 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
+      "mq-design.md 使用团队 MQ 模板",
+      "生产者表完整",
+      "消费者表完整",
       "消息 schema 完整",
       "幂等策略明确",
-      "重试/死信策略明确",
+      "重试/死信/回放策略明确",
       "监控告警明确"
     ],
     "allow_implicit_invocation": true
@@ -75,14 +78,20 @@
     "allow_implicit_invocation": true,
     "human_approval_required": [
       "MQ topic 删除或重命名",
+      "MQ 新队列或 topic",
       "核心消息链路变化",
-      "生产消息回放"
+      "生产消息回放",
+      "消息体超过 10KB",
+      "非仲裁队列"
     ]
   },
   "quality_gates": [
+    "mq-design.md 使用团队 MQ 模板",
+    "生产者表完整",
+    "消费者表完整",
     "消息 schema 完整",
     "幂等策略明确",
-    "重试/死信策略明确",
+    "重试/死信/回放策略明确",
     "监控告警明确"
   ],
   "workflow": {

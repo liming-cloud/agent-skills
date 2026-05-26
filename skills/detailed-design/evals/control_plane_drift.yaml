@@ -13,8 +13,8 @@
       "D4"
     ],
     "risk_focus": [
-      "接口定义完整",
-      "D1 模块包含描述、业务流程、时序/交互、数据库设计、接口设计、单元测试设计",
+      "主详细设计只保留功能实现主线",
+      "D1 详细设计主文档只保留功能实现主线，推荐结构为文档元数据、设计规则或规范、关联专项设计文档、模块边界、同步/异步或核心策略、流程图与流程设计、DDD/UML 类图、状态机、SDK/服务契约、接口设计、兼容策略、单元测试设计、人工评审项",
       "证据链",
       "门禁决策"
     ],
@@ -82,6 +82,9 @@
     "detailed-design.md",
     "implementation-plan.md",
     "interface-contracts.yaml",
-    "test-strategy.md"
+    "test-strategy.md",
+    "database-design.md",
+    "mq-design.md",
+    "redis-design.md"
   ]
 }

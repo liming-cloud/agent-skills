@@ -5,9 +5,9 @@
   "type": "stage_skill",
   "prompt_pack": {
     "display_name": "Database Design",
-    "short_description": "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。",
+    "short_description": "设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。",
     "default_prompt": "使用 database-design，先确认语言和必填输入，再输出声明产物与 gate decision。",
-    "trigger_description": "Use when the request is about 设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。；Do not use when 不执行生产 DDL；不做无用途字段和索引。",
+    "trigger_description": "Use when the request is about 设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。；Do not use when 不执行生产 DDL；不做无用途字段和索引。",
     "language_policy": {
       "supported": [
         "zh-CN",
@@ -36,8 +36,8 @@
       "database_design",
       "design",
       "stage_skill",
+      "修复和必要恢复方案",
       "并标记生产变更审批点。",
-      "灰度和回滚方案",
       "索引",
       "设计数据库表结构",
       "迁移"
@@ -45,7 +45,7 @@
     "positive_triggers": [
       "database-design",
       "Database Design",
-      "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。"
+      "设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。"
     ],
     "negative_triggers": [
       "只解释 Database Design 的用途，不执行任务",
@@ -62,10 +62,12 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
+      "database-design.md 使用 OLTP 或 OLAP 团队模板",
       "字段和索引均有查询/约束用途",
       "迁移步骤可回滚",
       "容量和查询模式已评估",
-      "生产变更审批明确"
+      "生产变更审批明确",
+      "未确认库名/实例/字符集/索引名时不得 final"
     ],
     "allow_implicit_invocation": true
   },
@@ -78,14 +80,17 @@
       "删除字段",
       "删除索引",
       "生产库变更",
-      "影响核心链路的索引调整"
+      "影响核心链路的索引调整",
+      "物理删除在线事实行"
     ]
   },
   "quality_gates": [
+    "database-design.md 使用 OLTP 或 OLAP 团队模板",
     "字段和索引均有查询/约束用途",
     "迁移步骤可回滚",
     "容量和查询模式已评估",
-    "生产变更审批明确"
+    "生产变更审批明确",
+    "未确认库名/实例/字符集/索引名时不得 final"
   ],
   "workflow": {
     "node_id": "database-design",

@@ -13,7 +13,8 @@ policy:
   human_approval_required:
     - "Redis key 批量删除"
     - "核心链路缓存策略变化"
-    - "无 TTL 高风险数据"
+    - "Redis 新 Key"
+    - "版本/拓扑/持久化/淘汰策略无法确认"
 metadata:
   owner: "架构师"
   stage: "redis_design"

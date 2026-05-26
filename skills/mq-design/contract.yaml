@@ -46,9 +46,12 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
+      "mq-design.md 使用团队 MQ 模板",
+      "生产者表完整",
+      "消费者表完整",
       "消息 schema 完整",
       "幂等策略明确",
-      "重试/死信策略明确",
+      "重试/死信/回放策略明确",
       "监控告警明确"
     ],
     "allow_implicit_invocation": true
@@ -252,8 +255,11 @@
   },
   "human_approval_required": [
     "MQ topic 删除或重命名",
+    "MQ 新队列或 topic",
     "核心消息链路变化",
-    "生产消息回放"
+    "生产消息回放",
+    "消息体超过 10KB",
+    "非仲裁队列"
   ],
   "risk_model": {
     "levels": [
@@ -264,35 +270,59 @@
     ],
     "upgrade_conditions": [
       "MQ topic 删除或重命名",
+      "MQ 新队列或 topic",
       "核心消息链路变化",
-      "生产消息回放"
+      "生产消息回放",
+      "消息体超过 10KB",
+      "非仲裁队列"
     ],
     "default_for_unknown": "medium"
   },
   "quality_gates": [
     {
       "gate_id": "mq-design-gate-1",
+      "name": "mq-design.md 使用团队 MQ 模板",
+      "type": "deterministic",
+      "pass_condition": "mq-design.md 使用团队 MQ 模板 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "mq-design-gate-2",
+      "name": "生产者表完整",
+      "type": "deterministic",
+      "pass_condition": "生产者表完整 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "mq-design-gate-3",
+      "name": "消费者表完整",
+      "type": "deterministic",
+      "pass_condition": "消费者表完整 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "mq-design-gate-4",
       "name": "消息 schema 完整",
       "type": "deterministic",
       "pass_condition": "消息 schema 完整 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "mq-design-gate-2",
+      "gate_id": "mq-design-gate-5",
       "name": "幂等策略明确",
       "type": "deterministic",
       "pass_condition": "幂等策略明确 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "mq-design-gate-3",
-      "name": "重试/死信策略明确",
+      "gate_id": "mq-design-gate-6",
+      "name": "重试/死信/回放策略明确",
       "type": "deterministic",
-      "pass_condition": "重试/死信策略明确 有证据证明已满足",
+      "pass_condition": "重试/死信/回放策略明确 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "mq-design-gate-4",
+      "gate_id": "mq-design-gate-7",
       "name": "监控告警明确",
       "type": "deterministic",
       "pass_condition": "监控告警明确 有证据证明已满足",
@@ -405,5 +435,70 @@
     "架构师",
     "测试负责人"
   ],
-  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor"
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "team_document_policy": {
+    "artifact": "mq-design.md",
+    "producer_table_fields": [
+      "业务用途",
+      "场景应用",
+      "业务消息 key",
+      "消息类型",
+      "消息体内容",
+      "优先等级",
+      "消息 TTL",
+      "持久化",
+      "目的交换机",
+      "路由 key",
+      "消息预估大小",
+      "生产服务或模块名称",
+      "软件需求号或 bug 号",
+      "设计日期",
+      "设计者",
+      "备注"
+    ],
+    "consumer_table_fields": [
+      "队列名称",
+      "业务用途",
+      "场景应用",
+      "单消费节点消费",
+      "队列类型",
+      "优先队列",
+      "是否持久化",
+      "自动删除",
+      "TTL",
+      "消息大小",
+      "绑定的 Exchange/routingKey",
+      "死信队列 exchange/routeKey",
+      "消费服务",
+      "消息 key",
+      "运维监控",
+      "软件需求号或 bug 号",
+      "设计日期",
+      "设计者",
+      "备注"
+    ],
+    "rules": [
+      "MQ 只用于削峰填谷、异步执行和服务解耦",
+      "进程内异步不默认使用 MQ",
+      "一个服务一个队列，一个队列可绑定多个 Exchange/routingKey",
+      "队列默认建议仲裁队列",
+      "必须设计死信队列",
+      "消息体默认不超过 10KB",
+      "必须定义幂等、重试、死信、回放策略"
+    ],
+    "waiting_for_human_review_when": [
+      "MQ 新队列",
+      "MQ 新 topic",
+      "非仲裁队列",
+      "消息体超过 10KB",
+      "生产消息回放",
+      "删除或重命名 topic/queue"
+    ],
+    "blocked_when": [
+      "缺少生产者表或消费者表",
+      "消息体承载大查询条件、文件内容或敏感明文",
+      "无幂等策略",
+      "无死信队列"
+    ]
+  }
 }

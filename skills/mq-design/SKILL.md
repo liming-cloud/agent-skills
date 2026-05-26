@@ -58,6 +58,15 @@ description: Use when the request is about 设计 MQ 主题、消息体、生产
 
 
 
+# 团队 MQ 设计规则
+- MQ 设计必须生成独立 `mq-design.md`，不得在主详细设计中展开。
+- 文档必须按 `assets/mq-design-template.md` 组织，至少包含生产者表和消费者表。
+- MQ 只用于削峰填谷、异步执行和服务解耦；进程内异步不默认使用 MQ。
+- 一个服务一个队列，一个队列可绑定多个 Exchange/routingKey；队列默认建议仲裁队列，非仲裁队列需要评审。
+- 必须设计死信队列、幂等策略、重试策略、死信策略和回放策略。
+- 消息体默认不超过 10KB，不得承载大查询条件、文件内容或敏感明文；超过 10KB 必须评审。
+- 回放生产消息、删除或重命名 topic/queue 必须人工审批。
+
 
 # 操作流程
 1. 将请求规范化为 `StageRunRequest`。
@@ -74,6 +83,9 @@ description: Use when the request is about 设计 MQ 主题、消息体、生产
 - M9 消息等级：9 核心交易，7 价格/会员/促销，5 配置，3 字典权限，1 数据同步/监控/死信
 - M10 等级 <=3 原则上设置 TTL；等级 >5 必须持久化
 - M11 顺序消息可单消费节点，但必须评审扩展性影响
+- M12 mq-design.md 必须至少包含生产者表和消费者表；主详细设计只引用该专项，不展开 MQ 字段
+- M13 消息体不得承载大查询条件、文件内容或敏感明文
+- M14 回放生产消息、删除或重命名 topic/queue 必须人工审批
 4. 生成全部声明产物。
 5. 评估质量门禁，并给出 `pass`、`warn`、`block` 或 `require_human_review`。
 6. 输出包含 trace、artifacts、findings、required_information_requests 和 required actions 的 `StageRunResult`。
@@ -93,9 +105,12 @@ description: Use when the request is about 设计 MQ 主题、消息体、生产
 
 
 # 质量门禁
+- mq-design.md 使用团队 MQ 模板
+- 生产者表完整
+- 消费者表完整
 - 消息 schema 完整
 - 幂等策略明确
-- 重试/死信策略明确
+- 重试/死信/回放策略明确
 - 监控告警明确
 
 # 失败处理
@@ -106,8 +121,11 @@ description: Use when the request is about 设计 MQ 主题、消息体、生产
 
 # 人工审批规则
 - MQ topic 删除或重命名
+- MQ 新队列或 topic
 - 核心消息链路变化
 - 生产消息回放
+- 消息体超过 10KB
+- 非仲裁队列
 
 # 独立运行模式
 当用户只要求执行本阶段时，直接运行该 skill。生成完整产物集和门禁决策，不调用无关阶段。

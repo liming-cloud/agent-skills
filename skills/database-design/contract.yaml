@@ -4,13 +4,13 @@
   "version": "1.0.0",
   "stage": "database_design",
   "type": "stage_skill",
-  "purpose": "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。",
+  "purpose": "设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。",
   "non_goals": [
     "不执行生产 DDL",
     "不做无用途字段和索引",
     "不省略回滚方案"
   ],
-  "trigger_description": "Use when the request is about 设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。；Do not use when 不执行生产 DDL；不做无用途字段和索引。",
+  "trigger_description": "Use when the request is about 设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。；Do not use when 不执行生产 DDL；不做无用途字段和索引。",
   "routing": {
     "intent_tags": [
       "database",
@@ -18,8 +18,8 @@
       "database_design",
       "design",
       "stage_skill",
+      "修复和必要恢复方案",
       "并标记生产变更审批点。",
-      "灰度和回滚方案",
       "索引",
       "设计数据库表结构",
       "迁移"
@@ -27,7 +27,7 @@
     "positive_triggers": [
       "database-design",
       "Database Design",
-      "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。"
+      "设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。"
     ],
     "negative_triggers": [
       "只解释 Database Design 的用途，不执行任务",
@@ -44,10 +44,12 @@
     "risk_level": "medium",
     "cost_class": "medium",
     "evidence_required": [
+      "database-design.md 使用 OLTP 或 OLAP 团队模板",
       "字段和索引均有查询/约束用途",
       "迁移步骤可回滚",
       "容量和查询模式已评估",
-      "生产变更审批明确"
+      "生产变更审批明确",
+      "未确认库名/实例/字符集/索引名时不得 final"
     ],
     "allow_implicit_invocation": true
   },
@@ -261,7 +263,8 @@
     "删除字段",
     "删除索引",
     "生产库变更",
-    "影响核心链路的索引调整"
+    "影响核心链路的索引调整",
+    "物理删除在线事实行"
   ],
   "risk_model": {
     "levels": [
@@ -276,37 +279,52 @@
       "删除字段",
       "删除索引",
       "生产库变更",
-      "影响核心链路的索引调整"
+      "影响核心链路的索引调整",
+      "物理删除在线事实行"
     ],
     "default_for_unknown": "medium"
   },
   "quality_gates": [
     {
       "gate_id": "database-design-gate-1",
+      "name": "database-design.md 使用 OLTP 或 OLAP 团队模板",
+      "type": "deterministic",
+      "pass_condition": "database-design.md 使用 OLTP 或 OLAP 团队模板 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "database-design-gate-2",
       "name": "字段和索引均有查询/约束用途",
       "type": "deterministic",
       "pass_condition": "字段和索引均有查询/约束用途 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "database-design-gate-2",
+      "gate_id": "database-design-gate-3",
       "name": "迁移步骤可回滚",
       "type": "deterministic",
       "pass_condition": "迁移步骤可回滚 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "database-design-gate-3",
+      "gate_id": "database-design-gate-4",
       "name": "容量和查询模式已评估",
       "type": "deterministic",
       "pass_condition": "容量和查询模式已评估 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "database-design-gate-4",
+      "gate_id": "database-design-gate-5",
       "name": "生产变更审批明确",
       "type": "hybrid",
       "pass_condition": "生产变更审批明确 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "database-design-gate-6",
+      "name": "未确认库名/实例/字符集/索引名时不得 final",
+      "type": "deterministic",
+      "pass_condition": "未确认库名/实例/字符集/索引名时不得 final 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     }
   ],
@@ -417,5 +435,63 @@
     "架构师",
     "测试负责人"
   ],
-  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor"
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "team_document_policy": {
+    "artifact": "database-design.md",
+    "template_selection": {
+      "oltp": [
+        "文档信息",
+        "变更记录",
+        "术语定义",
+        "参考文档",
+        "文档定位",
+        "设计对象类型",
+        "业务语义与生命周期",
+        "状态机",
+        "物理结构设计",
+        "字段定义",
+        "敏感级别",
+        "索引设计",
+        "约束与数据库对象",
+        "字段可变性矩阵",
+        "数据量与性能设计",
+        "CRUD 契约设计",
+        "强制前置条件",
+        "禁止操作清单",
+        "批量操作与数据修复规则",
+        "事务、一致性与并发控制",
+        "安全与审计设计",
+        "人工审批点"
+      ],
+      "olap": [
+        "数据分层",
+        "字段级血缘",
+        "MergeTree 引擎选型",
+        "ORDER BY",
+        "PARTITION BY",
+        "TTL",
+        "物化视图关系",
+        "刷新策略",
+        "上下游影响"
+      ]
+    },
+    "forbidden": [
+      "无用途字段和索引",
+      "没有 WHERE 的 UPDATE/DELETE",
+      "业务代码物理删除在线事实行",
+      "Redis/MQ/文件系统作为事实数据来源"
+    ],
+    "waiting_for_human_review_when": [
+      "DDL",
+      "数据订正",
+      "物理删除在线事实行",
+      "删除字段",
+      "删除索引"
+    ],
+    "blocked_when": [
+      "未确认库名、实例、字符集、索引名时标记为 approved/final",
+      "缺少模板必填章节",
+      "无审批却包含高风险生产变更"
+    ]
+  }
 }

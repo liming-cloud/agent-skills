@@ -258,6 +258,38 @@ for skill in sorted(p for p in Path("skills").glob("*") if p.is_dir()):
         fingerprints.add(fingerprint)
         if skill.name in {"high-level-design", "detailed-design", "redis-design", "mq-design", "database-design", "design-review"} and len(scenario.get("team_rule_refs", [])) < 3:
             warnings.append(f"{path}: 核心设计 skill 建议至少引用 3 条团队规范")
+    for path in sorted((skill / "evals").glob("*.yaml")):
+        if path.stem in CASES:
+            continue
+        data = load_json(path)
+        if not data:
+            continue
+        for field in REQUIRED_FIELDS:
+            if field not in data:
+                errors.append(f"{path}: 缺少字段 {field}")
+        if data.get("case_type") != path.stem:
+            errors.append(f"{path}: case_type 应为 {path.stem}")
+        scenario = data.get("scenario", {})
+        for field in SCENARIO_FIELDS:
+            if field not in scenario:
+                errors.append(f"{path}: scenario 缺少字段 {field}")
+        if len(str(scenario.get("material", ""))) < 40:
+            errors.append(f"{path}: scenario.material 过短，不能作为真实压力场景")
+        if len(scenario.get("team_rule_refs", [])) < 3:
+            errors.append(f"{path}: 团队专项 eval 至少引用 3 条团队规范")
+        criteria_text = "\n".join(data.get("pass_criteria", []))
+        for required_text in ["language", "document_metadata", "required_information_requests"]:
+            if required_text not in criteria_text:
+                errors.append(f"{path}: pass_criteria 缺少运行时行为断言 {required_text}")
+        for required_text in ["detailed-design.md", "sequenceDiagram", "flowchart", "StageRunResult.artifacts"]:
+            if skill.name == "detailed-design" and required_text not in criteria_text:
+                errors.append(f"{path}: pass_criteria 缺少团队详细设计断言 {required_text}")
+        if data.get("expected_gate_decision") not in VALID_DECISIONS:
+            errors.append(f"{path}: expected_gate_decision 不合法")
+        if data.get("expected_status") not in VALID_STATUS:
+            errors.append(f"{path}: expected_status 不合法")
+        if data.get("required_artifacts") != declared_outputs:
+            errors.append(f"{path}: required_artifacts 与 contract outputs 不一致")
 
 for required_skill in ["frontend-design", "frontend-development"]:
     if not (Path("skills") / required_skill / "SKILL.md").exists():

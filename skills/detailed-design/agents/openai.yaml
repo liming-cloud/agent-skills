@@ -14,6 +14,9 @@ policy:
     - "核心链路事务边界变化"
     - "高并发路径设计"
     - "权限/认证/鉴权设计"
+    - "DDL"
+    - "MQ 新队列或 topic"
+    - "Redis 新 Key"
 metadata:
   owner: "后端开发"
   stage: "detailed_design"

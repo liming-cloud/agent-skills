@@ -1,0 +1,81 @@
+{
+  "id": "detailed-design-team_redis_template_reference_only",
+  "name": "Detailed Design Redis 设计使用专项模板",
+  "case_type": "team_redis_template_reference_only",
+  "scenario": {
+    "title": "Redis 设计使用专项模板",
+    "material": "用户要求 Redis 设计使用团队模板；主详细设计只引用 redis-design.md，专项覆盖 Key、Value、TTL、容量和降级。",
+    "system_scope": "目标业务系统 + 目标客户端系统",
+    "team_rule_refs": [
+      "D4",
+      "R7",
+      "R8",
+      "R10"
+    ],
+    "risk_focus": [
+      "Redis 专项模板",
+      "TTL",
+      "降级策略"
+    ],
+    "forbidden_behavior": [
+      "在主详细设计展开 Redis Key 表",
+      "缺少 TTL 单位",
+      "缺少降级策略"
+    ]
+  },
+  "input": {
+    "stage_run_request": {
+      "run_id": "team-doc-eval-001",
+      "workflow_id": "team-doc-eval-workflow",
+      "node_id": "detailed-design",
+      "skill_id": "detailed-design",
+      "mode": "standalone",
+      "inputs": {
+        "high-level-design.md": "provided: 用户要求 Redis 设计使用团队模板；主详细设计只引用 redis-design.md，专项覆盖 Key、Value、TTL、容量和降级。"
+      },
+      "artifacts": {},
+      "context": {
+        "risk_policy": "team-default",
+        "team_rule_refs": [
+          "D4",
+          "R7",
+          "R8",
+          "R10"
+        ],
+        "expected_gate_decision": "require_human_review"
+      },
+      "requested_by": "eval",
+      "approval_context": {}
+    }
+  },
+  "expected_behavior": "按团队详细设计拆分规范输出产物，主文档不混入证据、选型、专项展开或发布灰度章节，并用确定性校验阻断违规内容。",
+  "expected_gate_decision": "require_human_review",
+  "expected_status": "waiting_for_human_review",
+  "pass_criteria": [
+    "StageRunResult status 合法",
+    "未指定 language 时必须询问用户选择 zh-CN 或 en",
+    "正式 Markdown 文档必须包含 document_metadata.document_number、document_status、retention_policy",
+    "required_information_requests 在输入缺失时必须包含 questions",
+    "framework selection 必须遵循 repo_context/profile；Java/Spring 持久化默认 mybatis-plus，JDBC 必须评审",
+    "detailed-design.md 不得包含来源证据、技术选型、数据库设计、MQ 设计、Redis 设计、业务规则与校验、幂等与一致性、异常与日志、发布、灰度、上线等禁止标题",
+    "detailed-design.md 不得包含 sequenceDiagram，必须包含 flowchart，且每个 flowchart 后必须有流程设计说明",
+    "出现 DDD、聚合根、ApplicationService、Repository、Handler 或 Template 时必须包含 classDiagram",
+    "涉及 DB/MQ/Redis 时必须生成独立专项文档并登记到 StageRunResult.artifacts",
+    "存在 DDL、MQ 新队列或 Redis 新 Key 时必须 waiting_for_human_review",
+    "forbidden_behavior 未出现在输出决策中"
+  ],
+  "severity_when_failed": "critical",
+  "grader": {
+    "type": "deterministic",
+    "rubric": "校验团队详细设计拆分规则、专项模板、流程图、UML、人工评审和 StageRunResult artifact 登记。"
+  },
+  "required_artifacts": [
+    "detailed-design.md",
+    "implementation-plan.md",
+    "interface-contracts.yaml",
+    "test-strategy.md",
+    "database-design.md",
+    "mq-design.md",
+    "redis-design.md"
+  ]
+}

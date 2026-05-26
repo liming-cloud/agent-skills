@@ -13,7 +13,7 @@
       "DB3"
     ],
     "risk_focus": [
-      "字段和索引均有查询/约束用途",
+      "database-design.md 使用 OLTP 或 OLAP 团队模板",
       "DB1 MySQL 是事实数据唯一真相来源，Redis/MQ 不作为事实数据最终来源",
       "证据链",
       "门禁决策"

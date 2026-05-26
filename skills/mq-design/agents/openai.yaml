@@ -12,8 +12,11 @@ policy:
   risk_level: "medium"
   human_approval_required:
     - "MQ topic 删除或重命名"
+    - "MQ 新队列或 topic"
     - "核心消息链路变化"
     - "生产消息回放"
+    - "消息体超过 10KB"
+    - "非仲裁队列"
 metadata:
   owner: "架构师"
   stage: "mq_design"

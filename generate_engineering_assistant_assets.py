@@ -31,6 +31,173 @@ EVAL_CASES = [
     "low_quality_automation",
 ]
 
+TEAM_DOC_TARGET_SKILLS = {"detailed-design", "database-design", "redis-design", "mq-design"}
+
+DETAILED_DESIGN_MAIN_SECTIONS = [
+    "文档元数据",
+    "设计规则或设计规范",
+    "关联专项设计文档",
+    "模块边界",
+    "同步/异步或核心策略规则",
+    "流程图与流程设计",
+    "DDD/UML 类图",
+    "状态机",
+    "SDK/服务契约",
+    "接口设计",
+    "兼容策略",
+    "单元测试设计",
+    "人工评审项",
+]
+
+DETAILED_DESIGN_FORBIDDEN_HEADINGS = [
+    "来源证据",
+    "技术选型",
+    "数据库设计",
+    "MQ 设计",
+    "Redis 设计",
+    "业务规则与校验",
+    "幂等与一致性",
+    "异常与日志",
+    "发布",
+    "灰度",
+    "上线",
+]
+
+DETAILED_DESIGN_FLOW_NOTE_FIELDS = [
+    "业务规则",
+    "校验规则",
+    "事务边界",
+    "幂等与一致性",
+    "异常场景",
+    "日志要求",
+]
+
+DETAILED_DESIGN_DDD_TERMS = [
+    "DDD",
+    "聚合根",
+    "领域服务",
+    "ApplicationService",
+    "Repository",
+    "Handler",
+    "Strategy",
+    "Template",
+    "port",
+    "adapter",
+]
+
+DETAILED_DESIGN_SPECIALTY_DOCS = {
+    "database-design.md": "数据库设计",
+    "mq-design.md": "MQ 设计",
+    "redis-design.md": "Redis 设计",
+    "interface-contracts.yaml": "接口契约",
+    "test-strategy.md": "测试策略",
+}
+
+DB_OLTP_REQUIRED_SECTIONS = [
+    "文档信息",
+    "变更记录",
+    "术语定义",
+    "参考文档",
+    "文档定位",
+    "设计对象类型",
+    "业务语义与生命周期",
+    "状态机",
+    "物理结构设计",
+    "字段定义",
+    "敏感级别",
+    "索引设计",
+    "约束与数据库对象",
+    "字段可变性矩阵",
+    "数据量与性能设计",
+    "CRUD 契约设计",
+    "强制前置条件",
+    "禁止操作清单",
+    "批量操作与数据修复规则",
+    "事务、一致性与并发控制",
+    "安全与审计设计",
+    "人工审批点",
+]
+
+DB_OLAP_REQUIRED_SECTIONS = [
+    "数据分层",
+    "字段级血缘",
+    "MergeTree 引擎选型",
+    "ORDER BY",
+    "PARTITION BY",
+    "TTL",
+    "物化视图关系",
+    "刷新策略",
+    "上下游影响",
+]
+
+REDIS_REQUIRED_SECTIONS = [
+    "文档头信息",
+    "历史版本信息",
+    "前言",
+    "公共配置",
+    "Redis 版本",
+    "集群配置",
+    "持久化策略",
+    "过期淘汰策略",
+    "设计项",
+    "安全与运维",
+    "人工评审项",
+]
+
+REDIS_DESIGN_ITEM_FIELDS = [
+    "特性用途",
+    "业务说明",
+    "存储设计",
+    "库",
+    "数据结构",
+    "TTL",
+    "Key 定义",
+    "Value 数据格式",
+    "预估数据和容量",
+    "多团队协同",
+]
+
+MQ_PRODUCER_FIELDS = [
+    "业务用途",
+    "场景应用",
+    "业务消息 key",
+    "消息类型",
+    "消息体内容",
+    "优先等级",
+    "消息 TTL",
+    "持久化",
+    "目的交换机",
+    "路由 key",
+    "消息预估大小",
+    "生产服务或模块名称",
+    "软件需求号或 bug 号",
+    "设计日期",
+    "设计者",
+    "备注",
+]
+
+MQ_CONSUMER_FIELDS = [
+    "队列名称",
+    "业务用途",
+    "场景应用",
+    "单消费节点消费",
+    "队列类型",
+    "优先队列",
+    "是否持久化",
+    "自动删除",
+    "TTL",
+    "消息大小",
+    "绑定的 Exchange/routingKey",
+    "死信队列 exchange/routeKey",
+    "消费服务",
+    "消息 key",
+    "运维监控",
+    "软件需求号或 bug 号",
+    "设计日期",
+    "设计者",
+    "备注",
+]
+
 COMMON_STATES = [
     "pending",
     "running",
@@ -638,15 +805,21 @@ SKILLS = [
         "purpose": "将概要设计拆解为可实现的详细设计、接口契约、任务清单和测试策略。",
         "non_goals": ["不批准设计进入研发", "不直接修改代码", "不省略专项设计"],
         "inputs": ["high-level-design.md", "architecture-decision-record.md", "module-boundary.yaml", "team_standards"],
-        "outputs": ["detailed-design.md", "implementation-plan.md", "interface-contracts.yaml", "test-strategy.md"],
-        "gates": ["接口定义完整", "事务边界明确", "幂等策略明确", "测试策略覆盖主干和异常路径"],
-        "approvals": ["核心链路事务边界变化", "高并发路径设计", "权限/认证/鉴权设计"],
+        "outputs": ["detailed-design.md", "implementation-plan.md", "interface-contracts.yaml", "test-strategy.md", "database-design.md", "mq-design.md", "redis-design.md"],
+        "gates": ["主详细设计只保留功能实现主线", "专项设计独立成文并在主文档引用", "流程使用 flowchart 且紧跟流程设计说明", "DDD/分层/扩展点方案包含 classDiagram", "测试策略覆盖主干和异常路径"],
+        "approvals": ["核心链路事务边界变化", "高并发路径设计", "权限/认证/鉴权设计", "DDL", "MQ 新队列或 topic", "Redis 新 Key"],
         "checks": [
-            "D1 模块包含描述、业务流程、时序/交互、数据库设计、接口设计、单元测试设计",
-            "D2 列出业务规则、状态机、校验规则、异常码、幂等点、事务边界、回滚策略",
-            "D3 导入、批处理、异步任务必须写数据量上限、批次大小、超时时间、进度查询、失败处理",
-            "D4 状态流转说明允许状态、终态、CAS/乐观锁控制、并发竞争处理",
-            "D5 项目定制功能不能破坏原有通用能力，说明新增模块边界和兼容策略",
+            "D1 详细设计主文档只保留功能实现主线，推荐结构为文档元数据、设计规则或规范、关联专项设计文档、模块边界、同步/异步或核心策略、流程图与流程设计、DDD/UML 类图、状态机、SDK/服务契约、接口设计、兼容策略、单元测试设计、人工评审项",
+            "D2 主文档不得生成来源证据、技术选型、数据库设计展开、MQ 设计展开、Redis 设计展开、业务规则和校验独立章节、幂等和一致性独立章节、异常和日志独立章节、发布、灰度、上线章节",
+            "D3 来源证据放入 StageRunResult、repo-context 产物或评审证据；技术选型放入概要设计、技术选型评审或 repo-context 产物，除非用户明确要求，不进入详细设计正文",
+            "D4 数据库、MQ、Redis、接口契约、测试策略只能在主文档的关联专项设计文档表中引用；不得在主文档重复展开字段表、消息表、Redis Key 表",
+            "D5 详细设计流程必须使用 Mermaid flowchart，不得用 sequenceDiagram 替代流程图；每个 flowchart 下必须紧跟流程设计说明",
+            "D6 流程设计说明必须把业务规则、校验规则、事务边界、幂等与一致性、异常场景、日志要求、取消、重试、补偿、文件清理等合并到对应流程下，不得堆到文档后半部分",
+            "D7 出现 DDD、聚合根、领域服务、application/domain/infrastructure 分层、port/adapter、SDK 模板方法、Handler、Strategy、Template 等扩展模型时，必须补充 Mermaid classDiagram",
+            "D8 classDiagram 至少体现聚合根或核心领域对象、application service、模板或领域服务、业务扩展接口、repository/mapper 或 port、外部适配器以及主要依赖关系",
+            "D9 导入、批处理、异步任务必须写数据量上限、批次大小、超时时间、进度查询、失败处理",
+            "D10 状态流转说明允许状态、终态、CAS/乐观锁控制、并发竞争处理",
+            "D11 项目定制功能不能破坏原有通用能力，说明新增模块边界和兼容策略",
             "I1 路径遵循 /api/v1、/service/v1、/console、/tapi/v1、/mapi",
             "I2 接口必须有充分业务理由，禁止 API 简单封装 DB CRUD",
             "I3 一个接口只负责一个业务功能，禁止随意加参数或合并职责不同接口",
@@ -668,6 +841,7 @@ SKILLS = [
             "P4 最终一致性只处理最新消息，旧消息基于时间戳或版本号丢弃",
             "P5 高竞争写使用悲观锁，低冲突场景使用乐观锁/version",
             "P6 分布式锁必须有超时时间和兜底方案",
+            "P7 存在 DDL、MQ 新队列或 topic、Redis 新 Key 时，详细设计阶段状态必须为 waiting_for_human_review，不得直接 succeeded",
             "DG1-DG5 正式详细设计必须有文档编号、状态和留存策略；任务过程和待确认清单只作为 run artifact",
         ],
     },
@@ -682,8 +856,8 @@ SKILLS = [
         "non_goals": ["不替代数据库主数据设计", "不未经审批批量删除 Redis key", "不默认缓存所有查询"],
         "inputs": ["detailed-design.md", "redis-standard.md", "repo_context", "risk_policy"],
         "outputs": ["redis-design.md", "redis-key-registry.yaml", "cache-consistency-plan.md", "redis-risk-report.json"],
-        "gates": ["key 命名合规", "TTL 或无 TTL 原因明确", "一致性策略可验证", "穿透/击穿/雪崩有策略"],
-        "approvals": ["Redis key 批量删除", "核心链路缓存策略变化", "无 TTL 高风险数据"],
+        "gates": ["redis-design.md 使用团队 Redis 模板", "key 命名合规", "所有 Key 设置 TTL 且单位明确", "一致性策略可验证", "穿透/击穿/雪崩有策略", "不可用降级策略明确"],
+        "approvals": ["Redis key 批量删除", "核心链路缓存策略变化", "Redis 新 Key", "版本/拓扑/持久化/淘汰策略无法确认"],
         "checks": [
             "R1 Redis 只做加速层、协调层、短态承载层，不做事实库、分析库、跨服务共享源、消息队列",
             "R2 已用 RabbitMQ 项目禁止 Redis 发布订阅或延迟队列",
@@ -691,10 +865,13 @@ SKILLS = [
             "R4 Key 格式为 {服务模块}:{租户ID}:{数据结构}:{业务Key}，长度不超过 100 字节",
             "R5 Value 单 Key 不超过 1MB，常规 String 建议不超过 10KB",
             "R6 所有 Key 必须设置 TTL，最大不超过 30 天，大批量 Key 增加随机抖动",
-            "R7 设计说明 Redis 版本、集群、持久化、淘汰策略、Key、结构、TTL、容量、命中率、资源池、降级方案",
-            "R8 Spring 接入优先 StringRedisTemplate，复杂结构才使用 RedisTemplate<String,Object>",
-            "R9 库存扣减、分布式锁、幂等、延迟双删、排行榜、Pipeline 不使用 Spring Cache 注解",
-            "R10 Redis 部署版本、拓扑、持久化和淘汰策略由项目 profile 或 repo_context 注入",
+            "R7 redis-design.md 必须包含文档头信息、历史版本信息、前言、公共配置、Redis 版本、集群配置、持久化策略、过期淘汰策略、设计项、安全与运维、人工评审项",
+            "R8 每个设计项必须包含特性用途、业务说明、存储设计、库、数据结构、TTL、Key 定义、Value 数据格式、预估数据和容量、多团队协同",
+            "R9 Redis 版本、拓扑、持久化、淘汰策略无法确认时，必须进入 waiting_for_input 或 waiting_for_human_review",
+            "R10 Redis 不可用必须有降级策略",
+            "R11 Spring 接入优先 StringRedisTemplate，复杂结构才使用 RedisTemplate<String,Object>",
+            "R12 库存扣减、分布式锁、幂等、延迟双删、排行榜、Pipeline 不使用 Spring Cache 注解",
+            "R13 Redis 部署版本、拓扑、持久化和淘汰策略由项目 profile 或 repo_context 注入",
         ],
     },
     {
@@ -708,8 +885,8 @@ SKILLS = [
         "non_goals": ["不未经审批删除或重命名 topic", "不隐藏重复消费风险", "不把不同语义消息混成单一处理流"],
         "inputs": ["detailed-design.md", "mq-standard.md", "repo_context", "risk_policy"],
         "outputs": ["mq-design.md", "mq-topic-contract.yaml", "message-schema.json", "mq-risk-report.json"],
-        "gates": ["消息 schema 完整", "幂等策略明确", "重试/死信策略明确", "监控告警明确"],
-        "approvals": ["MQ topic 删除或重命名", "核心消息链路变化", "生产消息回放"],
+        "gates": ["mq-design.md 使用团队 MQ 模板", "生产者表完整", "消费者表完整", "消息 schema 完整", "幂等策略明确", "重试/死信/回放策略明确", "监控告警明确"],
+        "approvals": ["MQ topic 删除或重命名", "MQ 新队列或 topic", "核心消息链路变化", "生产消息回放", "消息体超过 10KB", "非仲裁队列"],
         "checks": [
             "M1 MQ 仅用于削峰填谷和服务解耦；进程内异步不用 MQ",
             "M2 服务内通信使用 MQ 必须评审",
@@ -722,6 +899,9 @@ SKILLS = [
             "M9 消息等级：9 核心交易，7 价格/会员/促销，5 配置，3 字典权限，1 数据同步/监控/死信",
             "M10 等级 <=3 原则上设置 TTL；等级 >5 必须持久化",
             "M11 顺序消息可单消费节点，但必须评审扩展性影响",
+            "M12 mq-design.md 必须至少包含生产者表和消费者表；主详细设计只引用该专项，不展开 MQ 字段",
+            "M13 消息体不得承载大查询条件、文件内容或敏感明文",
+            "M14 回放生产消息、删除或重命名 topic/queue 必须人工审批",
         ],
     },
     {
@@ -730,20 +910,24 @@ SKILLS = [
         "type": "stage_skill",
         "stage": "database_design",
         "owner": "DBA",
-        "description": "数据库设计、表结构、索引、迁移、灰度和回滚方案设计时使用；不要用于缓存或消息队列专项设计。",
-        "purpose": "设计数据库表结构、索引、迁移、灰度和回滚方案，并标记生产变更审批点。",
+        "description": "数据库设计、表结构、索引、迁移、修复和必要恢复方案设计时使用；不要用于缓存或消息队列专项设计。",
+        "purpose": "设计数据库表结构、索引、迁移、修复和必要恢复方案，并标记生产变更审批点。",
         "non_goals": ["不执行生产 DDL", "不做无用途字段和索引", "不省略回滚方案"],
         "inputs": ["detailed-design.md", "database-standard.md", "repo_context", "risk_policy"],
         "outputs": ["database-design.md", "schema-change-plan.sql", "migration-plan.md", "rollback-plan.md", "database-risk-report.json"],
-        "gates": ["字段和索引均有查询/约束用途", "迁移步骤可回滚", "容量和查询模式已评估", "生产变更审批明确"],
-        "approvals": ["DDL", "数据订正", "删除字段", "删除索引", "生产库变更", "影响核心链路的索引调整"],
+        "gates": ["database-design.md 使用 OLTP 或 OLAP 团队模板", "字段和索引均有查询/约束用途", "迁移步骤可回滚", "容量和查询模式已评估", "生产变更审批明确", "未确认库名/实例/字符集/索引名时不得 final"],
+        "approvals": ["DDL", "数据订正", "删除字段", "删除索引", "生产库变更", "影响核心链路的索引调整", "物理删除在线事实行"],
         "checks": [
             "DB1 MySQL 是事实数据唯一真相来源，Redis/MQ 不作为事实数据最终来源",
             "DB2 数据库设计说明字段用途、索引用途、唯一约束、状态字段、审计字段是否必要",
             "DB3 禁止无条件全表查询，动态 where 至少有有效条件",
             "DB4 写库操作明确事务边界；多表写入说明同事务或最终一致性方案",
             "DB5 删除优先逻辑删除，并说明关联数据校验规则",
-            "DB6 数据迁移、DDL、订正需要迁移步骤、灰度、回滚、审批点",
+            "DB6 数据迁移、DDL、订正需要迁移步骤、修复规则、必要恢复方案和审批点；这些内容保留在数据库专项设计，不进入主详细设计发布/灰度章节",
+            "DB7 OLTP 数据库设计必须覆盖文档信息、变更记录、术语定义、参考文档、文档定位、设计对象类型、业务语义与生命周期、状态机、物理结构设计、字段定义和敏感级别、索引设计、约束与数据库对象、字段可变性矩阵、数据量与性能设计、CRUD 契约设计、强制前置条件、禁止操作清单、批量操作与数据修复规则、事务一致性与并发控制、安全与审计设计、人工审批点",
+            "DB8 ClickHouse、物化视图或分析宽表必须使用 OLAP 模板，覆盖数据分层、字段级血缘、MergeTree 引擎选型、ORDER BY、PARTITION BY、TTL、物化视图关系、刷新策略、上下游影响",
+            "DB9 禁止无用途字段和索引，禁止没有 WHERE 的 UPDATE/DELETE，禁止业务代码物理删除在线事实行，除非专项审批",
+            "DB10 未确认库名、实例、字符集、索引名时，不得标记为 approved/final",
         ],
     },
     {
@@ -1296,6 +1480,634 @@ def control_surface_policy(skill: dict) -> dict:
     }
 
 
+def team_document_policy(skill: dict) -> dict:
+    if skill["id"] == "detailed-design":
+        return {
+            "scope": "团队详细设计主文档只保留功能实现主线，证据、选型、专项设计和发布灰度内容必须拆出。",
+            "main_document": {
+                "artifact": "detailed-design.md",
+                "allowed_sections": DETAILED_DESIGN_MAIN_SECTIONS,
+                "forbidden_headings": DETAILED_DESIGN_FORBIDDEN_HEADINGS,
+                "forbidden_mermaid": ["sequenceDiagram"],
+                "required_mermaid": ["flowchart"],
+                "flowchart_note_required": True,
+                "flowchart_note_fields": DETAILED_DESIGN_FLOW_NOTE_FIELDS,
+                "class_diagram_required_when_terms_present": DETAILED_DESIGN_DDD_TERMS,
+                "specialty_reference_only": DETAILED_DESIGN_SPECIALTY_DOCS,
+                "evidence_location": ["stage-run-result.json", "repo-context-report.md", "review evidence artifacts"],
+                "technology_selection_location": ["high-level-design.md", "technology-selection-review.md", "repo-context-report.md"],
+            },
+            "stage_result": {
+                "must_register_specialty_artifacts": list(DETAILED_DESIGN_SPECIALTY_DOCS),
+                "waiting_for_human_review_when": ["DDL", "MQ 新队列", "MQ 新 topic", "Redis 新 Key"],
+                "blocked_when": [
+                    "detailed-design.md 包含禁止标题",
+                    "detailed-design.md 包含 sequenceDiagram",
+                    "detailed-design.md 缺少 flowchart",
+                    "flowchart 后缺少流程设计说明",
+                    "DDD/分层/扩展点关键词出现但缺少 classDiagram",
+                    "涉及 DB/MQ/Redis 但缺少独立专项文档或 StageRunResult 未登记",
+                ],
+            },
+        }
+    if skill["id"] == "database-design":
+        return {
+            "artifact": "database-design.md",
+            "template_selection": {"oltp": DB_OLTP_REQUIRED_SECTIONS, "olap": DB_OLAP_REQUIRED_SECTIONS},
+            "forbidden": ["无用途字段和索引", "没有 WHERE 的 UPDATE/DELETE", "业务代码物理删除在线事实行", "Redis/MQ/文件系统作为事实数据来源"],
+            "waiting_for_human_review_when": ["DDL", "数据订正", "物理删除在线事实行", "删除字段", "删除索引"],
+            "blocked_when": ["未确认库名、实例、字符集、索引名时标记为 approved/final", "缺少模板必填章节", "无审批却包含高风险生产变更"],
+        }
+    if skill["id"] == "redis-design":
+        return {
+            "artifact": "redis-design.md",
+            "required_sections": REDIS_REQUIRED_SECTIONS,
+            "design_item_required_fields": REDIS_DESIGN_ITEM_FIELDS,
+            "rules": ["Redis 只做加速层、协调层、短态承载层", "Redis 不做事实库", "Redis 不做消息队列", "所有 Key 必须设置 TTL，最大不超过 30 天", "Redis 不可用必须有降级策略"],
+            "waiting_for_input_when": ["Redis 版本无法确认", "拓扑无法确认", "持久化策略无法确认", "淘汰策略无法确认"],
+            "waiting_for_human_review_when": ["Redis 新 Key", "批量 Key", "Key 批量删除", "Value 单 Key 超过 1MB"],
+            "blocked_when": ["Redis 作为事实库", "RabbitMQ 项目设计 Redis 发布订阅或 Redis 延迟队列", "缺少 TTL 或 TTL 单位", "缺少不可用降级策略"],
+        }
+    if skill["id"] == "mq-design":
+        return {
+            "artifact": "mq-design.md",
+            "producer_table_fields": MQ_PRODUCER_FIELDS,
+            "consumer_table_fields": MQ_CONSUMER_FIELDS,
+            "rules": ["MQ 只用于削峰填谷、异步执行和服务解耦", "进程内异步不默认使用 MQ", "一个服务一个队列，一个队列可绑定多个 Exchange/routingKey", "队列默认建议仲裁队列", "必须设计死信队列", "消息体默认不超过 10KB", "必须定义幂等、重试、死信、回放策略"],
+            "waiting_for_human_review_when": ["MQ 新队列", "MQ 新 topic", "非仲裁队列", "消息体超过 10KB", "生产消息回放", "删除或重命名 topic/queue"],
+            "blocked_when": ["缺少生产者表或消费者表", "消息体承载大查询条件、文件内容或敏感明文", "无幂等策略", "无死信队列"],
+        }
+    return {}
+
+
+def team_document_note(skill: dict) -> str:
+    if skill["id"] == "detailed-design":
+        forbidden = "、".join(DETAILED_DESIGN_FORBIDDEN_HEADINGS)
+        return f"""
+# 团队详细设计主文档规则
+- `detailed-design.md` 只保留功能实现相关的主线设计，章节限定为：{"、".join(DETAILED_DESIGN_MAIN_SECTIONS)}。
+- 主文档不得包含独立章节：{forbidden}；不得展开数据库字段表、MQ 表格、Redis Key 表格。
+- 来源证据只能进入 `stage-run-result.json`、repo-context 产物或评审证据；技术选型进入概要设计、技术选型评审或 repo-context，除非用户明确要求。
+- 数据库、MQ、Redis、接口契约和测试策略只能在“关联专项设计文档”中引用，并登记到 `StageRunResult.artifacts`。
+- 流程必须使用 Mermaid `flowchart`，禁止用 `sequenceDiagram` 替代；每个 `flowchart` 后必须紧跟“流程设计说明”。
+- 流程设计说明必须把业务规则、校验规则、事务边界、幂等与一致性、异常场景、日志要求以及取消、重试、补偿、文件清理等合并到对应流程下。
+- 出现 DDD、聚合根、领域服务、application/domain/infrastructure 分层、port/adapter、SDK 模板方法、Handler、Strategy、Template 等设计取向时，主文档必须补充 Mermaid `classDiagram`。
+- 存在 DDL、MQ 新队列或 topic、Redis 新 Key 时，`StageRunResult.status` 必须为 `waiting_for_human_review`，不得直接 `succeeded`。
+"""
+    if skill["id"] == "database-design":
+        return """
+# 团队数据库设计规则
+- 数据库设计必须生成独立 `database-design.md`，不得用主详细设计中的简写字段表替代。
+- OLTP 场景使用 `assets/database-oltp-template.md`；ClickHouse、物化视图或分析宽表使用 `assets/database-olap-template.md`。
+- 禁止无用途字段和索引、没有 WHERE 的 UPDATE/DELETE、业务代码物理删除在线事实行，除非专项审批。
+- Redis/MQ/文件系统不得作为事实数据来源。
+- 未确认库名、实例、字符集、索引名时，不得标记为 `approved` 或 `final`。
+"""
+    if skill["id"] == "redis-design":
+        return """
+# 团队 Redis 设计规则
+- Redis 设计必须生成独立 `redis-design.md`，不得在主详细设计中展开。
+- 文档必须按 `assets/redis-design-template.md` 组织，并覆盖 Redis 版本、集群、持久化、淘汰策略、设计项、安全与运维和人工评审项。
+- Redis 只做加速层、协调层、短态承载层，不做事实库、不做消息队列；已使用 RabbitMQ 的项目不得设计 Redis 发布订阅或 Redis 延迟队列。
+- Key 默认使用 db0，建议格式 `{服务模块}:{租户ID}:{数据结构}:{业务Key}`，长度不超过 100 字节。
+- 所有 Key 必须设置 TTL，最大不超过 30 天；大批量 Key 必须有随机 TTL 抖动；Redis 不可用必须有降级策略。
+- Redis 版本、拓扑、持久化、淘汰策略无法确认时，状态必须为 `waiting_for_input` 或 `waiting_for_human_review`。
+"""
+    if skill["id"] == "mq-design":
+        return """
+# 团队 MQ 设计规则
+- MQ 设计必须生成独立 `mq-design.md`，不得在主详细设计中展开。
+- 文档必须按 `assets/mq-design-template.md` 组织，至少包含生产者表和消费者表。
+- MQ 只用于削峰填谷、异步执行和服务解耦；进程内异步不默认使用 MQ。
+- 一个服务一个队列，一个队列可绑定多个 Exchange/routingKey；队列默认建议仲裁队列，非仲裁队列需要评审。
+- 必须设计死信队列、幂等策略、重试策略、死信策略和回放策略。
+- 消息体默认不超过 10KB，不得承载大查询条件、文件内容或敏感明文；超过 10KB 必须评审。
+- 回放生产消息、删除或重命名 topic/queue 必须人工审批。
+"""
+    return ""
+
+
+def artifact_templates(skill: dict) -> dict:
+    if skill["id"] == "detailed-design":
+        return {
+            "detailed-design-template.md": """---
+document_number: "DDD-<DOMAIN>-<YYYYMMDD>-<SEQ>"
+document_status: "draft"
+retention_policy: "keep_until_run_end"
+language: "zh-CN"
+owner: "后端开发"
+source_artifacts: []
+---
+
+# 详细设计
+
+## 1. 文档元数据
+
+## 2. 设计规则或设计规范
+
+## 3. 关联专项设计文档
+| 专项 | 文档 | 说明 |
+| --- | --- | --- |
+| 数据库设计 | `database-design.md` | 表级 OLTP/OLAP 设计、字段、索引、CRUD 契约、并发和修复规则 |
+| MQ 设计 | `mq-design.md` | 生产者、消费者、消息体、队列、死信、重试、回放和监控 |
+| Redis 设计 | `redis-design.md` | Key、Value、TTL、容量、降级和运维 |
+| 接口契约 | `interface-contracts.yaml` | 请求响应、处理上限和消息 contract |
+| 测试策略 | `test-strategy.md` | 单元、集成、性能、稳定性和回归测试 |
+
+## 4. 模块边界
+
+## 5. 同步/异步或核心策略规则
+
+## 6. 流程图与流程设计
+
+### 6.1 <流程名称>
+
+```mermaid
+flowchart TD
+    A["开始"] --> B["校验输入与权限"]
+```
+
+流程设计说明：
+
+- 业务规则：
+- 校验规则：
+- 事务边界：
+- 幂等与一致性：
+- 异常场景：
+- 日志要求：
+- 取消、重试、补偿、文件清理：
+
+## 7. DDD/UML 类图
+
+```mermaid
+classDiagram
+    class ApplicationService
+    class DomainService
+    class RepositoryPort
+    class ExternalAdapter
+    ApplicationService --> DomainService
+    DomainService --> RepositoryPort
+    ApplicationService --> ExternalAdapter
+```
+
+## 8. 状态机
+
+## 9. SDK/服务契约
+
+## 10. 接口设计
+
+## 11. 兼容策略
+
+## 12. 单元测试设计
+
+## 13. 人工评审项
+""",
+        }
+    if skill["id"] == "database-design":
+        return {
+            "database-oltp-template.md": "# OLTP 数据库设计\n\n" + "\n\n".join(f"## {index}. {section}" for index, section in enumerate(DB_OLTP_REQUIRED_SECTIONS, start=1)) + "\n",
+            "database-olap-template.md": "# OLAP 数据库设计\n\n" + "\n\n".join(f"## {index}. {section}" for index, section in enumerate(DB_OLAP_REQUIRED_SECTIONS, start=1)) + "\n",
+        }
+    if skill["id"] == "redis-design":
+        item_fields = "\n".join(f"- {field}：" for field in REDIS_DESIGN_ITEM_FIELDS)
+        return {
+            "redis-design-template.md": """# Redis 设计
+
+## 1. 文档头信息
+
+## 2. 历史版本信息
+
+## 3. 前言
+
+## 4. 公共配置
+
+## 5. Redis 版本
+
+## 6. 集群配置
+
+## 7. 持久化策略
+
+## 8. 过期淘汰策略
+
+## 9. 设计项
+
+### 9.1 <设计项名称>
+""" + item_fields + """
+
+## 10. 安全与运维
+
+## 11. 人工评审项
+""",
+        }
+    if skill["id"] == "mq-design":
+        producer_header = " | ".join(MQ_PRODUCER_FIELDS)
+        producer_sep = " | ".join(["---"] * len(MQ_PRODUCER_FIELDS))
+        consumer_header = " | ".join(MQ_CONSUMER_FIELDS)
+        consumer_sep = " | ".join(["---"] * len(MQ_CONSUMER_FIELDS))
+        return {
+            "mq-design-template.md": f"""# MQ 设计
+
+## 1. 文档信息
+
+## 2. 生产者表
+| {producer_header} |
+| {producer_sep} |
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+
+## 3. 消费者表
+| {consumer_header} |
+| {consumer_sep} |
+|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+
+## 4. 幂等、重试、死信和回放策略
+
+## 5. 运维监控
+
+## 6. 人工评审项
+""",
+        }
+    return {}
+
+
+def generic_validator_script() -> str:
+    return """#!/usr/bin/env python3
+import json
+import sys
+from pathlib import Path
+
+schema = json.loads(Path(__file__).parents[1].joinpath("output.schema.json").read_text(encoding="utf-8"))
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+missing = [field for field in schema.get("required", []) if field not in payload]
+if missing:
+    raise SystemExit(f"缺少必填字段: {missing}")
+if payload.get("skill_id") != schema["properties"]["skill_id"]["const"]:
+    raise SystemExit("skill_id 不匹配")
+if payload.get("status") not in schema["properties"]["status"]["enum"]:
+    raise SystemExit("status 不合法")
+print("ok")
+"""
+
+
+def team_validator_script(skill_id: str) -> str:
+    if skill_id not in TEAM_DOC_TARGET_SKILLS:
+        return generic_validator_script()
+    policy = {
+        "detailed-design": {
+            "forbidden_headings": DETAILED_DESIGN_FORBIDDEN_HEADINGS,
+            "flow_note_fields": DETAILED_DESIGN_FLOW_NOTE_FIELDS,
+            "ddd_terms": DETAILED_DESIGN_DDD_TERMS,
+            "specialty_docs": DETAILED_DESIGN_SPECIALTY_DOCS,
+        },
+        "database-design": {
+            "oltp_sections": DB_OLTP_REQUIRED_SECTIONS,
+            "olap_sections": DB_OLAP_REQUIRED_SECTIONS,
+        },
+        "redis-design": {
+            "required_sections": REDIS_REQUIRED_SECTIONS,
+            "item_fields": REDIS_DESIGN_ITEM_FIELDS,
+        },
+        "mq-design": {
+            "producer_fields": MQ_PRODUCER_FIELDS,
+            "consumer_fields": MQ_CONSUMER_FIELDS,
+        },
+    }[skill_id]
+    return f"""#!/usr/bin/env python3
+import json
+import re
+import sys
+from pathlib import Path
+
+SKILL_ID = {json.dumps(skill_id, ensure_ascii=False)}
+POLICY = {json.dumps(policy, ensure_ascii=False, indent=2)}
+
+
+def load_payload(path):
+    schema = json.loads(Path(__file__).parents[1].joinpath("output.schema.json").read_text(encoding="utf-8"))
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    missing = [field for field in schema.get("required", []) if field not in payload]
+    if missing:
+        raise SystemExit(f"缺少必填字段: {{missing}}")
+    if payload.get("skill_id") != schema["properties"]["skill_id"]["const"]:
+        raise SystemExit("skill_id 不匹配")
+    if payload.get("status") not in schema["properties"]["status"]["enum"]:
+        raise SystemExit("status 不合法")
+    return payload
+
+
+def artifact_map(payload):
+    return {{item.get("name"): item for item in payload.get("artifacts", [])}}
+
+
+def resolve_artifact(payload_path, item):
+    raw = item.get("path") if item else ""
+    if not raw:
+        return None
+    path = Path(raw)
+    if path.is_absolute():
+        return path
+    cwd_path = Path.cwd() / path
+    if cwd_path.exists():
+        return cwd_path
+    return Path(payload_path).parent / path
+
+
+def read_artifact(payload_path, payload, name):
+    item = artifact_map(payload).get(name)
+    path = resolve_artifact(payload_path, item)
+    if path and path.exists():
+        return path.read_text(encoding="utf-8")
+    return ""
+
+
+def markdown_headings(text):
+    return [match.group(1).strip() for match in re.finditer(r"(?m)^#{{1,6}}\\s*(?:\\d+(?:\\.\\d+)*\\s*)?(.+?)\\s*$", text)]
+
+
+def fail(errors):
+    if errors:
+        raise SystemExit("\\n".join(errors))
+    print("ok")
+
+
+def validate_detailed(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "detailed-design.md")
+    if not text:
+        return ["缺少 detailed-design.md artifact 或文件不可读"]
+    normalized_headings = [re.sub(r"\\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
+    for forbidden in POLICY["forbidden_headings"]:
+        if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):
+            errors.append("detailed-design.md 包含禁止标题: " + forbidden)
+    if "sequenceDiagram" in text:
+        errors.append("detailed-design.md 不得包含 sequenceDiagram")
+    if "flowchart" not in text:
+        errors.append("detailed-design.md 必须包含 flowchart")
+    flow_blocks = list(re.finditer(r"```mermaid\\s*\\n\\s*flowchart[\\s\\S]*?```", text))
+    for index, block in enumerate(flow_blocks, start=1):
+        tail = text[block.end(): block.end() + 700]
+        if "流程设计说明" not in tail:
+            errors.append(f"第 {{index}} 个 flowchart 后缺少流程设计说明")
+            continue
+        for field in POLICY["flow_note_fields"]:
+            if field not in tail:
+                errors.append(f"第 {{index}} 个 flowchart 的流程设计说明缺少 {{field}}")
+    if any(term in text for term in POLICY["ddd_terms"]) and "classDiagram" not in text:
+        errors.append("出现 DDD/分层/扩展点关键词时必须包含 classDiagram")
+    artifacts = artifact_map(payload)
+    for doc_name in POLICY["specialty_docs"]:
+        if doc_name not in artifacts:
+            errors.append("StageRunResult.artifacts 未登记专项文档: " + doc_name)
+    status = payload.get("status")
+    high_risk_terms = ["DDL", "CREATE TABLE", "ALTER TABLE", "新队列", "新 topic", "新Topic", "Redis 新 Key", "新增 Key"]
+    if status == "succeeded" and any(term in text for term in high_risk_terms):
+        errors.append("存在 DDL、MQ 新队列/topic 或 Redis 新 Key 时状态必须为 waiting_for_human_review")
+    return errors
+
+
+def validate_database(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "database-design.md")
+    if not text:
+        return ["缺少 database-design.md artifact 或文件不可读"]
+    sections = POLICY["olap_sections"] if any(term in text for term in ["ClickHouse", "MergeTree", "物化视图", "分析宽表"]) else POLICY["oltp_sections"]
+    for section in sections:
+        if section not in text:
+            errors.append("database-design.md 缺少模板章节或字段: " + section)
+    for match in re.finditer(r"(?is)\\b(update|delete)\\b([^;]{{0,300}});", text):
+        if "where" not in match.group(2).lower():
+            errors.append("禁止没有 WHERE 的 UPDATE/DELETE")
+    final_status = payload.get("document_metadata", {{}}).get("document_status")
+    if final_status in {{"approved", "final"}}:
+        for required in ["库名", "实例", "字符集", "索引名"]:
+            if required + "：" not in text and required + ":" not in text:
+                errors.append("approved/final 文档必须确认" + required)
+    if payload.get("status") == "succeeded" and any(term in text for term in ["CREATE TABLE", "ALTER TABLE", "DROP TABLE", "DDL"]):
+        errors.append("包含 DDL 时必须 waiting_for_human_review")
+    return errors
+
+
+def validate_redis(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "redis-design.md")
+    if not text:
+        return ["缺少 redis-design.md artifact 或文件不可读"]
+    for section in POLICY["required_sections"] + POLICY["item_fields"]:
+        if section not in text:
+            errors.append("redis-design.md 缺少模板章节或字段: " + section)
+    if re.search(r"Redis\\s*(作为|做|充当).{{0,12}}事实库", text):
+        errors.append("Redis 不得作为事实库")
+    if re.search(r"Redis\\s*(作为|做|充当).{{0,12}}消息队列", text):
+        errors.append("Redis 不得作为消息队列")
+    if not re.search(r"TTL[^\\n]*(秒|分钟|小时|天|ms|s|min|hour|day)", text, re.IGNORECASE):
+        errors.append("TTL 必须带单位")
+    if "降级" not in text:
+        errors.append("Redis 不可用必须有降级策略")
+    if payload.get("status") == "succeeded" and any(term in text for term in ["版本待确认", "拓扑待确认", "持久化待确认", "淘汰策略待确认"]):
+        errors.append("Redis 版本、拓扑、持久化或淘汰策略无法确认时不得 succeeded")
+    if payload.get("status") == "succeeded" and any(term in text for term in ["Redis 新 Key", "新增 Key", "新 Key"]):
+        errors.append("Redis 新 Key 必须 waiting_for_human_review")
+    return errors
+
+
+def validate_mq(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "mq-design.md")
+    if not text:
+        return ["缺少 mq-design.md artifact 或文件不可读"]
+    for field in POLICY["producer_fields"]:
+        if field not in text:
+            errors.append("mq-design.md 生产者表缺少字段: " + field)
+    for field in POLICY["consumer_fields"]:
+        if field not in text:
+            errors.append("mq-design.md 消费者表缺少字段: " + field)
+    if "死信" not in text:
+        errors.append("MQ 必须设计死信队列")
+    if "幂等" not in text:
+        errors.append("MQ 必须定义幂等策略")
+    for size in re.findall(r"(\\d+)\\s*KB", text, re.IGNORECASE):
+        if int(size) > 10 and payload.get("status") == "succeeded":
+            errors.append("消息体超过 10KB 必须 waiting_for_human_review")
+    if payload.get("status") == "succeeded" and any(term in text for term in ["回放生产消息", "删除队列", "重命名队列", "删除 topic", "重命名 topic", "删除Topic", "重命名Topic"]):
+        errors.append("生产消息回放或删除/重命名 topic/queue 必须 waiting_for_human_review")
+    return errors
+
+
+payload_path = Path(sys.argv[1])
+payload = load_payload(payload_path)
+validators = {{
+    "detailed-design": validate_detailed,
+    "database-design": validate_database,
+    "redis-design": validate_redis,
+    "mq-design": validate_mq,
+}}
+fail(validators[SKILL_ID](payload_path, payload))
+"""
+
+
+EXTRA_EVAL_SCENARIOS = {
+    "detailed-design": [
+        {
+            "case": "team_db_reference_only",
+            "title": "数据库设计只在主文档引用专项",
+            "material": "用户要求详细设计中数据库设计不需要体现，关联数据库设计文档即可；场景涉及新增表、索引和 CRUD 契约。",
+            "expected_gate_decision": "require_human_review",
+            "rule_refs": ["D2", "D4", "DB7", "P7"],
+            "risk_focus": ["主文档 DB 展开", "database-design.md", "DDL 审批"],
+            "forbidden_behavior": ["在 detailed-design.md 展开数据库字段表", "StageRunResult 不登记 database-design.md", "DDL 直接 succeeded"],
+        },
+        {
+            "case": "team_mq_template_reference_only",
+            "title": "MQ 设计使用专项模板",
+            "material": "用户要求 MQ 设计使用模板；主详细设计只引用 mq-design.md，专项必须生成生产者表和消费者表。",
+            "expected_gate_decision": "require_human_review",
+            "rule_refs": ["D4", "M7", "M8", "M12"],
+            "risk_focus": ["MQ 表格展开位置", "生产者表", "消费者表"],
+            "forbidden_behavior": ["在主详细设计展开 MQ 字段", "缺少生产者表或消费者表"],
+        },
+        {
+            "case": "team_redis_template_reference_only",
+            "title": "Redis 设计使用专项模板",
+            "material": "用户要求 Redis 设计使用团队模板；主详细设计只引用 redis-design.md，专项覆盖 Key、Value、TTL、容量和降级。",
+            "expected_gate_decision": "require_human_review",
+            "rule_refs": ["D4", "R7", "R8", "R10"],
+            "risk_focus": ["Redis 专项模板", "TTL", "降级策略"],
+            "forbidden_behavior": ["在主详细设计展开 Redis Key 表", "缺少 TTL 单位", "缺少降级策略"],
+        },
+        {
+            "case": "team_flowchart_not_sequence",
+            "title": "流程使用流程图替代时序图",
+            "material": "用户要求流程使用流程图替代时序图；详细设计必须使用 Mermaid flowchart，并禁止 sequenceDiagram。",
+            "expected_gate_decision": "pass",
+            "rule_refs": ["D5", "D6", "RRQ-LOG1"],
+            "risk_focus": ["流程图类型", "流程设计说明"],
+            "forbidden_behavior": ["生成 sequenceDiagram", "flowchart 后没有流程设计说明"],
+        },
+        {
+            "case": "team_rules_under_flow",
+            "title": "业务规则异常事务放到流程图模块下",
+            "material": "用户要求业务规则、异常、事务、幂等和日志放到流程图模块下；不得生成独立业务规则、异常、幂等章节。",
+            "expected_gate_decision": "pass",
+            "rule_refs": ["D2", "D6", "P4", "E7"],
+            "risk_focus": ["流程说明", "独立章节禁止", "日志 TraceId"],
+            "forbidden_behavior": ["生成业务规则与校验章节", "生成幂等与一致性章节", "生成异常与日志章节"],
+        },
+        {
+            "case": "team_ddd_requires_uml",
+            "title": "DDD 模式补充 UML 类图",
+            "material": "用户要求设计 DDD 模式并包含聚合根、ApplicationService、Repository、Handler 模板扩展点。",
+            "expected_gate_decision": "pass",
+            "rule_refs": ["D7", "D8", "FW1"],
+            "risk_focus": ["classDiagram", "聚合根", "端口适配器"],
+            "forbidden_behavior": ["出现 DDD 关键词但没有 classDiagram", "类图缺少 Repository 或外部适配器"],
+        },
+        {
+            "case": "team_no_release_gray_sections",
+            "title": "团队详细设计不需要发布和灰度内容",
+            "material": "用户要求团队详细设计不需要发布和灰度内容；主文档和测试策略不得生成发布、灰度、上线章节。",
+            "expected_gate_decision": "pass",
+            "rule_refs": ["D2", "DB6", "QIN1"],
+            "risk_focus": ["发布章节禁止", "灰度章节禁止", "测试策略边界"],
+            "forbidden_behavior": ["主文档生成发布章节", "测试策略生成灰度验证章节"],
+        },
+    ],
+    "mq-design": [
+        {
+            "case": "team_mq_template_tables",
+            "title": "MQ 专项必须包含生产者表和消费者表",
+            "material": "用户要求 MQ 设计使用模板，需定义生产者字段、消费者字段、死信、重试、回放和幂等策略。",
+            "expected_gate_decision": "require_human_review",
+            "rule_refs": ["M7", "M8", "M12", "M14"],
+            "risk_focus": ["生产者表", "消费者表", "回放审批"],
+            "forbidden_behavior": ["只写文字说明不出表", "缺少死信或幂等策略"],
+        }
+    ],
+    "redis-design": [
+        {
+            "case": "team_redis_template_required",
+            "title": "Redis 专项必须使用团队模板",
+            "material": "用户要求 Redis 设计使用模板，需覆盖公共配置、Redis 版本、集群、持久化、淘汰、设计项、TTL、容量和降级。",
+            "expected_gate_decision": "waiting_for_input",
+            "rule_refs": ["R7", "R8", "R9", "R10"],
+            "risk_focus": ["Redis 版本", "TTL 单位", "降级策略"],
+            "forbidden_behavior": ["版本拓扑待确认但 succeeded", "没有 TTL 单位"],
+        }
+    ],
+    "database-design": [
+        {
+            "case": "team_database_template_required",
+            "title": "数据库专项必须使用 OLTP 或 OLAP 模板",
+            "material": "用户要求数据库设计使用团队模板，OLTP 覆盖字段、索引、CRUD、事务和审批；ClickHouse 使用 OLAP 模板。",
+            "expected_gate_decision": "require_human_review",
+            "rule_refs": ["DB7", "DB8", "DB9", "DB10"],
+            "risk_focus": ["OLTP 模板", "OLAP 模板", "DDL 审批"],
+            "forbidden_behavior": ["用主文档字段表替代专项", "未确认库名实例却 final"],
+        }
+    ],
+}
+
+
+def extra_eval_case(skill: dict, scenario: dict) -> dict:
+    expected_status = {
+        "pass": "succeeded",
+        "waiting_for_input": "waiting_for_input",
+        "require_human_review": "waiting_for_human_review",
+        "block": "blocked",
+    }[scenario["expected_gate_decision"]]
+    return {
+        "id": f"{skill['id']}-{scenario['case']}",
+        "name": f"{skill['name']} {scenario['title']}",
+        "case_type": scenario["case"],
+        "scenario": {
+            "title": scenario["title"],
+            "material": scenario["material"],
+            "system_scope": "目标业务系统 + 目标客户端系统",
+            "team_rule_refs": scenario["rule_refs"],
+            "risk_focus": scenario["risk_focus"],
+            "forbidden_behavior": scenario["forbidden_behavior"],
+        },
+        "input": {
+            "stage_run_request": {
+                "run_id": "team-doc-eval-001",
+                "workflow_id": "team-doc-eval-workflow",
+                "node_id": skill["id"],
+                "skill_id": skill["id"],
+                "mode": "standalone",
+                "inputs": {skill["inputs"][0]: "provided: " + scenario["material"]},
+                "artifacts": {},
+                "context": {
+                    "risk_policy": "team-default",
+                    "team_rule_refs": scenario["rule_refs"],
+                    "expected_gate_decision": scenario["expected_gate_decision"],
+                },
+                "requested_by": "eval",
+                "approval_context": {},
+            }
+        },
+        "expected_behavior": "按团队详细设计拆分规范输出产物，主文档不混入证据、选型、专项展开或发布灰度章节，并用确定性校验阻断违规内容。",
+        "expected_gate_decision": scenario["expected_gate_decision"],
+        "expected_status": expected_status,
+        "pass_criteria": [
+            "StageRunResult status 合法",
+            "未指定 language 时必须询问用户选择 zh-CN 或 en",
+            "正式 Markdown 文档必须包含 document_metadata.document_number、document_status、retention_policy",
+            "required_information_requests 在输入缺失时必须包含 questions",
+            "framework selection 必须遵循 repo_context/profile；Java/Spring 持久化默认 mybatis-plus，JDBC 必须评审",
+            "detailed-design.md 不得包含来源证据、技术选型、数据库设计、MQ 设计、Redis 设计、业务规则与校验、幂等与一致性、异常与日志、发布、灰度、上线等禁止标题",
+            "detailed-design.md 不得包含 sequenceDiagram，必须包含 flowchart，且每个 flowchart 后必须有流程设计说明",
+            "出现 DDD、聚合根、ApplicationService、Repository、Handler 或 Template 时必须包含 classDiagram",
+            "涉及 DB/MQ/Redis 时必须生成独立专项文档并登记到 StageRunResult.artifacts",
+            "存在 DDL、MQ 新队列或 Redis 新 Key 时必须 waiting_for_human_review",
+            "forbidden_behavior 未出现在输出决策中",
+        ],
+        "severity_when_failed": "critical",
+        "grader": {
+            "type": "deterministic",
+            "rubric": "校验团队详细设计拆分规则、专项模板、流程图、UML、人工评审和 StageRunResult artifact 登记。",
+        },
+        "required_artifacts": [output for output in skill["outputs"] if output != "code changes"],
+    }
+
+
 def contract(skill: dict) -> dict:
     payload = {
         "skill_id": skill["id"],
@@ -1414,6 +2226,9 @@ def contract(skill: dict) -> dict:
     control_policy = control_surface_policy(skill)
     if control_policy.get("required"):
         payload["control_surface_policy"] = control_policy
+    doc_policy = team_document_policy(skill)
+    if doc_policy:
+        payload["team_document_policy"] = doc_policy
     return payload
 
 
@@ -1631,7 +2446,7 @@ description: {skill_trigger_description(skill)}
 {rich_html_report_note(skill)}
 {implementation_controller_note(skill)}
 {quality_control_note(skill)}
-{controlled_execution_note(skill)}
+{controlled_execution_note(skill)}{team_document_note(skill)}
 
 # 操作流程
 1. 将请求规范化为 `StageRunRequest`。
@@ -1852,24 +2667,13 @@ source_artifacts: []
 
 ## 门禁决策
 """)
-        write_text(base / "scripts" / "validate_output.py", """#!/usr/bin/env python3
-import json
-import sys
-from pathlib import Path
-
-schema = json.loads(Path(__file__).parents[1].joinpath("output.schema.json").read_text(encoding="utf-8"))
-payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-missing = [field for field in schema.get("required", []) if field not in payload]
-if missing:
-    raise SystemExit(f"缺少必填字段: {missing}")
-if payload.get("skill_id") != schema["properties"]["skill_id"]["const"]:
-    raise SystemExit("skill_id 不匹配")
-if payload.get("status") not in schema["properties"]["status"]["enum"]:
-    raise SystemExit("status 不合法")
-print("ok")
-""")
+        for template_name, template_content in artifact_templates(skill).items():
+            write_text(base / "assets" / template_name, template_content)
+        write_text(base / "scripts" / "validate_output.py", team_validator_script(skill["id"]))
         for case in EVAL_CASES:
             write_text(base / "evals" / f"{case}.yaml", json.dumps(eval_case(skill, case), ensure_ascii=False, indent=2))
+        for scenario in EXTRA_EVAL_SCENARIOS.get(skill["id"], []):
+            write_text(base / "evals" / f"{scenario['case']}.yaml", json.dumps(extra_eval_case(skill, scenario), ensure_ascii=False, indent=2))
         write_text(base / "workflow" / "node.yaml", json.dumps(workflow_node(skill), ensure_ascii=False, indent=2))
 
 
@@ -2809,22 +3613,53 @@ def copy_tree(source: Path, target: Path) -> None:
     shutil.copytree(source, target)
 
 
-def marketplace_payload(config: dict) -> dict:
+def plugin_entry(config: dict) -> dict:
     plugin_name = config.get("plugin_name", "teamwork-engineering-assistant")
     return {
-        "name": config.get("name", "local-teamwork-engineering"),
-        "interface": config.get("interface", {"displayName": "Local Teamwork Engineering Plugins"}),
-        "plugins": [
-            {
-                "name": plugin_name,
-                "source": {
-                    "source": "local",
-                    "path": "./" + config.get("plugin_relative_path", f"plugins/{plugin_name}").strip("/"),
-                },
-                "policy": config.get("policy", {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}),
-                "category": config.get("category", "Productivity"),
-            }
-        ],
+        "name": plugin_name,
+        "source": {
+            "source": "local",
+            "path": "./" + config.get("plugin_relative_path", f"plugins/{plugin_name}").strip("/"),
+        },
+        "policy": config.get("policy", {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}),
+        "category": config.get("category", "Productivity"),
+    }
+
+
+def load_marketplace(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"invalid marketplace json: {path}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise SystemExit(f"marketplace must be a JSON object: {path}")
+    return data
+
+
+def upsert_plugin_entry(existing_plugins, entry: dict) -> list:
+    plugins = existing_plugins if isinstance(existing_plugins, list) else []
+    updated = []
+    replaced = False
+    for item in plugins:
+        if isinstance(item, dict) and item.get("name") == entry["name"]:
+            updated.append(entry)
+            replaced = True
+        else:
+            updated.append(item)
+    if not replaced:
+        updated.append(entry)
+    return updated
+
+
+def marketplace_payload(config: dict, existing=None) -> dict:
+    payload = dict(existing or {})
+    return {
+        **payload,
+        "name": payload.get("name") or config.get("name", "local-teamwork-engineering"),
+        "interface": payload.get("interface") if isinstance(payload.get("interface"), dict) else config.get("interface", {"displayName": "Local Teamwork Engineering Plugins"}),
+        "plugins": upsert_plugin_entry(payload.get("plugins"), plugin_entry(config)),
     }
 
 
@@ -2869,7 +3704,7 @@ def publish(repo_root: Path, config: dict, publish_root=None, marketplace_path=N
     copy_tree(runtime, plugin_root / "engineering-assistant")
 
     marketplace_path.parent.mkdir(parents=True, exist_ok=True)
-    marketplace_path.write_text(json.dumps(marketplace_payload(config), ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+    marketplace_path.write_text(json.dumps(marketplace_payload(config, load_marketplace(marketplace_path)), ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
     legacy_marketplace = publish_root / "marketplace.json"
     if legacy_marketplace != marketplace_path and legacy_marketplace.exists():
         legacy_marketplace.unlink()
@@ -3856,6 +4691,38 @@ for skill in sorted(p for p in Path("skills").glob("*") if p.is_dir()):
         fingerprints.add(fingerprint)
         if skill.name in {"high-level-design", "detailed-design", "redis-design", "mq-design", "database-design", "design-review"} and len(scenario.get("team_rule_refs", [])) < 3:
             warnings.append(f"{path}: 核心设计 skill 建议至少引用 3 条团队规范")
+    for path in sorted((skill / "evals").glob("*.yaml")):
+        if path.stem in CASES:
+            continue
+        data = load_json(path)
+        if not data:
+            continue
+        for field in REQUIRED_FIELDS:
+            if field not in data:
+                errors.append(f"{path}: 缺少字段 {field}")
+        if data.get("case_type") != path.stem:
+            errors.append(f"{path}: case_type 应为 {path.stem}")
+        scenario = data.get("scenario", {})
+        for field in SCENARIO_FIELDS:
+            if field not in scenario:
+                errors.append(f"{path}: scenario 缺少字段 {field}")
+        if len(str(scenario.get("material", ""))) < 40:
+            errors.append(f"{path}: scenario.material 过短，不能作为真实压力场景")
+        if len(scenario.get("team_rule_refs", [])) < 3:
+            errors.append(f"{path}: 团队专项 eval 至少引用 3 条团队规范")
+        criteria_text = "\\n".join(data.get("pass_criteria", []))
+        for required_text in ["language", "document_metadata", "required_information_requests"]:
+            if required_text not in criteria_text:
+                errors.append(f"{path}: pass_criteria 缺少运行时行为断言 {required_text}")
+        for required_text in ["detailed-design.md", "sequenceDiagram", "flowchart", "StageRunResult.artifacts"]:
+            if skill.name == "detailed-design" and required_text not in criteria_text:
+                errors.append(f"{path}: pass_criteria 缺少团队详细设计断言 {required_text}")
+        if data.get("expected_gate_decision") not in VALID_DECISIONS:
+            errors.append(f"{path}: expected_gate_decision 不合法")
+        if data.get("expected_status") not in VALID_STATUS:
+            errors.append(f"{path}: expected_status 不合法")
+        if data.get("required_artifacts") != declared_outputs:
+            errors.append(f"{path}: required_artifacts 与 contract outputs 不一致")
 
 for required_skill in ["frontend-design", "frontend-development"]:
     if not (Path("skills") / required_skill / "SKILL.md").exists():
