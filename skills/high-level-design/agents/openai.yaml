@@ -1,0 +1,21 @@
+display_name: "High Level Design"
+short_description: "从需求契约生成概要设计，明确架构边界、数据流、异常流和发布影响。"
+default_prompt: "使用 high-level-design，先确认输出语言和必须补充的信息，再基于输入材料执行本阶段任务，输出声明产物、findings、required actions 和 gate decision。"
+language_policy:
+  supported:
+    - "zh-CN"
+    - "en"
+  when_unspecified: "ask_user"
+  question: "请确认输出语言：简体中文还是 English？"
+policy:
+  allow_implicit_invocation: true
+  risk_level: "medium"
+  human_approval_required:
+    - "高风险架构决策"
+    - "跨域边界调整"
+    - "核心链路兼容性变化"
+metadata:
+  owner: "架构师"
+  stage: "high_level_design"
+  type: "stage_skill"
+  trigger_description: "Use when the request is about 从需求契约生成概要设计，明确架构边界、数据流、异常流和发布影响。；Do not use when 不深入代码实现细节；不跳过架构风险。"

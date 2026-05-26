@@ -1,0 +1,418 @@
+{
+  "skill_id": "code-review",
+  "skill_name": "Code Review",
+  "version": "1.0.0",
+  "stage": "code_review",
+  "type": "stage_skill",
+  "purpose": "对代码进行人工评审辅助，按问题、证据、影响、级别、建议和阻断状态输出。",
+  "non_goals": [
+    "不替代 code-quality-governor",
+    "不输出无证据建议",
+    "不忽略测试缺口"
+  ],
+  "trigger_description": "Use when the request is about 对代码进行人工评审辅助，按问题、证据、影响、级别、建议和阻断状态输出。；Do not use when 不替代 code-quality-governor；不输出无证据建议。",
+  "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
+  "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
+  "language_policy": {
+    "supported": [
+      "zh-CN",
+      "en"
+    ],
+    "when_unspecified": "ask_user",
+    "blocking_status": "waiting_for_input",
+    "question": "请确认输出语言：简体中文还是 English？",
+    "writeback": "StageRunRequest.context.language"
+  },
+  "technology_selection_policy": {
+    "categories": [
+      "backend_framework",
+      "persistence_framework",
+      "frontend_stack",
+      "component_library",
+      "middleware",
+      "test_framework",
+      "build_tool",
+      "observability",
+      "deployment"
+    ],
+    "must_confirm_when": [
+      "设计未声明技术选型",
+      "repo_context 未识别现有技术栈",
+      "生成代码需要选择后端/持久化/前端/组件库/测试/构建框架",
+      "拟使用与现有项目不一致的技术"
+    ],
+    "ask_user_when_unspecified": true,
+    "team_defaults": {
+      "java_spring_persistence": "mybatis-plus"
+    },
+    "requires_review": [
+      "JDBC",
+      "框架替换",
+      "绕过现有 mapper/repository 模式",
+      "前端技术栈或组件库变更",
+      "测试框架替换",
+      "构建工具替换",
+      "中间件替换"
+    ],
+    "writeback": "StageRunRequest.context.technology_selection"
+  },
+  "inputs": [
+    {
+      "name": "code-quality-report.json",
+      "type": "artifact|string|object",
+      "required": true,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    },
+    {
+      "name": "changed-files-report.json",
+      "type": "artifact|string|object",
+      "required": false,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    },
+    {
+      "name": "implementation-summary.md",
+      "type": "artifact|string|object",
+      "required": false,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    },
+    {
+      "name": "repo_context",
+      "type": "artifact|string|object",
+      "required": false,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "code-review-report.md",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/code-review/code-review-report.md",
+      "schema": "output.schema.json#code-review-report.md",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "code-review-report.html",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/code-review/code-review-report.html",
+      "schema": "output.schema.json#code-review-report.html",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "review-comments.json",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/code-review/review-comments.json",
+      "schema": "output.schema.json#review-comments.json",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "blocker-list.md",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/code-review/blocker-list.md",
+      "schema": "output.schema.json#blocker-list.md",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    }
+  ],
+  "preconditions": [
+    "必填输入已提供或已记录缺失处理策略",
+    "风险策略已加载",
+    "目标范围已明确"
+  ],
+  "execution_gates": {
+    "language_confirmed": true,
+    "preflight_required_information": true,
+    "formal_document_metadata_required": true,
+    "stage_result_validation_required": true,
+    "block_when_agent_violates_contract": true
+  },
+  "required_information_policy": {
+    "must_ask_when": [
+      "必填输入缺失",
+      "系统边界无法确认",
+      "风险等级无法判断",
+      "审批状态缺失",
+      "无法基于仓库或上游产物可靠推导"
+    ],
+    "question_output": "required_information_requests",
+    "blocking_status": "waiting_for_input",
+    "human_review_html_required": true,
+    "human_review_html_requirements": [
+      "可填写每个待确认项",
+      "保留问题 id 或稳定序号",
+      "可复制或下载答案 JSON",
+      "登记到 StageRunResult.artifacts",
+      "HTML 路径必须位于目标项目 docs/human-review/",
+      "agent 只消费 MD/JSON/YAML，不把 HTML 作为事实输入源"
+    ],
+    "minimum_question_fields": [
+      "id",
+      "question",
+      "reason",
+      "required",
+      "priority",
+      "expected_format"
+    ],
+    "question_order": [
+      "critical",
+      "major",
+      "minor"
+    ],
+    "do_not_ask_when": "信息可从当前仓库、上游产物、明确 profile 或已确认上下文可靠获得时，不重复询问用户。"
+  },
+  "postconditions": [
+    "全部输出产物已生成，或已输出明确的阻断结果",
+    "质量门禁已评估",
+    "需要人工审批的事项已列出"
+  ],
+  "dependencies": [
+    "团队规范",
+    "文档模板",
+    "仓库上下文",
+    "风险策略",
+    "校验脚本"
+  ],
+  "permissions": {
+    "allowed_actions": [
+      "读取仓库文件",
+      "生成产物",
+      "运行确定性校验",
+      "请求人工审批"
+    ],
+    "forbidden_actions": [
+      "执行生产变更",
+      "自动批准高风险动作",
+      "隐藏失败检查",
+      "覆盖无关工作"
+    ]
+  },
+  "human_approval_required": [
+    "blocker 关闭",
+    "高风险人工豁免",
+    "核心链路评审通过"
+  ],
+  "risk_model": {
+    "levels": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ],
+    "upgrade_conditions": [
+      "blocker 关闭",
+      "高风险人工豁免",
+      "核心链路评审通过"
+    ],
+    "default_for_unknown": "medium"
+  },
+  "quality_gates": [
+    {
+      "gate_id": "code-review-gate-1",
+      "name": "blocker 清单为空",
+      "type": "deterministic",
+      "pass_condition": "blocker 清单为空 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "code-review-gate-2",
+      "name": "所有问题有证据",
+      "type": "deterministic",
+      "pass_condition": "所有问题有证据 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "code-review-gate-3",
+      "name": "严重级别一致",
+      "type": "deterministic",
+      "pass_condition": "严重级别一致 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "code-review-gate-4",
+      "name": "静态分析指标已纳入评审",
+      "type": "deterministic",
+      "pass_condition": "静态分析指标已纳入评审 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "code-review-gate-5",
+      "name": "富 HTML 人工走查报告已生成",
+      "type": "deterministic",
+      "pass_condition": "富 HTML 人工走查报告已生成 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "code-review-gate-6",
+      "name": "修复建议可执行",
+      "type": "deterministic",
+      "pass_condition": "修复建议可执行 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    }
+  ],
+  "failure_modes": [
+    {
+      "error_code": "MISSING_REQUIRED_INPUT",
+      "condition": "必填输入不可用",
+      "severity": "major",
+      "recovery_strategy": "输出缺失信息产物并等待补充输入",
+      "next_state": "waiting_for_input"
+    },
+    {
+      "error_code": "INVALID_OUTPUT_SCHEMA",
+      "condition": "输出无法按声明 schema 解析",
+      "severity": "blocker",
+      "recovery_strategy": "重新生成产物并再次运行校验器",
+      "next_state": "failed"
+    },
+    {
+      "error_code": "STAGE_RESULT_CONTRACT_VIOLATION",
+      "condition": "StageRunResult 缺少语言、文档编号、主动问询或其他运行时门禁字段",
+      "severity": "blocker",
+      "recovery_strategy": "运行 validate_stage_run_result.py 并阻断违规节点",
+      "next_state": "blocked"
+    },
+    {
+      "error_code": "QUALITY_GATE_FAILED",
+      "condition": "阻断门禁失败",
+      "severity": "blocker",
+      "recovery_strategy": "输出 findings 和 required actions",
+      "next_state": "blocked"
+    },
+    {
+      "error_code": "HUMAN_APPROVAL_REQUIRED",
+      "condition": "风险策略要求人工审批",
+      "severity": "major",
+      "recovery_strategy": "创建 ApprovalRequest",
+      "next_state": "waiting_for_human_review"
+    }
+  ],
+  "eval_cases": [
+    "happy_path",
+    "missing_required_input",
+    "ambiguous_input",
+    "policy_conflict",
+    "edge_case",
+    "regression_case",
+    "technology_demo_adoption",
+    "control_plane_drift",
+    "rule_consumption_gap",
+    "context_noise_overload",
+    "low_quality_automation"
+  ],
+  "workflow_interface": {
+    "node_id": "code-review",
+    "input_artifacts": [
+      "code-quality-report.json",
+      "changed-files-report.json",
+      "implementation-summary.md",
+      "repo_context"
+    ],
+    "output_artifacts": [
+      "code-review-report.md",
+      "code-review-report.html",
+      "review-comments.json",
+      "blocker-list.md"
+    ],
+    "document_metadata": {
+      "schema": "engineering-assistant/schemas/document-lifecycle.schema.json",
+      "required_when": "status=succeeded and markdown artifact exists"
+    },
+    "required_information_requests": {
+      "artifact": "artifacts/code-review/required-information-request.json",
+      "schema": "engineering-assistant/schemas/required-information-request.schema.json",
+      "status_when_blocking": "waiting_for_input"
+    },
+    "state_transitions": [
+      "pending",
+      "running",
+      "waiting_for_input",
+      "waiting_for_human_review",
+      "succeeded",
+      "failed",
+      "skipped",
+      "blocked",
+      "cancelled"
+    ],
+    "gate_decision": [
+      "continue",
+      "pause",
+      "retry",
+      "skip",
+      "block",
+      "stop"
+    ],
+    "retry_policy": {
+      "max_attempts": 1,
+      "retry_on": [
+        "TOOL_UNAVAILABLE",
+        "UNKNOWN_ERROR"
+      ]
+    }
+  },
+  "owner": "研发负责人",
+  "reviewers": [
+    "研发负责人",
+    "架构师",
+    "测试负责人"
+  ],
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "static_analysis_policy": {
+    "required": true,
+    "tools": [
+      "sonar-scanner-cli",
+      "qodana-cli",
+      "checkstyle"
+    ],
+    "discovery_first": true,
+    "script": "engineering-assistant/scripts/run_static_analysis_tools.py",
+    "download_requires_explicit_allow_download": true,
+    "secret_redaction_required": true,
+    "quality_dimensions": [
+      "bug",
+      "vulnerability",
+      "security_hotspot",
+      "code_smell",
+      "complexity",
+      "duplication",
+      "coverage",
+      "maintainability",
+      "reliability",
+      "security"
+    ],
+    "block_when": [
+      "required tool configured but execution failed",
+      "all static analysis tools unavailable without accepted waiver",
+      "critical/high vulnerability or blocker bug exists",
+      "complexity threshold exceeded without remediation plan"
+    ],
+    "outputs": [
+      "code-review-report.html"
+    ],
+    "consumer_mode": "must_consume_code_quality_static_analysis_outputs"
+  },
+  "rich_html_report_policy": {
+    "required": true,
+    "outputs": [
+      "code-review-report.html"
+    ],
+    "script": "engineering-assistant/scripts/render_code_review_html.py",
+    "sections": [
+      "gate decision",
+      "blocker summary",
+      "finding severity distribution",
+      "quality dimension distribution",
+      "tool execution status",
+      "evidence table",
+      "required actions",
+      "human review checklist"
+    ],
+    "traceability": "each finding links to stable JSON finding id",
+    "sensitive_data_policy": "redact tokens, passwords, private keys, internal credentials and full connection strings"
+  }
+}

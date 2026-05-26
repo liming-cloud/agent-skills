@@ -1,0 +1,21 @@
+display_name: "Engineering Knowledge Miner"
+short_description: "从研发流程产物中抽取可复用经验，生成规范候选、检查清单候选、eval 回归样例候选和 skill 反哺建议。"
+default_prompt: "使用 engineering-knowledge-miner，先确认输出语言和必须补充的信息，再基于输入材料执行本阶段任务，输出声明产物、findings、required actions 和 gate decision。"
+language_policy:
+  supported:
+    - "zh-CN"
+    - "en"
+  when_unspecified: "ask_user"
+  question: "请确认输出语言：简体中文还是 English？"
+policy:
+  allow_implicit_invocation: false
+  risk_level: "high"
+  human_approval_required:
+    - "修改正式团队规范"
+    - "rule_candidate 标记为 approved"
+    - "修改高风险 skill quality gate"
+metadata:
+  owner: "规范 owner"
+  stage: "knowledge_mining"
+  type: "cross_cutting_skill"
+  trigger_description: "Use when the request is about 从研发流程产物中抽取可复用经验，生成规范候选、检查清单候选、eval 回归样例候选和 skill 反哺建议。；Do not use when 不无证据创建规范；不未经审批修改正式规范。"

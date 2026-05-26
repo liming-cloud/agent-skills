@@ -1,0 +1,279 @@
+{
+  "workflow_id": "release-only",
+  "version": "1.0.0",
+  "states": [
+    "pending",
+    "running",
+    "waiting_for_input",
+    "waiting_for_human_review",
+    "succeeded",
+    "failed",
+    "skipped",
+    "blocked",
+    "cancelled"
+  ],
+  "gate_decisions": [
+    "continue",
+    "pause",
+    "retry",
+    "skip",
+    "block",
+    "stop"
+  ],
+  "supported_entry_modes": [
+    "auto_flow",
+    "from_node",
+    "single_node"
+  ],
+  "default_entry_mode": "auto_flow",
+  "start_node": "release-readiness",
+  "terminal_nodes": [
+    "release-retrospective"
+  ],
+  "composition_policy": {
+    "auto_flow": "从 start_node 开始，按 next_nodes 自动流转；遇到阻断、等待输入或等待人工审批时暂停。",
+    "from_node": "从用户指定 start_node 开始继续流转；必须校验该节点存在，并确认所需上游 artifacts 已提供或可从 artifact_index 获取。",
+    "single_node": "只执行用户指定 target_node，不自动进入 next_nodes；输出该节点 StageRunResult 和可继续执行的后续节点建议。",
+    "custom": "可按任务目标裁剪节点集合，但必须保留节点输入输出契约、失败策略、审批策略和产物路由。"
+  },
+  "nodes": [
+    {
+      "node_id": "release-readiness",
+      "stage": "release_readiness",
+      "skill_id": "release-readiness",
+      "version": "1.0.0",
+      "mode": "standalone|workflow",
+      "entry_modes": [
+        "auto_flow",
+        "from_node",
+        "single_node"
+      ],
+      "depends_on": [],
+      "inputs": [
+        "code-quality-report.json",
+        "code-review-report.md",
+        "release-standard.md",
+        "risk_policy"
+      ],
+      "outputs": [
+        "release-plan.md",
+        "release-checklist.md",
+        "rollback-plan.md",
+        "release-risk-report.json",
+        "release-gate-decision.json"
+      ],
+      "preconditions": [
+        "contract 输入可用",
+        "风险策略已加载"
+      ],
+      "postconditions": [
+        "StageRunResult 已输出",
+        "产物已登记索引"
+      ],
+      "quality_gates": [
+        "发布窗口明确",
+        "回滚方案存在",
+        "监控告警存在",
+        "审批状态有效"
+      ],
+      "approval_policy": {
+        "required_for": [
+          "生产发布",
+          "生产配置变更",
+          "高风险发布",
+          "回滚操作"
+        ],
+        "decision": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      "retry_policy": {
+        "max_attempts": 1,
+        "retry_on": [
+          "TOOL_UNAVAILABLE",
+          "UNKNOWN_ERROR"
+        ]
+      },
+      "failure_policy": {
+        "block_on": [
+          "QUALITY_GATE_FAILED",
+          "RISK_POLICY_VIOLATION",
+          "STAGE_RESULT_CONTRACT_VIOLATION"
+        ],
+        "pause_on": [
+          "HUMAN_APPROVAL_REQUIRED",
+          "MISSING_REQUIRED_INPUT"
+        ]
+      },
+      "next_nodes": [
+        "release-verification"
+      ],
+      "artifact_mapping": {
+        "release-plan.md": "artifacts/release-readiness/release-plan.md",
+        "release-checklist.md": "artifacts/release-readiness/release-checklist.md",
+        "rollback-plan.md": "artifacts/release-readiness/rollback-plan.md",
+        "release-risk-report.json": "artifacts/release-readiness/release-risk-report.json",
+        "release-gate-decision.json": "artifacts/release-readiness/release-gate-decision.json"
+      }
+    },
+    {
+      "node_id": "release-verification",
+      "stage": "release_verification",
+      "skill_id": "release-verification",
+      "version": "1.0.0",
+      "mode": "standalone|workflow",
+      "entry_modes": [
+        "auto_flow",
+        "from_node",
+        "single_node"
+      ],
+      "depends_on": [
+        "release-readiness"
+      ],
+      "inputs": [
+        "release-plan.md",
+        "release-checklist.md",
+        "observability data",
+        "risk_policy"
+      ],
+      "outputs": [
+        "release-verification-report.md",
+        "production-checks.json",
+        "anomaly-list.md"
+      ],
+      "preconditions": [
+        "contract 输入可用",
+        "风险策略已加载"
+      ],
+      "postconditions": [
+        "StageRunResult 已输出",
+        "产物已登记索引"
+      ],
+      "quality_gates": [
+        "核心功能验证通过",
+        "错误率/延迟未触发阈值",
+        "业务指标正常",
+        "回滚条件未触发"
+      ],
+      "approval_policy": {
+        "required_for": [
+          "回滚操作",
+          "生产验证豁免",
+          "延长观察窗口"
+        ],
+        "decision": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      "retry_policy": {
+        "max_attempts": 1,
+        "retry_on": [
+          "TOOL_UNAVAILABLE",
+          "UNKNOWN_ERROR"
+        ]
+      },
+      "failure_policy": {
+        "block_on": [
+          "QUALITY_GATE_FAILED",
+          "RISK_POLICY_VIOLATION",
+          "STAGE_RESULT_CONTRACT_VIOLATION"
+        ],
+        "pause_on": [
+          "HUMAN_APPROVAL_REQUIRED",
+          "MISSING_REQUIRED_INPUT"
+        ]
+      },
+      "next_nodes": [
+        "release-retrospective"
+      ],
+      "artifact_mapping": {
+        "release-verification-report.md": "artifacts/release-verification/release-verification-report.md",
+        "production-checks.json": "artifacts/release-verification/production-checks.json",
+        "anomaly-list.md": "artifacts/release-verification/anomaly-list.md"
+      }
+    },
+    {
+      "node_id": "release-retrospective",
+      "stage": "release_retrospective",
+      "skill_id": "release-retrospective",
+      "version": "1.0.0",
+      "mode": "standalone|workflow",
+      "entry_modes": [
+        "auto_flow",
+        "from_node",
+        "single_node"
+      ],
+      "depends_on": [
+        "release-verification"
+      ],
+      "inputs": [
+        "release-verification-report.md",
+        "code-quality-report.json",
+        "incident reports",
+        "release logs"
+      ],
+      "outputs": [
+        "release-retrospective.md",
+        "release-lessons.yaml",
+        "follow-up-actions.md"
+      ],
+      "preconditions": [
+        "contract 输入可用",
+        "风险策略已加载"
+      ],
+      "postconditions": [
+        "StageRunResult 已输出",
+        "产物已登记索引"
+      ],
+      "quality_gates": [
+        "问题有证据",
+        "行动项有 owner",
+        "规范候选状态为 candidate",
+        "skill 改进候选明确"
+      ],
+      "approval_policy": {
+        "required_for": [
+          "行动项关闭",
+          "规范候选批准",
+          "高风险复盘结论发布"
+        ],
+        "decision": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      "retry_policy": {
+        "max_attempts": 1,
+        "retry_on": [
+          "TOOL_UNAVAILABLE",
+          "UNKNOWN_ERROR"
+        ]
+      },
+      "failure_policy": {
+        "block_on": [
+          "QUALITY_GATE_FAILED",
+          "RISK_POLICY_VIOLATION",
+          "STAGE_RESULT_CONTRACT_VIOLATION"
+        ],
+        "pause_on": [
+          "HUMAN_APPROVAL_REQUIRED",
+          "MISSING_REQUIRED_INPUT"
+        ]
+      },
+      "next_nodes": [],
+      "artifact_mapping": {
+        "release-retrospective.md": "artifacts/release-retrospective/release-retrospective.md",
+        "release-lessons.yaml": "artifacts/release-retrospective/release-lessons.yaml",
+        "follow-up-actions.md": "artifacts/release-retrospective/follow-up-actions.md"
+      }
+    }
+  ],
+  "artifact_routing": "每个节点的输出进入 artifact-index.json，并映射到下游 StageRunRequest.artifacts",
+  "human_approval_gateway": "遇到 HUMAN_APPROVAL_REQUIRED 时暂停，仅在 ApprovalRequest.decision=approved 后恢复",
+  "failure_policy": "关键门禁失败则阻断，审批拒绝则停止，仅确定性工具失败可重试"
+}

@@ -1,0 +1,394 @@
+{
+  "skill_id": "workflow-orchestrator",
+  "skill_name": "Workflow Orchestrator",
+  "version": "1.0.0",
+  "stage": "workflow_orchestration",
+  "type": "workflow_skill",
+  "purpose": "支持阶段选择、全链路 workflow、状态机、错误处理、审批暂停/恢复、产物传递和 trace 记录。",
+  "non_goals": [
+    "不直接生成阶段文档",
+    "不绕过子 skill contract",
+    "不自动批准高风险动作"
+  ],
+  "trigger_description": "Use when the request is about 支持阶段选择、全链路 workflow、状态机、错误处理、审批暂停/恢复、产物传递和 trace 记录。；Do not use when 不直接生成阶段文档；不绕过子 skill contract。",
+  "standalone_mode": "读取输入、校验前置条件、在指定输出目录生成全部声明产物，并在阻断门禁处停止。",
+  "workflow_mode": "消费 StageRunRequest 中的上游产物，输出 StageRunResult，并把声明产物路由给下游 workflow 节点。",
+  "language_policy": {
+    "supported": [
+      "zh-CN",
+      "en"
+    ],
+    "when_unspecified": "ask_user",
+    "blocking_status": "waiting_for_input",
+    "question": "请确认输出语言：简体中文还是 English？",
+    "writeback": "StageRunRequest.context.language"
+  },
+  "technology_selection_policy": {
+    "categories": [
+      "backend_framework",
+      "persistence_framework",
+      "frontend_stack",
+      "component_library",
+      "middleware",
+      "test_framework",
+      "build_tool",
+      "observability",
+      "deployment"
+    ],
+    "must_confirm_when": [
+      "设计未声明技术选型",
+      "repo_context 未识别现有技术栈",
+      "生成代码需要选择后端/持久化/前端/组件库/测试/构建框架",
+      "拟使用与现有项目不一致的技术"
+    ],
+    "ask_user_when_unspecified": true,
+    "team_defaults": {
+      "java_spring_persistence": "mybatis-plus"
+    },
+    "requires_review": [
+      "JDBC",
+      "框架替换",
+      "绕过现有 mapper/repository 模式",
+      "前端技术栈或组件库变更",
+      "测试框架替换",
+      "构建工具替换",
+      "中间件替换"
+    ],
+    "writeback": "StageRunRequest.context.technology_selection"
+  },
+  "inputs": [
+    {
+      "name": "workflow.yaml",
+      "type": "artifact|string|object",
+      "required": true,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    },
+    {
+      "name": "stage node registry",
+      "type": "artifact|string|object",
+      "required": false,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    },
+    {
+      "name": "StageRunRequest",
+      "type": "artifact|string|object",
+      "required": false,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    },
+    {
+      "name": "approval_context",
+      "type": "artifact|string|object",
+      "required": false,
+      "source": "user|workflow|repo|ci",
+      "validation": "必填输入必须存在，选填输入必须可追溯来源",
+      "missing_strategy": "除非无法定义边界，否则基于明确假设继续；无法定义边界时进入 waiting_for_input"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "workflow-trace.json",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/workflow-orchestrator/workflow-trace.json",
+      "schema": "output.schema.json#workflow-trace.json",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "workflow-summary.md",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/workflow-orchestrator/workflow-summary.md",
+      "schema": "output.schema.json#workflow-summary.md",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "approval-requests.json",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/workflow-orchestrator/approval-requests.json",
+      "schema": "output.schema.json#approval-requests.json",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "artifact-index.json",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/workflow-orchestrator/artifact-index.json",
+      "schema": "output.schema.json#artifact-index.json",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    }
+  ],
+  "preconditions": [
+    "必填输入已提供或已记录缺失处理策略",
+    "风险策略已加载",
+    "目标范围已明确"
+  ],
+  "execution_gates": {
+    "language_confirmed": true,
+    "preflight_required_information": true,
+    "formal_document_metadata_required": true,
+    "stage_result_validation_required": true,
+    "block_when_agent_violates_contract": true
+  },
+  "required_information_policy": {
+    "must_ask_when": [
+      "必填输入缺失",
+      "系统边界无法确认",
+      "风险等级无法判断",
+      "审批状态缺失",
+      "无法基于仓库或上游产物可靠推导"
+    ],
+    "question_output": "required_information_requests",
+    "blocking_status": "waiting_for_input",
+    "human_review_html_required": true,
+    "human_review_html_requirements": [
+      "可填写每个待确认项",
+      "保留问题 id 或稳定序号",
+      "可复制或下载答案 JSON",
+      "登记到 StageRunResult.artifacts",
+      "HTML 路径必须位于目标项目 docs/human-review/",
+      "agent 只消费 MD/JSON/YAML，不把 HTML 作为事实输入源"
+    ],
+    "minimum_question_fields": [
+      "id",
+      "question",
+      "reason",
+      "required",
+      "priority",
+      "expected_format"
+    ],
+    "question_order": [
+      "critical",
+      "major",
+      "minor"
+    ],
+    "do_not_ask_when": "信息可从当前仓库、上游产物、明确 profile 或已确认上下文可靠获得时，不重复询问用户。"
+  },
+  "postconditions": [
+    "全部输出产物已生成，或已输出明确的阻断结果",
+    "质量门禁已评估",
+    "需要人工审批的事项已列出"
+  ],
+  "dependencies": [
+    "团队规范",
+    "文档模板",
+    "仓库上下文",
+    "风险策略",
+    "校验脚本"
+  ],
+  "permissions": {
+    "allowed_actions": [
+      "读取仓库文件",
+      "生成产物",
+      "运行确定性校验",
+      "请求人工审批"
+    ],
+    "forbidden_actions": [
+      "执行生产变更",
+      "自动批准高风险动作",
+      "隐藏失败检查",
+      "覆盖无关工作"
+    ]
+  },
+  "human_approval_required": [
+    "人工审批网关",
+    "跳过阻断节点",
+    "恢复 blocked workflow",
+    "高风险动作执行"
+  ],
+  "risk_model": {
+    "levels": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ],
+    "upgrade_conditions": [
+      "人工审批网关",
+      "跳过阻断节点",
+      "恢复 blocked workflow",
+      "高风险动作执行"
+    ],
+    "default_for_unknown": "medium"
+  },
+  "quality_gates": [
+    {
+      "gate_id": "workflow-orchestrator-gate-1",
+      "name": "节点 contract 匹配",
+      "type": "deterministic",
+      "pass_condition": "节点 contract 匹配 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "workflow-orchestrator-gate-2",
+      "name": "前置条件满足",
+      "type": "deterministic",
+      "pass_condition": "前置条件满足 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "workflow-orchestrator-gate-3",
+      "name": "产物 schema 合规",
+      "type": "deterministic",
+      "pass_condition": "产物 schema 合规 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "workflow-orchestrator-gate-4",
+      "name": "高风险动作进入审批",
+      "type": "hybrid",
+      "pass_condition": "高风险动作进入审批 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    }
+  ],
+  "failure_modes": [
+    {
+      "error_code": "MISSING_REQUIRED_INPUT",
+      "condition": "必填输入不可用",
+      "severity": "major",
+      "recovery_strategy": "输出缺失信息产物并等待补充输入",
+      "next_state": "waiting_for_input"
+    },
+    {
+      "error_code": "INVALID_OUTPUT_SCHEMA",
+      "condition": "输出无法按声明 schema 解析",
+      "severity": "blocker",
+      "recovery_strategy": "重新生成产物并再次运行校验器",
+      "next_state": "failed"
+    },
+    {
+      "error_code": "STAGE_RESULT_CONTRACT_VIOLATION",
+      "condition": "StageRunResult 缺少语言、文档编号、主动问询或其他运行时门禁字段",
+      "severity": "blocker",
+      "recovery_strategy": "运行 validate_stage_run_result.py 并阻断违规节点",
+      "next_state": "blocked"
+    },
+    {
+      "error_code": "QUALITY_GATE_FAILED",
+      "condition": "阻断门禁失败",
+      "severity": "blocker",
+      "recovery_strategy": "输出 findings 和 required actions",
+      "next_state": "blocked"
+    },
+    {
+      "error_code": "HUMAN_APPROVAL_REQUIRED",
+      "condition": "风险策略要求人工审批",
+      "severity": "major",
+      "recovery_strategy": "创建 ApprovalRequest",
+      "next_state": "waiting_for_human_review"
+    }
+  ],
+  "eval_cases": [
+    "happy_path",
+    "missing_required_input",
+    "ambiguous_input",
+    "policy_conflict",
+    "edge_case",
+    "regression_case",
+    "technology_demo_adoption",
+    "control_plane_drift",
+    "rule_consumption_gap",
+    "context_noise_overload",
+    "low_quality_automation"
+  ],
+  "workflow_interface": {
+    "node_id": "workflow-orchestrator",
+    "input_artifacts": [
+      "workflow.yaml",
+      "stage node registry",
+      "StageRunRequest",
+      "approval_context"
+    ],
+    "output_artifacts": [
+      "workflow-trace.json",
+      "workflow-summary.md",
+      "approval-requests.json",
+      "artifact-index.json"
+    ],
+    "document_metadata": {
+      "schema": "engineering-assistant/schemas/document-lifecycle.schema.json",
+      "required_when": "status=succeeded and markdown artifact exists"
+    },
+    "required_information_requests": {
+      "artifact": "artifacts/workflow-orchestrator/required-information-request.json",
+      "schema": "engineering-assistant/schemas/required-information-request.schema.json",
+      "status_when_blocking": "waiting_for_input"
+    },
+    "state_transitions": [
+      "pending",
+      "running",
+      "waiting_for_input",
+      "waiting_for_human_review",
+      "succeeded",
+      "failed",
+      "skipped",
+      "blocked",
+      "cancelled"
+    ],
+    "gate_decision": [
+      "continue",
+      "pause",
+      "retry",
+      "skip",
+      "block",
+      "stop"
+    ],
+    "retry_policy": {
+      "max_attempts": 1,
+      "retry_on": [
+        "TOOL_UNAVAILABLE",
+        "UNKNOWN_ERROR"
+      ]
+    }
+  },
+  "owner": "workflow owner",
+  "reviewers": [
+    "研发负责人",
+    "架构师",
+    "测试负责人"
+  ],
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "workflow_runtime_policy": {
+    "supported_entry_modes": [
+      "auto_flow",
+      "from_node",
+      "single_node"
+    ],
+    "default_entry_mode": "auto_flow",
+    "auto_flow": "按 workflow.nodes 顺序与 next_nodes 自动流转；遇到 waiting_for_input、waiting_for_human_review、blocked、failed 必须暂停。",
+    "auto_transition_policy": {
+      "continue_when": [
+        "StageRunResult.status == succeeded",
+        "required_information_requests 为空",
+        "未声明 HUMAN_APPROVAL_REQUIRED",
+        "next_node 存在"
+      ],
+      "record_required": "workflow-trace.json 必须记录 auto transition decision",
+      "dialog_confirmation_required": false,
+      "hld_to_detailed_design": "agent 自动流转检查，不等同于代码研发前的 design-review"
+    },
+    "from_node": "从指定 start_node 开始，沿 next_nodes 继续流转到 terminal_nodes；必须校验 start_node 存在且上游必要 artifacts 已由用户或 artifact_index 提供。",
+    "single_node": "只执行 target_node，不自动触发后续节点；必须输出 StageRunResult、artifact_index 更新建议和下游可继续执行提示。",
+    "from_node_required_fields": [
+      "workflow_id",
+      "entry_mode",
+      "start_node",
+      "artifact_index",
+      "approval_context"
+    ],
+    "single_node_required_fields": [
+      "workflow_id",
+      "entry_mode",
+      "target_node",
+      "stage_run_request"
+    ],
+    "composition_rules": [
+      "workflow 不是固定线路，节点可以按任务目标裁剪、跳过或从中间恢复，但必须保留输入输出契约和审批门禁。",
+      "跳过节点必须写入 skip_reason、risk_impact 和 human_approval 需求；不得静默跳过质量或审批节点。",
+      "只执行单节点时不得宣称全链路完成，只能给出该节点结果和建议的 next_nodes。",
+      "自动流转时下游节点只能消费已登记 artifact 或用户补充信息，不能虚构上游产物。"
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "task_id",
+    "allowed_modules",
+    "forbidden_modules",
+    "required_files_or_patterns",
+    "architecture_rules",
+    "required_tests",
+    "done_conditions",
+    "expected_interfaces",
+    "expected_services",
+    "expected_repositories_or_mappers",
+    "technology_adoption_contract"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "allowed_modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbidden_modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_files_or_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "architecture_rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_tests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "done_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_interfaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_repositories_or_mappers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "technology_adoption_contract": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

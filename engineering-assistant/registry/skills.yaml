@@ -1,0 +1,193 @@
+{
+  "skills": [
+    {
+      "skill_id": "requirement-intake",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "产品/需求负责人",
+      "path": "skills/requirement-intake",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "repo-context-miner",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "架构师/资深开发",
+      "path": "skills/repo-context-miner",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "high-level-design",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "架构师",
+      "path": "skills/high-level-design",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "detailed-design",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "后端开发",
+      "path": "skills/detailed-design",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "redis-design",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "架构师",
+      "path": "skills/redis-design",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "mq-design",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "架构师",
+      "path": "skills/mq-design",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "database-design",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "DBA",
+      "path": "skills/database-design",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "design-review",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "架构师",
+      "path": "skills/design-review",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "frontend-design",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "前端开发",
+      "path": "skills/frontend-design",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "code-development",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "后端开发",
+      "path": "skills/code-development",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    },
+    {
+      "skill_id": "frontend-development",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "前端开发",
+      "path": "skills/frontend-development",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "implementation-controller",
+      "version": "1.0.0",
+      "type": "control_skill",
+      "owner": "研发负责人",
+      "path": "skills/implementation-controller",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    },
+    {
+      "skill_id": "self-test",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "测试负责人",
+      "path": "skills/self-test",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "code-quality-governor",
+      "version": "1.0.0",
+      "type": "cross_cutting_skill",
+      "owner": "研发负责人",
+      "path": "skills/code-quality-governor",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    },
+    {
+      "skill_id": "code-review",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "研发负责人",
+      "path": "skills/code-review",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "release-readiness",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "发布负责人",
+      "path": "skills/release-readiness",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    },
+    {
+      "skill_id": "release-verification",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "SRE",
+      "path": "skills/release-verification",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    },
+    {
+      "skill_id": "release-retrospective",
+      "version": "1.0.0",
+      "type": "stage_skill",
+      "owner": "发布负责人",
+      "path": "skills/release-retrospective",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "engineering-knowledge-miner",
+      "version": "1.0.0",
+      "type": "cross_cutting_skill",
+      "owner": "规范 owner",
+      "path": "skills/engineering-knowledge-miner",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    },
+    {
+      "skill_id": "skill-quality-auditor",
+      "version": "1.0.0",
+      "type": "audit_skill",
+      "owner": "skill owner",
+      "path": "skills/skill-quality-auditor",
+      "risk_level": "medium",
+      "allow_implicit_invocation": true
+    },
+    {
+      "skill_id": "workflow-orchestrator",
+      "version": "1.0.0",
+      "type": "workflow_skill",
+      "owner": "workflow owner",
+      "path": "skills/workflow-orchestrator",
+      "risk_level": "high",
+      "allow_implicit_invocation": false
+    }
+  ]
+}
