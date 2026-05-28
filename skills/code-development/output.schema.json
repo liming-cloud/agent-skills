@@ -103,7 +103,7 @@
     },
     "artifacts": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 4,
       "items": {
         "type": "object",
         "required": [

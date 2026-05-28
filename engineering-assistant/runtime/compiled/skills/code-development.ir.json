@@ -26,7 +26,8 @@
     "code changes",
     "implementation-summary.md",
     "design-to-code-mapping.yaml",
-    "changed-files-report.json"
+    "changed-files-report.json",
+    "traceability-matrix.json"
   ],
   "routing": {
     "intent_tags": [
@@ -60,7 +61,8 @@
       "每个变更映射到设计",
       "无无关模块修改",
       "高风险文件已标记",
-      "测试命令已列出"
+      "测试命令已列出",
+      "需求-设计-代码追踪矩阵已刷新"
     ],
     "allow_implicit_invocation": false
   },
@@ -77,7 +79,8 @@
     "每个变更映射到设计",
     "无无关模块修改",
     "高风险文件已标记",
-    "测试命令已列出"
+    "测试命令已列出",
+    "需求-设计-代码追踪矩阵已刷新"
   ],
   "workflow": {
     "node_id": "code-development",

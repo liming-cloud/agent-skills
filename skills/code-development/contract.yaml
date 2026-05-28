@@ -43,7 +43,8 @@
       "每个变更映射到设计",
       "无无关模块修改",
       "高风险文件已标记",
-      "测试命令已列出"
+      "测试命令已列出",
+      "需求-设计-代码追踪矩阵已刷新"
     ],
     "allow_implicit_invocation": false
   },
@@ -153,6 +154,13 @@
       "type": "markdown|json|yaml|code|log|report",
       "path": "artifacts/code-development/changed-files-report.json",
       "schema": "output.schema.json#changed-files-report.json",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "traceability-matrix.json",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/code-development/traceability-matrix.json",
+      "schema": "output.schema.json#traceability-matrix.json",
       "consumer": "workflow-orchestrator|downstream-stage|human-review"
     }
   ],
@@ -275,6 +283,13 @@
       "type": "deterministic",
       "pass_condition": "测试命令已列出 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "code-development-gate-5",
+      "name": "需求-设计-代码追踪矩阵已刷新",
+      "type": "deterministic",
+      "pass_condition": "需求-设计-代码追踪矩阵已刷新 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
     }
   ],
   "failure_modes": [
@@ -339,7 +354,8 @@
       "code changes",
       "implementation-summary.md",
       "design-to-code-mapping.yaml",
-      "changed-files-report.json"
+      "changed-files-report.json",
+      "traceability-matrix.json"
     ],
     "document_metadata": {
       "schema": "engineering-assistant/schemas/document-lifecycle.schema.json",

@@ -228,8 +228,8 @@ flowchart LR
 - 设计摘要：基于设计文档进行最小必要代码变更或生成代码修改计划。
 - description：代码研发、按设计实施代码变更、生成实现总结和设计到代码映射时使用；不要用于无设计依据的大范围重构。
 - 输入：detailed-design.md, implementation-plan.md, interface-contracts.yaml, repo_context
-- 输出：code changes, implementation-summary.md, design-to-code-mapping.yaml, changed-files-report.json
-- 质量门禁：每个变更映射到设计; 无无关模块修改; 高风险文件已标记; 测试命令已列出
+- 输出：code changes, implementation-summary.md, design-to-code-mapping.yaml, changed-files-report.json, traceability-matrix.json
+- 质量门禁：每个变更映射到设计; 无无关模块修改; 高风险文件已标记; 测试命令已列出; 需求-设计-代码追踪矩阵已刷新
 - 失败处理：缺输入进入 `waiting_for_input`；schema 失败进入 `failed`；门禁失败进入 `blocked`；高风险进入 `waiting_for_human_review`。
 - 人工审批规则：DB/Redis/MQ/权限/发布脚本变更; 核心链路实现偏离设计; 高风险重构
 - 目录结构：`skills/code-development/SKILL.md`、`contract.yaml`、`output.schema.json`、`scripts/validate_output.py`、`evals/*.yaml`、`workflow/node.yaml`。
@@ -258,8 +258,8 @@ flowchart LR
 - 设计摘要：把已审批设计转换为机器可读实现合同和质量合同，并控制代码实现、验证、修复和最终人工审阅。
 - description：已审批设计需要编译成实现合同、控制代码执行范围、驱动质量命令和修复闭环时使用；不要用于未审批设计或单纯设计文档生成。
 - 输入：approved design artifact, target project root, project profile, changed-files-report.json
-- 输出：current-task.json, design-contract.json, implementation-contract.json, quality-contract.json, open-questions.json, task-context.agent.md, workflow-trace.json, control-health-report.json, technology-adoption-report.json, rule-consumption-report.json, repair-attempts.json
-- 质量门禁：设计合同已编译; 实现范围明确; 质量命令非空; 修复策略明确; 人工审阅包仅在阻断或最终审阅时生成
+- 输出：current-task.json, design-contract.json, implementation-contract.json, quality-contract.json, open-questions.json, task-context.agent.md, workflow-trace.json, control-health-report.json, technology-adoption-report.json, rule-consumption-report.json, traceability-matrix.json, traceability-report.html, repair-attempts.json
+- 质量门禁：设计合同已编译; 实现范围明确; 质量命令非空; 需求-设计-代码追踪关系可查看; 修复策略明确; 人工审阅包仅在阻断或最终审阅时生成
 - 失败处理：缺输入进入 `waiting_for_input`；schema 失败进入 `failed`；门禁失败进入 `blocked`；高风险进入 `waiting_for_human_review`。
 - 人工审批规则：修改已审批设计范围; 高风险实现豁免; 生产动作; 修复轮次耗尽后的人工决策
 - 目录结构：`skills/implementation-controller/SKILL.md`、`contract.yaml`、`output.schema.json`、`scripts/validate_output.py`、`evals/*.yaml`、`workflow/node.yaml`。

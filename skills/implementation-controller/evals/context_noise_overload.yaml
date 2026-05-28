@@ -89,6 +89,8 @@
     "control-health-report.json",
     "technology-adoption-report.json",
     "rule-consumption-report.json",
+    "traceability-matrix.json",
+    "traceability-report.html",
     "repair-attempts.json"
   ]
 }

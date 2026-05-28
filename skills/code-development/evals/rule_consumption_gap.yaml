@@ -81,6 +81,7 @@
   "required_artifacts": [
     "implementation-summary.md",
     "design-to-code-mapping.yaml",
-    "changed-files-report.json"
+    "changed-files-report.json",
+    "traceability-matrix.json"
   ]
 }

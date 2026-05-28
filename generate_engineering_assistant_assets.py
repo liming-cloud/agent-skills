@@ -713,8 +713,8 @@ SKILLS = [
         "purpose": "基于设计文档进行最小必要代码变更或生成代码修改计划。",
         "non_goals": ["不修改无关模块", "不绕过测试", "不执行未审批高风险动作"],
         "inputs": ["detailed-design.md", "implementation-plan.md", "interface-contracts.yaml", "repo_context"],
-        "outputs": ["code changes", "implementation-summary.md", "design-to-code-mapping.yaml", "changed-files-report.json"],
-        "gates": ["每个变更映射到设计", "无无关模块修改", "高风险文件已标记", "测试命令已列出"],
+        "outputs": ["code changes", "implementation-summary.md", "design-to-code-mapping.yaml", "changed-files-report.json", "traceability-matrix.json"],
+        "gates": ["每个变更映射到设计", "无无关模块修改", "高风险文件已标记", "测试命令已列出", "需求-设计-代码追踪矩阵已刷新"],
         "approvals": ["DB/Redis/MQ/权限/发布脚本变更", "核心链路实现偏离设计", "高风险重构"],
         "checks": [
             "执行前必须读取 artifacts/_control/task-context.agent.md、implementation-contract.json、quality-contract.json 和任务规则包",
@@ -723,6 +723,7 @@ SKILLS = [
             "风险标记",
             "测试覆盖",
             "变更摘要",
+            "完成实现后必须运行 build_traceability_report.py 刷新 artifacts/_control/traceability-matrix.json 和 docs/human-readable/traceability-report.html",
             "FW1 框架选型必须来自设计、repo_context 或用户确认；缺失时主动询问",
             "FW2 Java/Spring 持久化默认使用 mybatis-plus；直接 JDBC 必须有评审批准",
             "FW3 实现必须遵循现有仓库 mapper/repository/service 分层和依赖",
@@ -770,15 +771,18 @@ SKILLS = [
             "control-health-report.json",
             "technology-adoption-report.json",
             "rule-consumption-report.json",
+            "traceability-matrix.json",
+            "traceability-report.html",
             "repair-attempts.json",
         ],
-        "gates": ["设计合同已编译", "实现范围明确", "质量命令非空", "修复策略明确", "人工审阅包仅在阻断或最终审阅时生成"],
+        "gates": ["设计合同已编译", "实现范围明确", "质量命令非空", "需求-设计-代码追踪关系可查看", "修复策略明确", "人工审阅包仅在阻断或最终审阅时生成"],
         "approvals": ["修改已审批设计范围", "高风险实现豁免", "生产动作", "修复轮次耗尽后的人工决策"],
         "checks": [
             "只接受已审批 Markdown/JSON/YAML 设计产物，HTML 仅作为人工审阅入口",
             "所有 `_control` 产物写入目标项目 `artifacts/_control/`，不得写入插件目录",
             "implementation-contract.json 必须包含 allowed_modules、forbidden_modules、expected_interfaces、expected_services、expected_repositories_or_mappers、required_tests、architecture_rules、done_conditions、technology_adoption_contract",
             "quality-contract.json 必须包含 required_commands 和 required_evidence，缺失或占位命令必须阻断",
+            "必须生成 artifacts/_control/traceability-matrix.json 作为机读事实源，并生成 docs/human-readable/traceability-report.html 作为人工阅览入口；HTML 不得反向作为 agent 事实输入",
             "普通实现范围、测试、lint、设计映射失败进入 review -> repair -> validate，最多 2 轮",
             "业务决策、设计冲突、高风险动作、生产动作和修复轮次耗尽才进入人工审批",
         ],
@@ -1158,6 +1162,21 @@ def rich_html_report_policy(skill: dict) -> dict:
     html_outputs = [item for item in skill["outputs"] if item.endswith(".html")]
     if not html_outputs:
         return {"required": False}
+    if skill["id"] == "implementation-controller":
+        return {
+            "required": True,
+            "outputs": html_outputs,
+            "script": "engineering-assistant/scripts/build_traceability_report.py",
+            "sections": [
+                "task summary",
+                "requirement to design to code traceability matrix",
+                "validation status",
+                "gap and blocker summary",
+                "source evidence files",
+            ],
+            "traceability": "each row links requirement id, design refs, implementation targets, changed files, tests and validation status",
+            "html_policy": "HTML is human-only; artifacts/_control/traceability-matrix.json remains the agent source of truth",
+        }
     return {
         "required": True,
         "outputs": html_outputs,
@@ -1196,6 +1215,8 @@ def control_surface_policy(skill: dict) -> dict:
             "control-health-report.json",
             "technology-adoption-report.json",
             "rule-consumption-report.json",
+            "traceability-matrix.json",
+            "traceability-report.html",
             "repair-attempts.json",
         ],
         "bounded_repair": {
@@ -1442,8 +1463,9 @@ def implementation_controller_note(skill: dict) -> str:
 - 执行前必须解析 `<plugin-root>` 和 `<target-project-root>`；所有写能力脚本必须显式传 `--root <target-project-root>`。
 - 初始化控制面：`init_task.py` 生成 `current-task.json`、`artifact-index.json`、`open-questions.json` 和 `task-context.agent.md`。
 - 编译设计合同：`compile_design_contract.py` 只接受已审批的 Markdown/JSON/YAML 设计产物，拒绝 HTML 作为 agent 事实源。
-- 下游实现只能消费 `task-context.agent.md`、`design-contract.json`、`implementation-contract.json` 和 `quality-contract.json`。
-- 变更后必须执行 `collect_changed_files.py`、`validate_design_to_code.py` 和 `run_quality_commands.py`。
+- 下游实现只能消费 `task-context.agent.md`、`design-contract.json`、`implementation-contract.json`、`quality-contract.json` 和 `traceability-matrix.json`；`docs/human-readable/traceability-report.html` 只给人查看。
+- 变更后必须执行 `collect_changed_files.py`、`validate_design_to_code.py`、`build_traceability_report.py` 和 `run_quality_commands.py`。
+- `build_traceability_report.py` 必须生成机读 `artifacts/_control/traceability-matrix.json` 与人工阅览 `docs/human-readable/traceability-report.html`；HTML 是结构化追踪页面，不得由 Markdown/JSON 机械转码替代。
 - 普通实现范围、测试、lint 和设计映射问题进入 `review -> repair -> validate`，最多 2 轮；业务决策、设计冲突、高风险动作、生产动作和修复耗尽才请求人工。
 """
 
@@ -1468,7 +1490,7 @@ def controlled_execution_note(skill: dict) -> str:
 - 执行前必须读取目标项目 `artifacts/_control/task-context.agent.md`、`implementation-contract.json`、`quality-contract.json` 和 `artifacts/rule-governance/task-rule-packs/<task>.json`。
 - 不得依赖聊天上下文记忆替代机读控制面；规则、技术栈、质量命令和停止条件必须来自控制产物。
 - 进入实现、自测、质量治理或代码评审前必须先运行 `validate_control_health.py`；控制面缺失、规则包缺失或 blocking open question 必须阻断。
-- 涉及代码变更后必须运行 `validate_technology_adoption.py`、`validate_design_to_code.py` 和 `validate_rule_consumption.py`。
+- 涉及代码变更后必须运行 `validate_technology_adoption.py`、`validate_design_to_code.py`、`build_traceability_report.py` 和 `validate_rule_consumption.py`。
 """
 
 
@@ -4104,6 +4126,104 @@ def infer_required_tests(text: str, file_patterns: list[str], profile: dict) -> 
         tests.append("task-specific failing test must be written before implementation and pass before review")
     return list(dict.fromkeys(tests))
 
+def esc(value) -> str:
+    return html.escape("" if value is None else str(value))
+
+def build_initial_traceability(design_contract: dict, implementation_contract: dict, quality_contract: dict) -> dict:
+    rows = []
+    seeds = design_contract.get("acceptance_criteria") or design_contract.get("goals") or ["Implement the approved design without expanding scope."]
+    for index, item in enumerate(seeds[:20], start=1):
+        rows.append({
+            "requirement_id": f"REQ-{index:03d}",
+            "requirement": item,
+            "design_refs": [design_contract.get("source_design", "")],
+            "implementation_targets": implementation_contract.get("allowed_modules", []),
+            "changed_files": [],
+            "tests": implementation_contract.get("required_tests", []),
+            "validation_status": "pending_code_development",
+            "evidence": {
+                "design_contract": "artifacts/_control/design-contract.json",
+                "implementation_contract": "artifacts/_control/implementation-contract.json",
+                "quality_contract": "artifacts/_control/quality-contract.json",
+            },
+            "gaps": ["等待 code-development 阶段写入 design-to-code-mapping.yaml、changed-files-report.json 并刷新追踪报告"],
+        })
+    return {
+        "task_id": design_contract.get("task_id"),
+        "status": "pending_code_development",
+        "source_of_truth": "artifacts/_control/traceability-matrix.json",
+        "human_readable_report": "docs/human-readable/traceability-report.html",
+        "html_policy": "HTML is human-only and cannot be consumed as agent source evidence",
+        "summary": {"requirements": len(rows), "mapped_rows": 0, "gap_rows": len(rows)},
+        "rows": rows,
+        "required_evidence": quality_contract.get("required_evidence", []),
+        "generated_at": now_iso(),
+    }
+
+def render_traceability_html(matrix: dict) -> str:
+    rows = matrix.get("rows", [])
+    summary = matrix.get("summary", {})
+    table_rows = []
+    for row in rows:
+        gaps = row.get("gaps") or []
+        status = row.get("validation_status") or "unknown"
+        design_cell = "<br>".join(esc(item) for item in row.get("design_refs", [])) or '<span class="muted">未登记</span>'
+        target_cell = "<br>".join(esc(item) for item in row.get("implementation_targets", [])) or '<span class="muted">待实现</span>'
+        changed_cell = "<br>".join(esc(item) for item in row.get("changed_files", [])) or '<span class="muted">待写入</span>'
+        tests_cell = "<br>".join(esc(item) for item in row.get("tests", [])) or '<span class="muted">待确认</span>'
+        gaps_cell = "<br>".join(esc(item) for item in gaps)
+        table_rows.append(
+            "<tr>"
+            f"<td><strong>{esc(row.get('requirement_id'))}</strong><div class='muted'>{esc(row.get('requirement'))}</div></td>"
+            f"<td>{design_cell}</td>"
+            f"<td>{target_cell}</td>"
+            f"<td>{changed_cell}</td>"
+            f"<td>{tests_cell}</td>"
+            f"<td><span class='status'>{esc(status)}</span><div class='gap'>{gaps_cell}</div></td>"
+            "</tr>"
+        )
+    return "\\n".join([
+        "<!doctype html>",
+        '<html lang="zh-CN" data-human-readable-report="traceability">',
+        "<head>",
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>需求-设计-代码追踪报告</title>",
+        "<style>",
+        'body{margin:0;background:#f5f7fb;color:#172033;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}',
+        "header{background:#111827;color:#fff;padding:28px 36px}main{padding:24px 36px 56px}",
+        "section{background:#fff;border:1px solid #dbe3ef;border-radius:8px;margin:0 0 18px;padding:18px}h1,h2{margin:0 0 12px}",
+        ".notice{color:#bfdbfe;margin-top:8px}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}",
+        ".metric{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px}.metric strong{display:block;font-size:26px;margin-top:4px}",
+        "table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e5eaf0;padding:9px;text-align:left;vertical-align:top}th{background:#f1f5f9}",
+        ".muted{color:#64748b;margin-top:4px}.status{display:inline-block;border-radius:999px;padding:3px 8px;background:#e0f2fe;color:#075985}.gap{color:#9a3412;margin-top:6px}.source{font-size:13px;color:#475569}",
+        "</style>",
+        "</head><body><header>",
+        "<h1>需求-设计-代码追踪报告</h1>",
+        f"<div>task_id: <strong>{esc(matrix.get('task_id'))}</strong> · status: <strong>{esc(matrix.get('status'))}</strong></div>",
+        '<div class="notice">人工阅览入口。机读事实源是 artifacts/_control/traceability-matrix.json，agent 不得反向读取本 HTML 作为事实输入。</div>',
+        "</header><main>",
+        '<section class="metrics">',
+        f'<div class="metric">需求条目<strong>{esc(summary.get("requirements", len(rows)))}</strong></div>',
+        f'<div class="metric">已映射<strong>{esc(summary.get("mapped_rows", 0))}</strong></div>',
+        f'<div class="metric">存在缺口<strong>{esc(summary.get("gap_rows", 0))}</strong></div>',
+        "</section>",
+        "<section><h2>追踪矩阵</h2><table><thead><tr><th>需求</th><th>设计依据</th><th>实现目标</th><th>代码文件</th><th>测试/验证</th><th>状态与缺口</th></tr></thead><tbody>",
+        "".join(table_rows) or '<tr><td colspan="6" class="muted">暂无追踪条目</td></tr>',
+        "</tbody></table></section>",
+        "<section class=\\\"source\\\"><h2>证据文件</h2><div>design-contract.json · implementation-contract.json · quality-contract.json · design-to-code-mapping.yaml · changed-files-report.json · design-to-code-validation.json</div></section>",
+        "</main></body></html>",
+    ])
+
+def write_traceability_outputs(root: Path, control: Path, matrix: dict) -> None:
+    matrix_path = control / "traceability-matrix.json"
+    html_path = root / "docs/human-readable/traceability-report.html"
+    write_json(matrix_path, matrix)
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(render_traceability_html(matrix), encoding="utf-8")
+    update_artifact_index(root, matrix_path.name, matrix_path, "json", "implementation-controller")
+    update_artifact_index(root, html_path.name, html_path, "html", "implementation-controller")
+
 def main():
     parser = argparse.ArgumentParser(description="Compile an approved design artifact into machine-readable control contracts.")
     parser.add_argument("--root", required=True)
@@ -4127,15 +4247,17 @@ def main():
     expected = infer_expected_contracts(text, lines, file_patterns)
     design_contract = {"task_id": task_id, "source_design": str(design_path.relative_to(root)), "source_checksum": checksum(design_path), "generated_at": now_iso(), "goals": lines[:8] or ["Implement the approved design without expanding scope."], "acceptance_criteria": lines[:12], "module_boundaries": {"allowed_from_design": file_patterns, "source": "compiled_from_design_artifact"}, "assumptions": ["The human-approved design is the source of truth for implementation scope."]}
     implementation_contract = {"task_id": task_id, "allowed_modules": file_patterns, "forbidden_modules": DEFAULT_FORBIDDEN, "required_files_or_patterns": file_patterns, "expected_interfaces": expected["expected_interfaces"], "expected_services": expected["expected_services"], "expected_repositories_or_mappers": expected["expected_repositories_or_mappers"], "technology_adoption_contract": infer_technology_adoption_contract(text, file_patterns, profile), "architecture_rules": DEFAULT_RULES, "required_tests": infer_required_tests(text, file_patterns, profile), "done_conditions": ["No changed file is outside allowed scope unless approved.", "Design-to-code validation passes with no blocker or major findings.", "Technology adoption validation passes.", "Rule consumption validation passes.", "Required quality commands pass; missing commands are blocking.", "Open blocking questions are empty."], "generated_at": now_iso()}
-    quality_contract = {"task_id": task_id, "required_commands": infer_commands(profile, file_patterns), "required_evidence": ["control_health", "design_to_code_mapping", "technology_adoption", "rule_consumption", "quality_commands"], "quality_gates": ["control_health", "design_to_code_mapping", "technology_adoption", "rule_consumption", "architecture_boundary", "build_lint_test", "semantic_review"], "repair_policy": {"max_attempts": 2, "ask_human_only_for": ["approved design conflict", "business decision missing", "high risk approval", "production action", "repair attempts exhausted"]}, "generated_at": now_iso()}
+    quality_contract = {"task_id": task_id, "required_commands": infer_commands(profile, file_patterns), "required_evidence": ["control_health", "design_to_code_mapping", "traceability_matrix", "traceability_report_html", "technology_adoption", "rule_consumption", "quality_commands"], "quality_gates": ["control_health", "design_to_code_mapping", "traceability_matrix", "technology_adoption", "rule_consumption", "architecture_boundary", "build_lint_test", "semantic_review"], "repair_policy": {"max_attempts": 2, "ask_human_only_for": ["approved design conflict", "business decision missing", "high risk approval", "production action", "repair attempts exhausted"]}, "generated_at": now_iso()}
     write_json(control / "design-contract.json", design_contract)
     write_json(control / "implementation-contract.json", implementation_contract)
     write_json(control / "quality-contract.json", quality_contract)
-    context = ["# Agent Context Pack", "", "## Read First", "- This is the task-scoped context pack. Consume it before broad doc search.", "- Required rule ids must come from `artifacts/rule-governance/task-rule-packs/code-development.json`.", "- A stale changed-files report, missing rule pack, blocking open question, or failed gate means stop and report blocked.", "", f"- task_id: {task_id}", f"- source_design: {design_contract['source_design']}", f"- source_checksum: {design_contract['source_checksum']}", f"- task_rule_pack: artifacts/rule-governance/task-rule-packs/code-development.json", "", "## Goals", *[f"- {item}" for item in design_contract["goals"]], "", "## Allowed Modules", *[f"- {item}" for item in implementation_contract["allowed_modules"]], "", "## Technology Adoption Contract", f"- {json.dumps(implementation_contract['technology_adoption_contract'], ensure_ascii=False)}", "", "## Required Evidence", *[f"- {item}" for item in quality_contract["required_evidence"]], "", "## Fast Validation Commands", "- python3 engineering-assistant/scripts/run_controlled_task.py --root <project-root> --mode audit-readonly", "- python3 engineering-assistant/scripts/run_controlled_task.py --root <project-root> --rule-evidence <evidence-json>", ""]
+    traceability_matrix = build_initial_traceability(design_contract, implementation_contract, quality_contract)
+    write_traceability_outputs(root, control, traceability_matrix)
+    context = ["# Agent Context Pack", "", "## Read First", "- This is the task-scoped context pack. Consume it before broad doc search.", "- Required rule ids must come from `artifacts/rule-governance/task-rule-packs/code-development.json`.", "- A stale changed-files report, missing rule pack, blocking open question, or failed gate means stop and report blocked.", "- Human-readable traceability is in `docs/human-readable/traceability-report.html`; agent source of truth is `artifacts/_control/traceability-matrix.json`.", "", f"- task_id: {task_id}", f"- source_design: {design_contract['source_design']}", f"- source_checksum: {design_contract['source_checksum']}", f"- task_rule_pack: artifacts/rule-governance/task-rule-packs/code-development.json", "", "## Goals", *[f"- {item}" for item in design_contract["goals"]], "", "## Allowed Modules", *[f"- {item}" for item in implementation_contract["allowed_modules"]], "", "## Technology Adoption Contract", f"- {json.dumps(implementation_contract['technology_adoption_contract'], ensure_ascii=False)}", "", "## Required Evidence", *[f"- {item}" for item in quality_contract["required_evidence"]], "", "## Fast Validation Commands", "- python3 engineering-assistant/scripts/run_controlled_task.py --root <project-root> --mode audit-readonly", "- python3 engineering-assistant/scripts/run_controlled_task.py --root <project-root> --rule-evidence <evidence-json>", ""]
     (control / "task-context.agent.md").write_text("\\n".join(context), encoding="utf-8")
     for name, rel, artifact_type in [("design-contract.json", control / "design-contract.json", "json"), ("implementation-contract.json", control / "implementation-contract.json", "json"), ("quality-contract.json", control / "quality-contract.json", "json"), ("task-context.agent.md", control / "task-context.agent.md", "markdown")]:
         update_artifact_index(root, name, rel, artifact_type, "implementation-controller")
-    task.update({"task_id": task_id, "status": "contract_compiled", "current_contracts": {"design_contract": str((control / "design-contract.json").relative_to(root)), "implementation_contract": str((control / "implementation-contract.json").relative_to(root)), "quality_contract": str((control / "quality-contract.json").relative_to(root)), "context_pack": str((control / "task-context.agent.md").relative_to(root))}, "updated_at": now_iso()})
+    task.update({"task_id": task_id, "status": "contract_compiled", "current_contracts": {"design_contract": str((control / "design-contract.json").relative_to(root)), "implementation_contract": str((control / "implementation-contract.json").relative_to(root)), "quality_contract": str((control / "quality-contract.json").relative_to(root)), "traceability_matrix": str((control / "traceability-matrix.json").relative_to(root)), "traceability_report": "docs/human-readable/traceability-report.html", "context_pack": str((control / "task-context.agent.md").relative_to(root))}, "updated_at": now_iso()})
     write_json(control / "current-task.json", task)
     print(control / "implementation-contract.json")
 
@@ -4288,6 +4410,193 @@ def main():
     print(output)
     if status == "block":
         raise SystemExit(1)
+
+if __name__ == "__main__":
+    main()
+""",
+        "build_traceability_report.py": """#!/usr/bin/env python3
+import argparse
+import html
+import json
+import re
+from pathlib import Path
+from control_runtime import ensure_control_dir, now_iso, read_json, update_artifact_index, validate_target_project_root, write_json
+
+PATH_RE = re.compile(r"[A-Za-z0-9_./{}*-]+\\.(?:java|kt|go|py|ts|tsx|js|jsx|vue|xml|sql|yaml|yml|json|md)$")
+REQ_RE = re.compile(r"\\bREQ[-_]?\\d+\\b", re.IGNORECASE)
+
+def esc(value) -> str:
+    return html.escape("" if value is None else str(value))
+
+def unique(items):
+    result = []
+    for item in items:
+        if item and item not in result:
+            result.append(item)
+    return result
+
+def existing_json(root: Path, *candidates: str) -> dict:
+    for item in candidates:
+        path = root / item
+        if path.exists():
+            return read_json(path, {})
+    return {}
+
+def existing_text(root: Path, *candidates: str) -> tuple[str, str]:
+    for item in candidates:
+        path = root / item
+        if path.exists():
+            return item, path.read_text(encoding="utf-8")
+    return "", ""
+
+def mapping_from_text(text: str) -> dict:
+    result = {"requirement_refs": [], "design_refs": [], "changed_files": [], "tests": []}
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        result["requirement_refs"].extend(REQ_RE.findall(line))
+        for token in re.split(r"[,，\\s]+", line):
+            token = token.strip().strip("`'\\\"[](){}，,.;；:")
+            if PATH_RE.search(token):
+                if re.search(r"test|spec|自测|测试", token, re.IGNORECASE):
+                    result["tests"].append(token)
+                else:
+                    result["changed_files"].append(token)
+        if any(word in line.lower() for word in ["design", "详细设计", "概要设计", "section", "章节"]):
+            result["design_refs"].append(line[:240])
+    return {key: unique(value) for key, value in result.items()}
+
+def rows_from_contracts(design: dict, implementation: dict, quality: dict, changed_report: dict, validation: dict, mapping: dict) -> list[dict]:
+    seeds = design.get("acceptance_criteria") or design.get("goals") or ["Implement the approved design without expanding scope."]
+    changed_files = changed_report.get("changed_files") or mapping.get("changed_files") or []
+    validation_status = validation.get("status") or "pending_validation"
+    validation_findings = validation.get("findings") or []
+    rows = []
+    explicit_req_ids = mapping.get("requirement_refs") or []
+    for index, item in enumerate(seeds[:40], start=1):
+        req_id = explicit_req_ids[index - 1] if index <= len(explicit_req_ids) else f"REQ-{index:03d}"
+        row_files = changed_files
+        gaps = []
+        if not row_files:
+            gaps.append("尚未登记 changed-files-report.json 或 design-to-code-mapping.yaml")
+        if not mapping.get("requirement_refs"):
+            gaps.append("design-to-code-mapping.yaml 未提供逐需求稳定编号映射")
+        if validation_status != "pass":
+            gaps.append("design-to-code-validation.json 未通过或尚未生成")
+        rows.append({
+            "requirement_id": req_id,
+            "requirement": item,
+            "design_refs": unique([design.get("source_design", "")] + mapping.get("design_refs", [])),
+            "implementation_targets": implementation.get("allowed_modules", []),
+            "changed_files": row_files,
+            "tests": unique((implementation.get("required_tests") or []) + mapping.get("tests", [])),
+            "validation_status": validation_status,
+            "validation_findings": validation_findings,
+            "evidence": {
+                "design_contract": "artifacts/_control/design-contract.json",
+                "implementation_contract": "artifacts/_control/implementation-contract.json",
+                "quality_contract": "artifacts/_control/quality-contract.json",
+                "changed_files_report": "artifacts/_control/changed-files-report.json",
+                "design_to_code_validation": "artifacts/_control/design-to-code-validation.json",
+                "design_to_code_mapping": "artifacts/code-development/design-to-code-mapping.yaml",
+            },
+            "gaps": unique(gaps),
+        })
+    return rows
+
+def render_html(matrix: dict) -> str:
+    rows = matrix.get("rows", [])
+    summary = matrix.get("summary", {})
+    table = []
+    for row in rows:
+        design = "<br>".join(esc(item) for item in row.get("design_refs", [])) or '<span class="muted">未登记</span>'
+        targets = "<br>".join(esc(item) for item in row.get("implementation_targets", [])) or '<span class="muted">未登记</span>'
+        files = "<br>".join(esc(item) for item in row.get("changed_files", [])) or '<span class="muted">待实现</span>'
+        tests = "<br>".join(esc(item) for item in row.get("tests", [])) or '<span class="muted">待确认</span>'
+        gaps = "<br>".join(esc(item) for item in row.get("gaps", [])) or '<span class="ok">无</span>'
+        table.append(
+            "<tr>"
+            f"<td><strong>{esc(row.get('requirement_id'))}</strong><div class='sub'>{esc(row.get('requirement'))}</div></td>"
+            f"<td>{design}</td><td>{targets}</td><td>{files}</td><td>{tests}</td>"
+            f"<td><span class='pill'>{esc(row.get('validation_status'))}</span><div class='gap'>{gaps}</div></td>"
+            "</tr>"
+        )
+    evidence_items = matrix.get("evidence_files", [])
+    evidence = "".join(f"<li>{esc(item)}</li>" for item in evidence_items)
+    return "\\n".join([
+        "<!doctype html>",
+        '<html lang="zh-CN" data-human-readable-report="traceability">',
+        "<head>",
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>需求-设计-代码追踪报告</title>",
+        "<style>",
+        'body{margin:0;background:#f4f6fa;color:#18212f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}',
+        "header{background:#111827;color:#fff;padding:30px 36px}",
+        "main{padding:24px 36px 60px}",
+        "section{background:#fff;border:1px solid #d8e1ee;border-radius:8px;margin-bottom:18px;padding:18px}",
+        "h1,h2{margin:0 0 12px}.notice{color:#c7d2fe}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}",
+        ".metric{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px}.metric strong{display:block;font-size:26px;margin-top:4px}",
+        "table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e5eaf0;padding:9px;text-align:left;vertical-align:top}th{background:#f1f5f9}",
+        ".sub,.muted{color:#64748b;margin-top:4px}.pill{display:inline-block;border-radius:999px;padding:3px 8px;background:#e0f2fe;color:#075985}.gap{margin-top:6px;color:#9a3412}.ok{color:#166534}",
+        "</style>",
+        "</head>",
+        "<body>",
+        "<header>",
+        "<h1>需求-设计-代码追踪报告</h1>",
+        f"<div>task_id: <strong>{esc(matrix.get('task_id'))}</strong> · status: <strong>{esc(matrix.get('status'))}</strong></div>",
+        '<div class="notice">人工阅览入口。机读事实源是 artifacts/_control/traceability-matrix.json；agent 不得反向读取本 HTML 作为事实输入。</div>',
+        "</header>",
+        "<main>",
+        '<section class="metrics">',
+        f'<div class="metric">需求条目<strong>{esc(summary.get("requirements", len(rows)))}</strong></div>',
+        f'<div class="metric">已映射代码<strong>{esc(summary.get("rows_with_code", 0))}</strong></div>',
+        f'<div class="metric">存在缺口<strong>{esc(summary.get("gap_rows", 0))}</strong></div>',
+        "</section>",
+        "<section><h2>追踪矩阵</h2><table><thead><tr><th>需求</th><th>设计依据</th><th>实现目标</th><th>代码文件</th><th>测试/验证</th><th>状态与缺口</th></tr></thead><tbody>",
+        "".join(table) or '<tr><td colspan="6" class="muted">暂无追踪条目</td></tr>',
+        "</tbody></table></section>",
+        f"<section><h2>证据文件</h2><ul>{evidence}</ul></section>",
+        "</main></body></html>",
+    ])
+
+def main():
+    parser = argparse.ArgumentParser(description="Build machine-readable traceability matrix and rich human-readable HTML report.")
+    parser.add_argument("--root", required=True)
+    parser.add_argument("--output", default="artifacts/_control/traceability-matrix.json")
+    parser.add_argument("--html-output", default="docs/human-readable/traceability-report.html")
+    args = parser.parse_args()
+    root = validate_target_project_root(Path(args.root))
+    control = ensure_control_dir(root)
+    design = read_json(control / "design-contract.json", {})
+    implementation = read_json(control / "implementation-contract.json", {})
+    quality = read_json(control / "quality-contract.json", {})
+    changed_report = existing_json(root, "artifacts/_control/changed-files-report.json", "artifacts/code-development/changed-files-report.json")
+    validation = existing_json(root, "artifacts/_control/design-to-code-validation.json")
+    mapping_path, mapping_text = existing_text(root, "artifacts/code-development/design-to-code-mapping.yaml", "artifacts/_control/design-to-code-mapping.yaml")
+    mapping = mapping_from_text(mapping_text)
+    rows = rows_from_contracts(design, implementation, quality, changed_report, validation, mapping)
+    matrix = {
+        "task_id": design.get("task_id") or implementation.get("task_id"),
+        "status": "pass" if rows and all(not row.get("gaps") for row in rows) else "needs_attention",
+        "source_of_truth": args.output,
+        "human_readable_report": args.html_output,
+        "html_policy": "HTML is human-only and cannot be consumed as agent source evidence",
+        "mapping_source": mapping_path,
+        "summary": {"requirements": len(rows), "rows_with_code": sum(1 for row in rows if row.get("changed_files")), "gap_rows": sum(1 for row in rows if row.get("gaps"))},
+        "rows": rows,
+        "evidence_files": unique(["artifacts/_control/design-contract.json", "artifacts/_control/implementation-contract.json", "artifacts/_control/quality-contract.json", mapping_path, "artifacts/_control/changed-files-report.json", "artifacts/_control/design-to-code-validation.json"]),
+        "generated_at": now_iso(),
+    }
+    matrix_path = root / args.output
+    html_path = root / args.html_output
+    write_json(matrix_path, matrix)
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(render_html(matrix), encoding="utf-8")
+    update_artifact_index(root, matrix_path.name, matrix_path, "json", "build_traceability_report")
+    update_artifact_index(root, html_path.name, html_path, "html", "build_traceability_report")
+    print(json.dumps({"matrix": str(matrix_path), "html": str(html_path), "status": matrix["status"]}, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()
@@ -4760,6 +5069,7 @@ def main():
         ("collect_changed_files", [py, str(here / "collect_changed_files.py"), "--root", str(root)]),
         ("validate_control_plane_readonly", [py, str(here / "validate_control_plane_readonly.py"), "--root", str(root), "--changed-files-report", args.changed_files_report]),
         ("validate_design_to_code", [py, str(here / "validate_design_to_code.py"), "--root", str(root), "--allow-major"]),
+        ("build_traceability_report", [py, str(here / "build_traceability_report.py"), "--root", str(root)]),
         ("validate_technology_adoption", [py, str(here / "validate_technology_adoption.py"), "--root", str(root)]),
         ("validate_spring_boot_quality", [py, str(here / "validate_spring_boot_quality.py"), "--root", str(root)]),
         ("run_quality_commands", [py, str(here / "run_quality_commands.py"), "--root", str(root)]),
@@ -4795,6 +5105,7 @@ required = [
     "engineering-assistant/scripts/validate_contract_control.py",
     "engineering-assistant/scripts/validate_control_plane_readonly.py",
     "engineering-assistant/scripts/validate_design_to_code.py",
+    "engineering-assistant/scripts/build_traceability_report.py",
     "engineering-assistant/scripts/run_quality_commands.py",
     "engineering-assistant/scripts/validate_control_health.py",
     "engineering-assistant/scripts/validate_technology_adoption.py",

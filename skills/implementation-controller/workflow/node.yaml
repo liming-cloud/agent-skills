@@ -27,6 +27,8 @@
     "control-health-report.json",
     "technology-adoption-report.json",
     "rule-consumption-report.json",
+    "traceability-matrix.json",
+    "traceability-report.html",
     "repair-attempts.json"
   ],
   "preconditions": [
@@ -41,6 +43,7 @@
     "设计合同已编译",
     "实现范围明确",
     "质量命令非空",
+    "需求-设计-代码追踪关系可查看",
     "修复策略明确",
     "人工审阅包仅在阻断或最终审阅时生成"
   ],
@@ -87,6 +90,8 @@
     "control-health-report.json": "artifacts/implementation-controller/control-health-report.json",
     "technology-adoption-report.json": "artifacts/implementation-controller/technology-adoption-report.json",
     "rule-consumption-report.json": "artifacts/implementation-controller/rule-consumption-report.json",
+    "traceability-matrix.json": "artifacts/implementation-controller/traceability-matrix.json",
+    "traceability-report.html": "artifacts/implementation-controller/traceability-report.html",
     "repair-attempts.json": "artifacts/implementation-controller/repair-attempts.json"
   }
 }
