@@ -86,6 +86,47 @@ class ControlledProductPipelineGuardTests(unittest.TestCase):
         self.assertEqual("block", report["status"])
         self.assertEqual("major", report["findings"][0]["severity"])
 
+    def test_traceability_report_builds_structured_html_for_humans(self) -> None:
+        root = self.make_control_root()
+        control = root / "artifacts" / "_control"
+        write_json(
+            control / "design-contract.json",
+            {
+                "task_id": "aip",
+                "source_design": "artifacts/detailed-design/aip/detailed-design.md",
+                "goals": ["登录用户可以查询导出任务状态"],
+                "acceptance_criteria": ["REQ-001 查询导出任务状态必须返回当前处理进度"],
+            },
+        )
+        write_json(
+            control / "implementation-contract.json",
+            {
+                "task_id": "aip",
+                "allowed_modules": ["backend/contexts/export"],
+                "required_tests": ["ExportTaskServiceTest"],
+            },
+        )
+        write_json(control / "quality-contract.json", {"required_evidence": ["traceability_matrix"]})
+        write_json(control / "changed-files-report.json", {"changed_files": ["backend/contexts/export/ExportTaskService.java"]})
+        write_json(control / "design-to-code-validation.json", {"status": "pass", "findings": []})
+        mapping = root / "artifacts" / "code-development" / "design-to-code-mapping.yaml"
+        mapping.parent.mkdir(parents=True)
+        mapping.write_text(
+            "- requirement: REQ-001\n  design: detailed-design.md#查询导出任务状态\n  code: backend/contexts/export/ExportTaskService.java\n  test: backend/contexts/export/ExportTaskServiceTest.java\n",
+            encoding="utf-8",
+        )
+
+        result = run_script("build_traceability_report.py", "--root", str(root))
+
+        self.assertEqual(0, result.returncode, result.stderr + result.stdout)
+        matrix = json.loads((control / "traceability-matrix.json").read_text(encoding="utf-8"))
+        html = (root / "docs" / "human-readable" / "traceability-report.html").read_text(encoding="utf-8")
+        self.assertEqual("pass", matrix["rows"][0]["validation_status"])
+        self.assertIn("backend/contexts/export/ExportTaskService.java", html)
+        self.assertIn('data-human-readable-report="traceability"', html)
+        self.assertIn("追踪矩阵", html)
+        self.assertNotIn("# 需求-设计-代码追踪报告", html)
+
     def test_quality_runner_blocks_missing_required_commands(self) -> None:
         root = self.make_control_root()
         control = root / "artifacts" / "_control"

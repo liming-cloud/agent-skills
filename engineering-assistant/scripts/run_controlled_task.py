@@ -45,6 +45,7 @@ def main():
         ("collect_changed_files", [py, str(here / "collect_changed_files.py"), "--root", str(root)]),
         ("validate_control_plane_readonly", [py, str(here / "validate_control_plane_readonly.py"), "--root", str(root), "--changed-files-report", args.changed_files_report]),
         ("validate_design_to_code", [py, str(here / "validate_design_to_code.py"), "--root", str(root), "--allow-major"]),
+        ("build_traceability_report", [py, str(here / "build_traceability_report.py"), "--root", str(root)]),
         ("validate_technology_adoption", [py, str(here / "validate_technology_adoption.py"), "--root", str(root)]),
         ("validate_spring_boot_quality", [py, str(here / "validate_spring_boot_quality.py"), "--root", str(root)]),
         ("run_quality_commands", [py, str(here / "run_quality_commands.py"), "--root", str(root)]),

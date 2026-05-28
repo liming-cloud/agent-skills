@@ -83,7 +83,7 @@ description: Use when the request is about 建立 Q0-Q4 多层代码质量门禁
 - 执行前必须读取目标项目 `artifacts/_control/task-context.agent.md`、`implementation-contract.json`、`quality-contract.json` 和 `artifacts/rule-governance/task-rule-packs/<task>.json`。
 - 不得依赖聊天上下文记忆替代机读控制面；规则、技术栈、质量命令和停止条件必须来自控制产物。
 - 进入实现、自测、质量治理或代码评审前必须先运行 `validate_control_health.py`；控制面缺失、规则包缺失或 blocking open question 必须阻断。
-- 涉及代码变更后必须运行 `validate_technology_adoption.py`、`validate_design_to_code.py` 和 `validate_rule_consumption.py`。
+- 涉及代码变更后必须运行 `validate_technology_adoption.py`、`validate_design_to_code.py`、`build_traceability_report.py` 和 `validate_rule_consumption.py`。
 
 
 # 操作流程

@@ -46,6 +46,7 @@
       "设计合同已编译",
       "实现范围明确",
       "质量命令非空",
+      "需求-设计-代码追踪关系可查看",
       "修复策略明确",
       "人工审阅包仅在阻断或最终审阅时生成"
     ],
@@ -218,6 +219,20 @@
       "consumer": "workflow-orchestrator|downstream-stage|human-review"
     },
     {
+      "name": "traceability-matrix.json",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/implementation-controller/traceability-matrix.json",
+      "schema": "output.schema.json#traceability-matrix.json",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
+      "name": "traceability-report.html",
+      "type": "markdown|json|yaml|code|log|report",
+      "path": "artifacts/implementation-controller/traceability-report.html",
+      "schema": "output.schema.json#traceability-report.html",
+      "consumer": "workflow-orchestrator|downstream-stage|human-review"
+    },
+    {
       "name": "repair-attempts.json",
       "type": "markdown|json|yaml|code|log|report",
       "path": "artifacts/implementation-controller/repair-attempts.json",
@@ -342,13 +357,20 @@
     },
     {
       "gate_id": "implementation-controller-gate-4",
+      "name": "需求-设计-代码追踪关系可查看",
+      "type": "deterministic",
+      "pass_condition": "需求-设计-代码追踪关系可查看 有证据证明已满足",
+      "fail_action": "block 或 require_human_review"
+    },
+    {
+      "gate_id": "implementation-controller-gate-5",
       "name": "修复策略明确",
       "type": "deterministic",
       "pass_condition": "修复策略明确 有证据证明已满足",
       "fail_action": "block 或 require_human_review"
     },
     {
-      "gate_id": "implementation-controller-gate-5",
+      "gate_id": "implementation-controller-gate-6",
       "name": "人工审阅包仅在阻断或最终审阅时生成",
       "type": "deterministic",
       "pass_condition": "人工审阅包仅在阻断或最终审阅时生成 有证据证明已满足",
@@ -424,6 +446,8 @@
       "control-health-report.json",
       "technology-adoption-report.json",
       "rule-consumption-report.json",
+      "traceability-matrix.json",
+      "traceability-report.html",
       "repair-attempts.json"
     ],
     "document_metadata": {
@@ -469,6 +493,22 @@
     "测试负责人"
   ],
   "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "rich_html_report_policy": {
+    "required": true,
+    "outputs": [
+      "traceability-report.html"
+    ],
+    "script": "engineering-assistant/scripts/build_traceability_report.py",
+    "sections": [
+      "task summary",
+      "requirement to design to code traceability matrix",
+      "validation status",
+      "gap and blocker summary",
+      "source evidence files"
+    ],
+    "traceability": "each row links requirement id, design refs, implementation targets, changed files, tests and validation status",
+    "html_policy": "HTML is human-only; artifacts/_control/traceability-matrix.json remains the agent source of truth"
+  },
   "control_surface_policy": {
     "required": true,
     "control_dir": "artifacts/_control",
@@ -485,6 +525,8 @@
       "control-health-report.json",
       "technology-adoption-report.json",
       "rule-consumption-report.json",
+      "traceability-matrix.json",
+      "traceability-report.html",
       "repair-attempts.json"
     ],
     "bounded_repair": {

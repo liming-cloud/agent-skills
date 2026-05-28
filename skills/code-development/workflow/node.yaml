@@ -20,7 +20,8 @@
     "code changes",
     "implementation-summary.md",
     "design-to-code-mapping.yaml",
-    "changed-files-report.json"
+    "changed-files-report.json",
+    "traceability-matrix.json"
   ],
   "preconditions": [
     "contract 输入可用",
@@ -34,7 +35,8 @@
     "每个变更映射到设计",
     "无无关模块修改",
     "高风险文件已标记",
-    "测试命令已列出"
+    "测试命令已列出",
+    "需求-设计-代码追踪矩阵已刷新"
   ],
   "approval_policy": {
     "required_for": [
@@ -71,6 +73,7 @@
     "code changes": "artifacts/code-development/code changes",
     "implementation-summary.md": "artifacts/code-development/implementation-summary.md",
     "design-to-code-mapping.yaml": "artifacts/code-development/design-to-code-mapping.yaml",
-    "changed-files-report.json": "artifacts/code-development/changed-files-report.json"
+    "changed-files-report.json": "artifacts/code-development/changed-files-report.json",
+    "traceability-matrix.json": "artifacts/code-development/traceability-matrix.json"
   }
 }
