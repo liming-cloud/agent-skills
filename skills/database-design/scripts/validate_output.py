@@ -7,28 +7,68 @@ from pathlib import Path
 SKILL_ID = "database-design"
 POLICY = {
   "oltp_sections": [
-    "文档信息",
-    "变更记录",
-    "术语定义",
-    "参考文档",
-    "文档定位",
-    "设计对象类型",
-    "业务语义与生命周期",
-    "状态机",
-    "物理结构设计",
-    "字段定义",
-    "敏感级别",
-    "索引设计",
-    "约束与数据库对象",
-    "字段可变性矩阵",
-    "数据量与性能设计",
-    "CRUD 契约设计",
-    "强制前置条件",
-    "禁止操作清单",
-    "批量操作与数据修复规则",
-    "事务、一致性与并发控制",
-    "安全与审计设计",
-    "人工审批点"
+    "1. 文档信息",
+    "1.1 变更记录",
+    "1.2 术语定义",
+    "1.3 参考文档",
+    "2. 文档定位",
+    "2.1 编写目的",
+    "2.2 设计对象类型",
+    "2.3 与其他文档的关系",
+    "2.4 强耦合表组说明",
+    "3. 业务语义与生命周期",
+    "3.1 表的业务职责",
+    "3.2 核心业务场景",
+    "3.3 数据生命周期阶段",
+    "3.4 状态机",
+    "4. 物理结构设计",
+    "4.1 建表级环境与约定",
+    "4.2 字段定义",
+    "4.3 索引设计",
+    "4.4 约束与数据库对象",
+    "4.5 字段可变性矩阵",
+    "4.6 技术实现依赖",
+    "5. 数据量与性能设计",
+    "5.1 数据量估算",
+    "5.2 读写 QPS 与延迟 SLA",
+    "5.3 热点与数据倾斜分析",
+    "5.4 容量规划",
+    "5.5 性能保障措施",
+    "6. CRUD 契约设计",
+    "6.1 CRUD 总览矩阵",
+    "6.2 强制前置条件",
+    "6.3 禁止操作清单",
+    "6.4 Create",
+    "6.5 Read",
+    "6.6 Update",
+    "6.7 Delete",
+    "6.8 幂等键与重复请求",
+    "6.9 批量操作与数据修复规则",
+    "7. 事务、一致性与并发控制",
+    "7.1 本地事务边界",
+    "7.2 跨表一致性",
+    "7.3 并发控制",
+    "7.4 数据质量校验",
+    "7.5 隔离级别、死锁与重试约定",
+    "7.6 跨表最终一致",
+    "8. 分区、分片与归档设计",
+    "8.1 路由与分片规则",
+    "8.2 分区策略",
+    "8.3 查询策略",
+    "8.4 归档与保留",
+    "8.5 冷热分离与只读副本",
+    "9. 安全与审计设计",
+    "9.1 敏感字段清单",
+    "9.2 脱敏与掩码规则",
+    "9.3 访问控制",
+    "9.4 审计要求",
+    "10. 测试与验收",
+    "10.1 验收检查表",
+    "10.2 测试用例类型",
+    "10.3 样例 SQL",
+    "11. 附录",
+    "11.1 DDL SQL",
+    "11.2 兼容性说明"
   ],
   "olap_sections": [
     "数据分层",
@@ -40,6 +80,79 @@ POLICY = {
     "物化视图关系",
     "刷新策略",
     "上下游影响"
+  ],
+  "oltp_table_headers": [
+    "| 项目 | 内容 |",
+    "| 版本 | 日期 | 变更原因/依据 | 变更摘要 | 变更人 | 评审/批准 |",
+    "| 术语 | 说明 |",
+    "| 文档名 | 关联类型 | 参考说明 |",
+    "| 成员表 | 角色 | 与主表关系 | 同事务要求 | 备注 |",
+    "| 场景 ID | 场景名称 | 触发入口 | 主要 SQL 形态 | 优先级 | 频率/峰值 |",
+    "| 阶段 | 进入条件 | 允许的操作类型 | 对外可见性 | 数据留存策略 |",
+    "| 当前状态",
+    "| 字段名 | 中文名 | 类型 | 必填 | 默认值 | 敏感级别 | 说明 |",
+    "| 索引名 | 类型 | 字段",
+    "| 类别 | 规则 | 实现方式 | 备注 |",
+    "| 字段 | 创建时赋值 | 运行中可改 | 结束态可改 | 修改主体 | 约束/备注 |",
+    "| 依赖项 | 版本/规格 | 本文档是否依赖 | 说明 |",
+    "| 维度 | 估算值 | 说明 |",
+    "| 场景 ID | 场景名称 | 操作类型 | QPS/TPS 目标 | P99 延迟目标 | 优先级 | 说明 |",
+    "| 热点类型 | 表现 | 发生条件 | 缓解措施 |",
+    "| 资源 | 估算方法 | 目标值 | 说明 |",
+    "| 措施 | 适用场景 | 实施状态 | 说明 |",
+    "| 操作 | 典型入口 | 定位键/幂等键 | 必备前置条件 | 允许字段/投影 | 明确禁止 | 并发控制 | 审计 |",
+    "| 操作 | 编号 | 强制条件",
+    "| 编号 | 禁止行为 | 适用范围 | 例外",
+    "| 规则项 | 要求 |",
+    "| 查询类型 | 必带条件 | 推荐索引 | 主库/只读 | 备注 |",
+    "| 场景 | 前置条件 | 允许 SET 字段 | 禁止 SET 字段 | 并发 |",
+    "| 操作 | 策略 | 前置条件 | 审批 |",
+    "| 层级 | 机制 | 说明 |",
+    "| 类型 | 允许条件 | 事务与批次 | 记录要求 |",
+    "| 场景 ID | 参与表/对象 | 一致性要求 | 提交/回滚 |",
+    "| 关系 | 策略 | 补偿/核对 |",
+    "| 场景 | 策略 | 说明 |",
+    "| 校验项 | 规则 | 频率 | 失败处理 |",
+    "| 主题 | 约定 |",
+    "| 步骤 | 动作 | 失败补偿 |",
+    "| 分片键 |",
+    "| 维度 | MySQL | PostgreSQL |",
+    "| 场景 | 是否带路由/分区键 | 预期计划 | 禁止 |",
+    "| 阶段 | 条件 | 目标存储 | 在线库策略 |",
+    "| 数据类别 | 放置 | 查询入口 | 说明 |",
+    "| 字段 | 级别 | 存储 | 应用展示 | 导出 |",
+    "| 场景 | 规则 | 示例 |",
+    "| 角色 | 读 | 写 | 说明 |",
+    "| 事件 | 记录内容 | 保留期 |",
+    "| 检查项 | 结果 | 备注 |",
+    "| 类型 | 目的 | 示例 |",
+    "| 主题 | 注意点 |"
+  ],
+  "oltp_fact_fields": [
+    "文档名称",
+    "逻辑库/Schema",
+    "物理库标识",
+    "所属集群/实例",
+    "设计对象",
+    "数据库产品",
+    "数据库版本",
+    "编写日期",
+    "编写人",
+    "业务负责人",
+    "DBA 负责人",
+    "安全/合规接口人"
+  ],
+  "unresolved_markers": [
+    "{",
+    "}",
+    "待补充",
+    "待确认",
+    "未知",
+    "未确认",
+    "TBD",
+    "TODO",
+    "<填写",
+    "请替换"
   ]
 }
 
@@ -92,42 +205,7 @@ def fail(errors):
     print("ok")
 
 
-def validate_detailed(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "detailed-design.md")
-    if not text:
-        return ["缺少 detailed-design.md artifact 或文件不可读"]
-    normalized_headings = [re.sub(r"\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
-    for forbidden in POLICY["forbidden_headings"]:
-        if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):
-            errors.append("detailed-design.md 包含禁止标题: " + forbidden)
-    if "sequenceDiagram" in text:
-        errors.append("detailed-design.md 不得包含 sequenceDiagram")
-    if "flowchart" not in text:
-        errors.append("detailed-design.md 必须包含 flowchart")
-    flow_blocks = list(re.finditer(r"```mermaid\s*\n\s*flowchart[\s\S]*?```", text))
-    for index, block in enumerate(flow_blocks, start=1):
-        tail = text[block.end(): block.end() + 700]
-        if "流程设计说明" not in tail:
-            errors.append(f"第 {index} 个 flowchart 后缺少流程设计说明")
-            continue
-        for field in POLICY["flow_note_fields"]:
-            if field not in tail:
-                errors.append(f"第 {index} 个 flowchart 的流程设计说明缺少 {field}")
-    if any(term in text for term in POLICY["ddd_terms"]) and "classDiagram" not in text:
-        errors.append("出现 DDD/分层/扩展点关键词时必须包含 classDiagram")
-    artifacts = artifact_map(payload)
-    for doc_name in POLICY["specialty_docs"]:
-        if doc_name not in artifacts:
-            errors.append("StageRunResult.artifacts 未登记专项文档: " + doc_name)
-    status = payload.get("status")
-    high_risk_terms = ["DDL", "CREATE TABLE", "ALTER TABLE", "新队列", "新 topic", "新Topic", "Redis 新 Key", "新增 Key"]
-    if status == "succeeded" and any(term in text for term in high_risk_terms):
-        errors.append("存在 DDL、MQ 新队列/topic 或 Redis 新 Key 时状态必须为 waiting_for_human_review")
-    return errors
-
-
-def validate_database(payload_path, payload):
+def validate_output(payload_path, payload):
     errors = []
     text = read_artifact(payload_path, payload, "database-design.md")
     if not text:
@@ -136,9 +214,31 @@ def validate_database(payload_path, payload):
     for section in sections:
         if section not in text:
             errors.append("database-design.md 缺少模板章节或字段: " + section)
+    if sections == POLICY.get("oltp_sections"):
+        section_positions = []
+        for section in POLICY["oltp_sections"]:
+            index = text.find(section)
+            if index >= 0:
+                section_positions.append(index)
+        if section_positions != sorted(section_positions):
+            errors.append("database-design.md OLTP 章节顺序必须与模板一致")
+        for header in POLICY["oltp_table_headers"]:
+            if header not in text:
+                errors.append("database-design.md 缺少 OLTP 模板表格列头: " + header)
+        for field in POLICY["oltp_fact_fields"]:
+            if field not in text:
+                errors.append("database-design.md 文档信息缺少必填事实字段: " + field)
+        for required_text in ["MC-", "PO-", "QPS", "P99", "DDL SQL", "兼容性说明", "敏感级别", "幂等"]:
+            if required_text not in text:
+                errors.append("database-design.md 缺少 OLTP 强制内容: " + required_text)
     for match in re.finditer(r"(?is)\b(update|delete)\b([^;]{0,300});", text):
         if "where" not in match.group(2).lower():
             errors.append("禁止没有 WHERE 的 UPDATE/DELETE")
+    unresolved = [marker for marker in POLICY.get("unresolved_markers", []) if marker in text]
+    if unresolved and payload.get("status") not in {"waiting_for_input", "waiting_for_human_review", "blocked"}:
+        errors.append("存在未确认信息时必须 waiting_for_input，禁止推测或以占位符输出 succeeded: " + ", ".join(sorted(set(unresolved))))
+    if payload.get("status") == "waiting_for_input" and not payload.get("required_information_requests"):
+        errors.append("waiting_for_input 必须输出 required_information_requests 主动询问用户")
     final_status = payload.get("document_metadata", {}).get("document_status")
     if final_status in {"approved", "final"}:
         for required in ["库名", "实例", "字符集", "索引名"]:
@@ -149,58 +249,6 @@ def validate_database(payload_path, payload):
     return errors
 
 
-def validate_redis(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "redis-design.md")
-    if not text:
-        return ["缺少 redis-design.md artifact 或文件不可读"]
-    for section in POLICY["required_sections"] + POLICY["item_fields"]:
-        if section not in text:
-            errors.append("redis-design.md 缺少模板章节或字段: " + section)
-    if re.search(r"Redis\s*(作为|做|充当).{0,12}事实库", text):
-        errors.append("Redis 不得作为事实库")
-    if re.search(r"Redis\s*(作为|做|充当).{0,12}消息队列", text):
-        errors.append("Redis 不得作为消息队列")
-    if not re.search(r"TTL[^\n]*(秒|分钟|小时|天|ms|s|min|hour|day)", text, re.IGNORECASE):
-        errors.append("TTL 必须带单位")
-    if "降级" not in text:
-        errors.append("Redis 不可用必须有降级策略")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["版本待确认", "拓扑待确认", "持久化待确认", "淘汰策略待确认"]):
-        errors.append("Redis 版本、拓扑、持久化或淘汰策略无法确认时不得 succeeded")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["Redis 新 Key", "新增 Key", "新 Key"]):
-        errors.append("Redis 新 Key 必须 waiting_for_human_review")
-    return errors
-
-
-def validate_mq(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "mq-design.md")
-    if not text:
-        return ["缺少 mq-design.md artifact 或文件不可读"]
-    for field in POLICY["producer_fields"]:
-        if field not in text:
-            errors.append("mq-design.md 生产者表缺少字段: " + field)
-    for field in POLICY["consumer_fields"]:
-        if field not in text:
-            errors.append("mq-design.md 消费者表缺少字段: " + field)
-    if "死信" not in text:
-        errors.append("MQ 必须设计死信队列")
-    if "幂等" not in text:
-        errors.append("MQ 必须定义幂等策略")
-    for size in re.findall(r"(\d+)\s*KB", text, re.IGNORECASE):
-        if int(size) > 10 and payload.get("status") == "succeeded":
-            errors.append("消息体超过 10KB 必须 waiting_for_human_review")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["回放生产消息", "删除队列", "重命名队列", "删除 topic", "重命名 topic", "删除Topic", "重命名Topic"]):
-        errors.append("生产消息回放或删除/重命名 topic/queue 必须 waiting_for_human_review")
-    return errors
-
-
 payload_path = Path(sys.argv[1])
 payload = load_payload(payload_path)
-validators = {
-    "detailed-design": validate_detailed,
-    "database-design": validate_database,
-    "redis-design": validate_redis,
-    "mq-design": validate_mq,
-}
-fail(validators[SKILL_ID](payload_path, payload))
+fail(validate_output(payload_path, payload))

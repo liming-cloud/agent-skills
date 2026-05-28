@@ -94,28 +94,144 @@ DETAILED_DESIGN_SPECIALTY_DOCS = {
 }
 
 DB_OLTP_REQUIRED_SECTIONS = [
-    "文档信息",
-    "变更记录",
-    "术语定义",
-    "参考文档",
-    "文档定位",
-    "设计对象类型",
-    "业务语义与生命周期",
-    "状态机",
-    "物理结构设计",
-    "字段定义",
-    "敏感级别",
-    "索引设计",
-    "约束与数据库对象",
-    "字段可变性矩阵",
-    "数据量与性能设计",
-    "CRUD 契约设计",
-    "强制前置条件",
-    "禁止操作清单",
-    "批量操作与数据修复规则",
-    "事务、一致性与并发控制",
-    "安全与审计设计",
-    "人工审批点",
+    "1. 文档信息",
+    "1.1 变更记录",
+    "1.2 术语定义",
+    "1.3 参考文档",
+    "2. 文档定位",
+    "2.1 编写目的",
+    "2.2 设计对象类型",
+    "2.3 与其他文档的关系",
+    "2.4 强耦合表组说明",
+    "3. 业务语义与生命周期",
+    "3.1 表的业务职责",
+    "3.2 核心业务场景",
+    "3.3 数据生命周期阶段",
+    "3.4 状态机",
+    "4. 物理结构设计",
+    "4.1 建表级环境与约定",
+    "4.2 字段定义",
+    "4.3 索引设计",
+    "4.4 约束与数据库对象",
+    "4.5 字段可变性矩阵",
+    "4.6 技术实现依赖",
+    "5. 数据量与性能设计",
+    "5.1 数据量估算",
+    "5.2 读写 QPS 与延迟 SLA",
+    "5.3 热点与数据倾斜分析",
+    "5.4 容量规划",
+    "5.5 性能保障措施",
+    "6. CRUD 契约设计",
+    "6.1 CRUD 总览矩阵",
+    "6.2 强制前置条件",
+    "6.3 禁止操作清单",
+    "6.4 Create",
+    "6.5 Read",
+    "6.6 Update",
+    "6.7 Delete",
+    "6.8 幂等键与重复请求",
+    "6.9 批量操作与数据修复规则",
+    "7. 事务、一致性与并发控制",
+    "7.1 本地事务边界",
+    "7.2 跨表一致性",
+    "7.3 并发控制",
+    "7.4 数据质量校验",
+    "7.5 隔离级别、死锁与重试约定",
+    "7.6 跨表最终一致",
+    "8. 分区、分片与归档设计",
+    "8.1 路由与分片规则",
+    "8.2 分区策略",
+    "8.3 查询策略",
+    "8.4 归档与保留",
+    "8.5 冷热分离与只读副本",
+    "9. 安全与审计设计",
+    "9.1 敏感字段清单",
+    "9.2 脱敏与掩码规则",
+    "9.3 访问控制",
+    "9.4 审计要求",
+    "10. 测试与验收",
+    "10.1 验收检查表",
+    "10.2 测试用例类型",
+    "10.3 样例 SQL",
+    "11. 附录",
+    "11.1 DDL SQL",
+    "11.2 兼容性说明",
+]
+
+DB_OLTP_REQUIRED_TABLE_HEADERS = [
+    "| 项目 | 内容 |",
+    "| 版本 | 日期 | 变更原因/依据 | 变更摘要 | 变更人 | 评审/批准 |",
+    "| 术语 | 说明 |",
+    "| 文档名 | 关联类型 | 参考说明 |",
+    "| 成员表 | 角色 | 与主表关系 | 同事务要求 | 备注 |",
+    "| 场景 ID | 场景名称 | 触发入口 | 主要 SQL 形态 | 优先级 | 频率/峰值 |",
+    "| 阶段 | 进入条件 | 允许的操作类型 | 对外可见性 | 数据留存策略 |",
+    "| 当前状态",
+    "| 字段名 | 中文名 | 类型 | 必填 | 默认值 | 敏感级别 | 说明 |",
+    "| 索引名 | 类型 | 字段",
+    "| 类别 | 规则 | 实现方式 | 备注 |",
+    "| 字段 | 创建时赋值 | 运行中可改 | 结束态可改 | 修改主体 | 约束/备注 |",
+    "| 依赖项 | 版本/规格 | 本文档是否依赖 | 说明 |",
+    "| 维度 | 估算值 | 说明 |",
+    "| 场景 ID | 场景名称 | 操作类型 | QPS/TPS 目标 | P99 延迟目标 | 优先级 | 说明 |",
+    "| 热点类型 | 表现 | 发生条件 | 缓解措施 |",
+    "| 资源 | 估算方法 | 目标值 | 说明 |",
+    "| 措施 | 适用场景 | 实施状态 | 说明 |",
+    "| 操作 | 典型入口 | 定位键/幂等键 | 必备前置条件 | 允许字段/投影 | 明确禁止 | 并发控制 | 审计 |",
+    "| 操作 | 编号 | 强制条件",
+    "| 编号 | 禁止行为 | 适用范围 | 例外",
+    "| 规则项 | 要求 |",
+    "| 查询类型 | 必带条件 | 推荐索引 | 主库/只读 | 备注 |",
+    "| 场景 | 前置条件 | 允许 SET 字段 | 禁止 SET 字段 | 并发 |",
+    "| 操作 | 策略 | 前置条件 | 审批 |",
+    "| 层级 | 机制 | 说明 |",
+    "| 类型 | 允许条件 | 事务与批次 | 记录要求 |",
+    "| 场景 ID | 参与表/对象 | 一致性要求 | 提交/回滚 |",
+    "| 关系 | 策略 | 补偿/核对 |",
+    "| 场景 | 策略 | 说明 |",
+    "| 校验项 | 规则 | 频率 | 失败处理 |",
+    "| 主题 | 约定 |",
+    "| 步骤 | 动作 | 失败补偿 |",
+    "| 分片键 |",
+    "| 维度 | MySQL | PostgreSQL |",
+    "| 场景 | 是否带路由/分区键 | 预期计划 | 禁止 |",
+    "| 阶段 | 条件 | 目标存储 | 在线库策略 |",
+    "| 数据类别 | 放置 | 查询入口 | 说明 |",
+    "| 字段 | 级别 | 存储 | 应用展示 | 导出 |",
+    "| 场景 | 规则 | 示例 |",
+    "| 角色 | 读 | 写 | 说明 |",
+    "| 事件 | 记录内容 | 保留期 |",
+    "| 检查项 | 结果 | 备注 |",
+    "| 类型 | 目的 | 示例 |",
+    "| 主题 | 注意点 |",
+]
+
+DB_OLTP_REQUIRED_FACT_FIELDS = [
+    "文档名称",
+    "逻辑库/Schema",
+    "物理库标识",
+    "所属集群/实例",
+    "设计对象",
+    "数据库产品",
+    "数据库版本",
+    "编写日期",
+    "编写人",
+    "业务负责人",
+    "DBA 负责人",
+    "安全/合规接口人",
+]
+
+DB_UNRESOLVED_INFO_MARKERS = [
+    "{",
+    "}",
+    "待补充",
+    "待确认",
+    "未知",
+    "未确认",
+    "TBD",
+    "TODO",
+    "<填写",
+    "请替换",
 ]
 
 DB_OLAP_REQUIRED_SECTIONS = [
@@ -928,6 +1044,8 @@ SKILLS = [
             "DB8 ClickHouse、物化视图或分析宽表必须使用 OLAP 模板，覆盖数据分层、字段级血缘、MergeTree 引擎选型、ORDER BY、PARTITION BY、TTL、物化视图关系、刷新策略、上下游影响",
             "DB9 禁止无用途字段和索引，禁止没有 WHERE 的 UPDATE/DELETE，禁止业务代码物理删除在线事实行，除非专项审批",
             "DB10 未确认库名、实例、字符集、索引名时，不得标记为 approved/final",
+            "DB11 关系型 OLTP 输出必须保持 `assets/database-oltp-template.md` 的章节顺序、标题名称和表格列头；不适用章节必须保留并写明不适用原因",
+            "DB12 缺少库名、实例、版本、负责人、字段口径、索引用途、QPS/容量、审批状态、敏感级别等事实时，必须进入 waiting_for_input 并输出 required_information_requests；除非用户明确允许，不得推测",
         ],
     },
     {
@@ -1513,10 +1631,21 @@ def team_document_policy(skill: dict) -> dict:
     if skill["id"] == "database-design":
         return {
             "artifact": "database-design.md",
+            "canonical_oltp_template": "skills/database-design/assets/database-oltp-template.md",
+            "positive_oltp_example": "用户提供的 customer_type_ref database-design.md 用作表达风格参考；结构以 canonical_oltp_template 为准。",
             "template_selection": {"oltp": DB_OLTP_REQUIRED_SECTIONS, "olap": DB_OLAP_REQUIRED_SECTIONS},
+            "oltp_required_table_headers": DB_OLTP_REQUIRED_TABLE_HEADERS,
+            "oltp_required_fact_fields": DB_OLTP_REQUIRED_FACT_FIELDS,
+            "missing_information_policy": {
+                "must_ask_user": True,
+                "forbid_guessing": True,
+                "forbid_unresolved_markers_when_succeeded": DB_UNRESOLVED_INFO_MARKERS,
+                "status_when_missing_facts": "waiting_for_input",
+                "required_output": "required_information_requests",
+            },
             "forbidden": ["无用途字段和索引", "没有 WHERE 的 UPDATE/DELETE", "业务代码物理删除在线事实行", "Redis/MQ/文件系统作为事实数据来源"],
             "waiting_for_human_review_when": ["DDL", "数据订正", "物理删除在线事实行", "删除字段", "删除索引"],
-            "blocked_when": ["未确认库名、实例、字符集、索引名时标记为 approved/final", "缺少模板必填章节", "无审批却包含高风险生产变更"],
+            "blocked_when": ["未确认库名、实例、字符集、索引名时标记为 approved/final", "缺少模板必填章节或表格列头", "无审批却包含高风险生产变更", "缺失事实却直接输出 succeeded"],
         }
     if skill["id"] == "redis-design":
         return {
@@ -1558,7 +1687,10 @@ def team_document_note(skill: dict) -> str:
         return """
 # 团队数据库设计规则
 - 数据库设计必须生成独立 `database-design.md`，不得用主详细设计中的简写字段表替代。
-- OLTP 场景使用 `assets/database-oltp-template.md`；ClickHouse、物化视图或分析宽表使用 `assets/database-olap-template.md`。
+- OLTP 场景必须严格使用 `assets/database-oltp-template.md` 的章节顺序、标题名称和表格列头；不适用章节也必须保留并写明“不适用原因”。
+- ClickHouse、物化视图或分析宽表使用 `assets/database-olap-template.md`。
+- 过程中缺少库名、实例、版本、负责人、字段口径、索引用途、QPS/容量、审批状态、敏感级别等事实时，必须主动输出 `required_information_requests` 询问用户，状态置为 `waiting_for_input`；除非用户明确允许，不得推测。
+- `succeeded`、`approved` 或 `final` 输出不得包含 `{占位符}`、`待补充`、`待确认`、`未知`、`TODO/TBD` 等未决标记。
 - 禁止无用途字段和索引、没有 WHERE 的 UPDATE/DELETE、业务代码物理删除在线事实行，除非专项审批。
 - Redis/MQ/文件系统不得作为事实数据来源。
 - 未确认库名、实例、字符集、索引名时，不得标记为 `approved` 或 `final`。
@@ -1585,6 +1717,485 @@ def team_document_note(skill: dict) -> str:
 - 回放生产消息、删除或重命名 topic/queue 必须人工审批。
 """
     return ""
+
+
+def database_oltp_template_md() -> str:
+    return """# 关系型（OLTP）表级详细设计文档模板
+
+> 适用范围：MySQL / PostgreSQL 等关系型 OLTP 场景；面向单表或强耦合表组的物理与行为设计。
+> 编写原则：本文档必须比建表 DDL 更完整，必须明确 CRUD 契约、幂等与并发、事务边界、禁止操作、批量与修复规则。
+> 信息原则：缺少事实必须主动询问用户并进入 waiting_for_input；除非用户明确允许，不得推测、补造或用示例值替代事实。
+
+## 1. 文档信息
+
+| 项目 | 内容 |
+|------|------|
+| 文档名称 |  |
+| 逻辑库/Schema |  |
+| 物理库标识 |  |
+| 所属集群/实例 |  |
+| 设计对象 | 单表 / 强耦合表组（列出成员表） |
+| 数据库产品 | MySQL / PostgreSQL |
+| 数据库版本 |  |
+| 文档版本 | v1.0 |
+| 编写日期 | YYYY-MM-DD |
+| 编写人 |  |
+| 业务负责人 |  |
+| DBA 负责人 |  |
+| 安全/合规接口人 |  |
+| 最后更新 | YYYY-MM-DD |
+
+### 1.1 变更记录
+
+| 版本 | 日期 | 变更原因/依据 | 变更摘要 | 变更人 | 评审/批准 |
+|------|------|---------------|----------|--------|-----------|
+| v1.0 | YYYY-MM-DD | 初版 | 首次发布 |  |  |
+
+### 1.2 术语定义
+
+| 术语 | 说明 |
+|------|------|
+| OLTP | Online Transaction Processing，联机事务处理 |
+| 幂等键 | 用于识别重复请求的业务键/请求号 |
+
+### 1.3 参考文档
+
+| 文档名 | 关联类型 | 参考说明 |
+|------|------|------|
+|  | 规范引用/设计依赖/附件/决策依据 |  |
+
+## 2. 文档定位
+
+### 2.1 编写目的
+
+- 本文档用于在 OLTP 语义下，把一张表或一组强耦合表的业务含义、物理结构、访问契约、并发与一致性、分区归档与安全审计落到可执行、可验收的规格。
+- 本文档是实现代码、集成测试、性能基线、发布脚本、运维操作的输入；与概要设计分工为：概要定域与边界，详细定表级行为与约束。
+
+### 2.2 设计对象类型
+
+| 项目 | 内容 |
+|------|------|
+| 对象类型 | 单表 / 主表+明细 / 主表+扩展 / 配置表 / 幂等请求表 / 状态流水表 / 其他 |
+| 是否核心业务表 | 是/否 |
+| 是否强耦合表组 | 是/否 |
+| 是否多租户 | 是/否；租户隔离字段： |
+| 是否分区/分表 | 是/否；键： |
+| 是否输出 CDC（binlog/WAL） | 是/否；消费方： |
+| 是否含敏感字段 | 是/否 |
+| 默认删除策略 | 物理删除 / 逻辑删除 / 禁止删除仅归档 |
+
+### 2.3 与其他文档的关系
+
+| 文档 | 关系 |
+|------|------|
+| 关系型 OLTP 概要设计 | 定义逻辑库、表组归属、跨表事务与一致性策略的上层边界 |
+| 数据字典 | 标准字段、枚举、命名、敏感等级的权威来源 |
+| 变更管理 / 发布规范 | 表结构变更、数据修复、批处理任务的流程与审批 |
+| API/领域服务设计 | 对外能力由服务暴露；禁止绕过契约直接写库的场景须在此声明 |
+
+### 2.4 强耦合表组说明
+
+| 成员表 | 角色 | 与主表关系 | 同事务要求 | 备注 |
+|--------|------|------------|------------|------|
+|  |  |  |  |  |
+
+一致性摘要：
+
+## 3. 业务语义与生命周期
+
+### 3.1 表的业务职责
+
+- 该表记录的业务事实：
+- 数据分类：主数据 / 交易事实 / 状态快照 / 审计流水 / 辅助配置。
+- 写入方、读取方、权威数据源：
+
+### 3.2 核心业务场景
+
+| 场景 ID | 场景名称 | 触发入口 | 主要 SQL 形态 | 优先级 | 频率/峰值 | 说明 |
+|---------|----------|----------|---------------|--------|-----------|------|
+| S01 |  | INSERT/UPDATE/SELECT/DELETE |  | P0/P1/P2 |  |  |
+
+### 3.3 数据生命周期阶段
+
+| 阶段 | 进入条件 | 允许的操作类型 | 对外可见性 | 数据留存策略 |
+|------|----------|----------------|------------|--------------|
+| 创建中 |  |  |  |  |
+| 生效中 |  |  |  |  |
+| 结束态 |  |  |  |  |
+| 归档态 |  |  |  |  |
+| 清理态 |  |  |  |  |
+
+### 3.4 状态机
+
+若无状态字段，写明“无状态机”并说明是否用版本号、乐观锁、事件顺序号约束变更。
+
+| 当前状态（值/枚举名） | 允许迁移至 | 触发动作/事件 | 是否可回退 | 备注 |
+|----------------------|------------|---------------|------------|------|
+|  |  |  |  |  |
+
+## 4. 物理结构设计
+
+### 4.1 建表级环境与约定
+
+| 项目 | MySQL 建议 | PostgreSQL 建议 | 本文档取值 |
+|------|------------|-----------------|------------|
+| 存储引擎 / 表类型 | InnoDB（必选 OLTP） | 默认堆表 / 按需 |  |
+| 字符集 | utf8mb4 | 数据库/库级 UTF8 |  |
+| 排序规则 | utf8mb4_unicode_ci（或团队统一） | C / C.UTF-8 等 |  |
+| 主键策略 | 自增 BIGINT / 雪花 ID / UUID | BIGINT GENERATED/序列/UUID |  |
+| 时间类型 | DATETIME(3) 或 TIMESTAMP | TIMESTAMPTZ 推荐 |  |
+| 金额类型 | DECIMAL(p,s)，禁止浮点 | NUMERIC(p,s) |  |
+| 默认隔离级别 | 与实例一致 | 与实例一致 |  |
+| 逻辑删除 | is_deleted + 默认值 0 | 同左或 RLS 另行说明 |  |
+
+### 4.2 字段定义
+
+| 序号 | 字段名 | 中文名 | 类型 | 必填 | 默认值 | 敏感级别 | 说明 |
+|------|--------|--------|------|------|--------|----------|------|
+| 1 |  |  |  | 是/否 |  | 低/中/高/极高 | 谁可写、何时可改 |
+
+敏感级别定义：
+
+| 级别 | 说明 | 存储 | 展示 | 日志 |
+|------|------|------|------|------|
+| 低 | 非个人信息 | 明文 | 明文 | 可打 INFO |
+| 中 | 业务敏感 | 明文+权限 | 按角色 | 脱敏 |
+| 高 | PII/强监管 | 加密/令牌化 | 脱敏/最小化 | 禁止完整输出 |
+| 极高 | 密钥类 | KMS/专用方案 | 不可展示 | 禁止 |
+
+### 4.3 索引设计
+
+| 索引名 | 类型 | 字段（顺序敏感） | 唯一 | 服务场景 | 备注 |
+|--------|------|------------------|------|----------|------|
+| PRIMARY | 主键 | id | 是 | 内部关联 |  |
+
+### 4.4 约束与数据库对象
+
+| 类别 | 规则 | 实现方式 | 备注 |
+|------|------|----------|------|
+| 主键 | 唯一且非空 | PRIMARY KEY |  |
+| 业务唯一 |  | UNIQUE / 应用保证 |  |
+| 检查约束 |  | CHECK + 应用校验 |  |
+| 外键 | 默认 OLTP 高并发分片场景慎用 | 应用层引用完整性 |  |
+| 默认值 | 状态、时间、版本 | DEFAULT + 应用一致 |  |
+
+### 4.5 字段可变性矩阵
+
+| 字段 | 创建时赋值 | 运行中可改 | 结束态可改 | 修改主体 | 约束/备注 |
+|------|------------|------------|------------|----------|-----------|
+|  | 是/否 | 是/否 | 是/否 |  |  |
+
+### 4.6 技术实现依赖
+
+| 依赖项 | 版本/规格 | 本文档是否依赖 | 说明 |
+|--------|-----------|----------------|------|
+| 数据库大版本 |  | 是 | 影响 CHECK、默认索引类型等 |
+| 客户端驱动 |  | 视需要 |  |
+| 中间件路由 |  | 视需要 |  |
+| 字符集/排序规则 |  | 是 |  |
+
+## 5. 数据量与性能设计
+
+### 5.1 数据量估算
+
+| 维度 | 估算值 | 说明 |
+|------|--------|------|
+| 当前总行数 |  | 截止日期和依据 |
+| 日均新增行数 |  | 含峰值说明 |
+| 峰值日增 |  |  |
+| 年增长率 |  | 基于业务预测 |
+| 3 年预计总行数 |  | 含增长假设 |
+| 单行平均大小 |  | 含索引估算 |
+| 3 年预计磁盘占用 |  | 数据+索引+冗余 |
+
+### 5.2 读写 QPS 与延迟 SLA
+
+| 场景 ID | 场景名称 | 操作类型 | QPS/TPS 目标 | P99 延迟目标 | 优先级 | 说明 |
+|---------|----------|----------|-------------|-------------|--------|------|
+|  |  |  |  |  |  |  |
+
+### 5.3 热点与数据倾斜分析
+
+| 热点类型 | 表现 | 发生条件 | 缓解措施 |
+|----------|------|----------|----------|
+| 写热点 |  |  |  |
+| 读热点 |  |  |  |
+| 数据倾斜 |  |  |  |
+
+### 5.4 容量规划
+
+| 资源 | 估算方法 | 目标值 | 说明 |
+|------|----------|--------|------|
+| 磁盘（数据+索引） | 单行 × 行数 × 冗余系数 |  | 含备份空间 |
+| InnoDB Buffer Pool | 热数据量 × 系数 |  | 建议覆盖热数据索引 |
+| 连接数 | 应用实例 × 连接池 |  | 含监控/运维预留 |
+| IOPS | 峰值 QPS × IO 放大 |  |  |
+
+### 5.5 性能保障措施
+
+| 措施 | 适用场景 | 实施状态 | 说明 |
+|------|----------|----------|------|
+| 索引覆盖 P0 查询 | 全部 P0 查询 | 已/待实施 | 见 4.3 |
+| Redis 缓存 | 高频读场景 | 已/待实施/不适用 | Key 设计见缓存设计文档 |
+| 读写分离 | 列表/报表查询 | 已/待实施/不适用 | 从库延迟可接受范围 |
+| 分区裁剪 | 按时间范围查询 | 已/待实施/不适用 | 见 8.2 |
+| 连接池优化 | 高并发场景 | 已/待实施 |  |
+
+## 6. CRUD 契约设计
+
+### 6.1 CRUD 总览矩阵
+
+| 操作 | 典型入口 | 定位键/幂等键 | 必备前置条件 | 允许字段/投影 | 明确禁止 | 并发控制 | 审计 |
+|------|----------|---------------|--------------|---------------|----------|----------|------|
+| C |  |  |  |  |  |  |  |
+| R |  |  |  |  |  |  |  |
+| U |  |  |  |  |  |  |  |
+| D |  |  |  |  |  |  |  |
+
+### 6.2 强制前置条件
+
+| 操作 | 编号 | 强制条件（不满足则拒绝） | 错误码/HTTP 建议 |
+|------|------|---------------------------|------------------|
+| Create | MC-C1 |  |  |
+| Read | MC-R1 |  |  |
+| Update | MC-U1 |  |  |
+| Delete | MC-D1 |  |  |
+
+### 6.3 禁止操作清单
+
+| 编号 | 禁止行为 | 适用范围 | 例外（须工单+审批） |
+|------|----------|----------|---------------------|
+| PO-01 | 无 WHERE 的 UPDATE/DELETE | 全部环境 | 不存在 |
+| PO-02 | 修改 id / 业务锚点 / tenant_id / create_time | 生产 | 仅迁移/纠错脚本 |
+| PO-03 | 业务代码物理删除在线事实行 | 生产 | 归档后清理任务 |
+| PO-04 | 绕过服务层直接写核心表 | 生产 | DBA 紧急修复 |
+
+### 6.4 Create
+
+| 规则项 | 要求 |
+|--------|------|
+| 调用方必填 |  |
+| 系统生成 |  |
+| 幂等策略 |  |
+| 事务边界 |  |
+| 失败语义 |  |
+
+### 6.5 Read
+
+| 查询类型 | 必带条件 | 推荐索引 | 主库/只读 | 备注 |
+|----------|----------|----------|-----------|------|
+| 单笔详情 |  |  |  |  |
+| 列表分页 |  |  |  |  |
+| 对账/风控 |  |  |  |  |
+
+### 6.6 Update
+
+| 场景 | 前置条件 | 允许 SET 字段 | 禁止 SET 字段 | 并发 |
+|------|----------|---------------|---------------|------|
+| 状态迁移 |  |  |  |  |
+| 业务补录 |  |  |  |  |
+
+### 6.7 Delete
+
+| 操作 | 策略 | 前置条件 | 审批 |
+|------|------|----------|------|
+| 业务删除 | 逻辑删除优先 |  |  |
+| 归档清理 | 先归档再删/迁 |  |  |
+| 物理删除 | 极少 |  | 高风险 |
+
+### 6.8 幂等键与重复请求
+
+| 层级 | 机制 | 说明 |
+|------|------|------|
+| API | Idempotency-Key / 业务请求号 | 网关或服务缓存短期去重 |
+| DB | UNIQUE(tenant_id, biz_no) | 最终以数据库为准 |
+| 消息 | 消费者 msg_id 去重表 | 与业务表配合 |
+
+### 6.9 批量操作与数据修复规则
+
+| 类型 | 允许条件 | 事务与批次 | 记录要求 |
+|------|----------|------------|----------|
+| 批量修正 | 工单 + 脚本版本 | 每批有上限；单批失败可重入 | 影响行数、样本校验 |
+| 全表迁移 | 停机/双写方案 | 另行专项设计 | DBA 执行证据 |
+| 临时手工 SQL | 默认禁止 |  | 紧急需审批+留痕 |
+
+## 7. 事务、一致性与并发控制
+
+### 7.1 本地事务边界
+
+| 场景 ID | 参与表/对象 | 一致性要求 | 提交/回滚 |
+|---------|-------------|------------|-----------|
+| T01 |  | 强一致 | 单事务 |
+
+### 7.2 跨表一致性
+
+| 关系 | 策略 | 补偿/核对 |
+|------|------|-----------|
+| 同库主明细 | 同事务 | 日终一致性校验任务 |
+| 跨库 | Saga/本地消息表/TCC | 对账任务、幂等重试 |
+| 读侧延迟 | 明确允许延迟的场景 | 禁止用于资金最终状态展示 |
+
+### 7.3 并发控制
+
+| 场景 | 策略 | 说明 |
+|------|------|------|
+| 一般更新 | 乐观锁 version | UPDATE WHERE version=? |
+| 高竞争扣减 | 条件更新或专用服务 | 评估死锁与重试 |
+| 幂等插入 | UNIQUE + 捕获冲突 | 返回已有记录 |
+
+### 7.4 数据质量校验
+
+| 校验项 | 规则 | 频率 | 失败处理 |
+|--------|------|------|----------|
+|  |  |  |  |
+
+### 7.5 隔离级别、死锁与重试约定
+
+| 主题 | 约定 |
+|------|------|
+| 默认隔离级别 | 与实例一致；若依赖幻读语义须在代码与测试中明示 |
+| 读已提交 vs 可重复读 | 写后读、防脏读为底线 |
+| 死锁 | 统一锁顺序；有限次退避重试并记录 trace_id |
+| 长事务 | 禁止在 OLTP 长事务中混合外部 HTTP/RPC；批处理拆批并设超时 |
+
+### 7.6 跨表最终一致
+
+| 步骤 | 动作 | 失败补偿 |
+|------|------|----------|
+| 1 | 本地事务提交主事实 |  |
+| 2 | 发送消息/写 outbox 表 | 重试 + 幂等消费 |
+| 3 | 下游更新读模型 | 对账任务修正 |
+
+## 8. 分区、分片与归档设计
+
+### 8.1 路由与分片规则
+
+| 项目 | 内容 |
+|------|------|
+| 分片键 |  |
+| 路由算法 | 哈希 / 范围 / 中间件规则 |
+| 全局唯一 |  |
+
+### 8.2 分区策略
+
+| 维度 | MySQL | PostgreSQL |
+|------|-------|------------|
+| 分区类型 | RANGE/LIST/HASH | RANGE/LIST + 声明式分区 |
+| 分区键 |  |  |
+| 跨分区查询 | 必须限制时间窗 | 必须限制时间窗 |
+
+### 8.3 查询策略
+
+| 场景 | 是否带路由/分区键 | 预期计划 | 禁止 |
+|------|-------------------|----------|------|
+| 点查 | 是 | 点查索引 |  |
+| 跨月 | 明确时间范围 | 分区裁剪 | 无界扫描 |
+
+### 8.4 归档与保留
+
+| 阶段 | 条件 | 目标存储 | 在线库策略 |
+|------|------|----------|------------|
+| 归档 |  |  |  |
+| 清理 |  |  |  |
+
+### 8.5 冷热分离与只读副本
+
+| 数据类别 | 放置 | 查询入口 | 说明 |
+|----------|------|----------|------|
+| 热数据 | 在线库 | 主路径 API | 默认 |
+| 温数据 | 在线库分区/归档表 | 带时间窗查询 | 控制扫描范围 |
+| 冷数据 | 归档库/对象存储 | 离线任务/专用查询 | 禁止与热路径混用 |
+| 报表 | 汇总表/OLAP | BI 账号 | 禁止直连核心 OLTP 大表扫 |
+
+## 9. 安全与审计设计
+
+### 9.1 敏感字段清单
+
+| 字段 | 级别 | 存储 | 应用展示 | 导出 |
+|------|------|------|----------|------|
+|  | 低/中/高/极高 |  |  |  |
+
+### 9.2 脱敏与掩码规则
+
+| 场景 | 规则 | 示例 |
+|------|------|------|
+| 手机号 | 保留前3后4 | 138****5678 |
+
+### 9.3 访问控制
+
+| 角色 | 读 | 写 | 说明 |
+|------|----|----|------|
+| 应用账号 | 白名单列 | 白名单列 | 最小权限 |
+| 只读账号 | 允许 | 禁止 | 报表/BI |
+| DBA 运维 | 审批后 | 变更窗口 | 双人复核 |
+
+### 9.4 审计要求
+
+| 事件 | 记录内容 | 保留期 |
+|------|----------|--------|
+| 敏感字段访问 | 操作者、对象、时间、原因码 |  |
+| 数据修复 | 工单、脚本版本、影响行、校验截图 |  |
+| 管理端导出 | 审批单、导出人、范围 |  |
+
+## 10. 测试与验收
+
+### 10.1 验收检查表
+
+| 检查项 | 结果 | 备注 |
+|--------|------|------|
+| 与概要设计库表边界一致 | ☐ |  |
+| InnoDB / utf8mb4（或 PG 等价）已声明 | ☐ |  |
+| 字段与数据字典一致（含敏感级别） | ☐ |  |
+| 索引覆盖 P0 查询 | ☐ |  |
+| CRUD 契约、禁止项、批量规则完整 | ☐ |  |
+| 状态机/可变性矩阵可测试 | ☐ |  |
+| 幂等键与唯一约束对齐 | ☐ |  |
+| 事务边界与补偿策略明确 | ☐ |  |
+| 分区/归档策略与运维一致 | ☐ |  |
+| 安全与审计要求可落地 | ☐ |  |
+| 强制前置条件 MC-* 有对应用例 | ☐ |  |
+| 禁止操作 PO-* 有反向用例 | ☐ |  |
+| 批处理行数上限与工单流程验证 | ☐ |  |
+
+### 10.2 测试用例类型
+
+| 类型 | 目的 | 示例 |
+|------|------|------|
+| 正向 | 主路径 | 创建成功、状态合法迁移 |
+| 反向 | 非法输入 | 缺租户、非法状态跳转 |
+| 幂等 | 重复提交 | 同键重复创建仅一条 |
+| 并发 | 竞争 | 双写同单、乐观锁冲突 |
+| 批处理 | 边界 | 批次上限、失败重试 |
+| 归档 | 生命周期 | 归档后查询路径 |
+| 安全 | 越权 | 跨租户 ID 访问、脱敏绕过 |
+| 兼容 | 方言 | PG 与 MySQL 同一契约下的参数与类型 |
+
+### 10.3 样例 SQL
+
+```sql
+-- 将与本设计一致的查询、插入、更新、删除样例写入此处。
+```
+
+## 11. 附录
+
+### 11.1 DDL SQL
+
+```sql
+-- 将最终建表/改表 DDL 粘贴于此；须与正文字段、索引、约束完全一致。
+```
+
+### 11.2 兼容性说明
+
+| 主题 | 注意点 |
+|------|--------|
+| CHECK 约束 | MySQL 8.0.16+ 强制执行；PG 原生支持 |
+| 索引类型 | PG 的 GIN/GIST 用于 JSONB/全文；勿与 OLTP 主路径混用无设计 |
+| 分区 DDL | 语法与限制因产品而异；迁移需双轨验证 |
+| 序列与 ID | 自增 vs IDENTITY vs 雪花；回填与复制冲突 |
+| NULL 与唯一索引 | 多列唯一时 NULL 行为因版本/索引类型而异 |
+| 隐式类型转换 | 类型不一致可能导致索引失效；参数绑定与列类型一致 |
+| 批插入 | LOAD DATA / COPY 与触发器、复制延迟；大批量走离线通道 |
+"""
 
 
 def artifact_templates(skill: dict) -> dict:
@@ -1665,7 +2276,7 @@ classDiagram
         }
     if skill["id"] == "database-design":
         return {
-            "database-oltp-template.md": "# OLTP 数据库设计\n\n" + "\n\n".join(f"## {index}. {section}" for index, section in enumerate(DB_OLTP_REQUIRED_SECTIONS, start=1)) + "\n",
+            "database-oltp-template.md": database_oltp_template_md(),
             "database-olap-template.md": "# OLAP 数据库设计\n\n" + "\n\n".join(f"## {index}. {section}" for index, section in enumerate(DB_OLAP_REQUIRED_SECTIONS, start=1)) + "\n",
         }
     if skill["id"] == "redis-design":
@@ -1751,7 +2362,7 @@ print("ok")
 def team_validator_script(skill_id: str) -> str:
     if skill_id not in TEAM_DOC_TARGET_SKILLS:
         return generic_validator_script()
-    policy = {
+    policies = {
         "detailed-design": {
             "forbidden_headings": DETAILED_DESIGN_FORBIDDEN_HEADINGS,
             "flow_note_fields": DETAILED_DESIGN_FLOW_NOTE_FIELDS,
@@ -1761,6 +2372,9 @@ def team_validator_script(skill_id: str) -> str:
         "database-design": {
             "oltp_sections": DB_OLTP_REQUIRED_SECTIONS,
             "olap_sections": DB_OLAP_REQUIRED_SECTIONS,
+            "oltp_table_headers": DB_OLTP_REQUIRED_TABLE_HEADERS,
+            "oltp_fact_fields": DB_OLTP_REQUIRED_FACT_FIELDS,
+            "unresolved_markers": DB_UNRESOLVED_INFO_MARKERS,
         },
         "redis-design": {
             "required_sections": REDIS_REQUIRED_SECTIONS,
@@ -1770,7 +2384,135 @@ def team_validator_script(skill_id: str) -> str:
             "producer_fields": MQ_PRODUCER_FIELDS,
             "consumer_fields": MQ_CONSUMER_FIELDS,
         },
-    }[skill_id]
+    }
+    validator_bodies = {
+        "detailed-design": r'''
+def validate_output(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "detailed-design.md")
+    if not text:
+        return ["缺少 detailed-design.md artifact 或文件不可读"]
+    normalized_headings = [re.sub(r"\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
+    for forbidden in POLICY["forbidden_headings"]:
+        if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):
+            errors.append("detailed-design.md 包含禁止标题: " + forbidden)
+    if "sequenceDiagram" in text:
+        errors.append("detailed-design.md 不得包含 sequenceDiagram")
+    if "flowchart" not in text:
+        errors.append("detailed-design.md 必须包含 flowchart")
+    flow_blocks = list(re.finditer(r"```mermaid\s*\n\s*flowchart[\s\S]*?```", text))
+    for index, block in enumerate(flow_blocks, start=1):
+        tail = text[block.end(): block.end() + 700]
+        if "流程设计说明" not in tail:
+            errors.append(f"第 {index} 个 flowchart 后缺少流程设计说明")
+            continue
+        for field in POLICY["flow_note_fields"]:
+            if field not in tail:
+                errors.append(f"第 {index} 个 flowchart 的流程设计说明缺少 {field}")
+    if any(term in text for term in POLICY["ddd_terms"]) and "classDiagram" not in text:
+        errors.append("出现 DDD/分层/扩展点关键词时必须包含 classDiagram")
+    artifacts = artifact_map(payload)
+    for doc_name in POLICY["specialty_docs"]:
+        if doc_name not in artifacts:
+            errors.append("StageRunResult.artifacts 未登记专项文档: " + doc_name)
+    status = payload.get("status")
+    high_risk_terms = ["DDL", "CREATE TABLE", "ALTER TABLE", "新队列", "新 topic", "新Topic", "Redis 新 Key", "新增 Key"]
+    if status == "succeeded" and any(term in text for term in high_risk_terms):
+        errors.append("存在 DDL、MQ 新队列/topic 或 Redis 新 Key 时状态必须为 waiting_for_human_review")
+    return errors
+''',
+        "database-design": r'''
+def validate_output(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "database-design.md")
+    if not text:
+        return ["缺少 database-design.md artifact 或文件不可读"]
+    sections = POLICY["olap_sections"] if any(term in text for term in ["ClickHouse", "MergeTree", "物化视图", "分析宽表"]) else POLICY["oltp_sections"]
+    for section in sections:
+        if section not in text:
+            errors.append("database-design.md 缺少模板章节或字段: " + section)
+    if sections == POLICY.get("oltp_sections"):
+        section_positions = []
+        for section in POLICY["oltp_sections"]:
+            index = text.find(section)
+            if index >= 0:
+                section_positions.append(index)
+        if section_positions != sorted(section_positions):
+            errors.append("database-design.md OLTP 章节顺序必须与模板一致")
+        for header in POLICY["oltp_table_headers"]:
+            if header not in text:
+                errors.append("database-design.md 缺少 OLTP 模板表格列头: " + header)
+        for field in POLICY["oltp_fact_fields"]:
+            if field not in text:
+                errors.append("database-design.md 文档信息缺少必填事实字段: " + field)
+        for required_text in ["MC-", "PO-", "QPS", "P99", "DDL SQL", "兼容性说明", "敏感级别", "幂等"]:
+            if required_text not in text:
+                errors.append("database-design.md 缺少 OLTP 强制内容: " + required_text)
+    for match in re.finditer(r"(?is)\b(update|delete)\b([^;]{0,300});", text):
+        if "where" not in match.group(2).lower():
+            errors.append("禁止没有 WHERE 的 UPDATE/DELETE")
+    unresolved = [marker for marker in POLICY.get("unresolved_markers", []) if marker in text]
+    if unresolved and payload.get("status") not in {"waiting_for_input", "waiting_for_human_review", "blocked"}:
+        errors.append("存在未确认信息时必须 waiting_for_input，禁止推测或以占位符输出 succeeded: " + ", ".join(sorted(set(unresolved))))
+    if payload.get("status") == "waiting_for_input" and not payload.get("required_information_requests"):
+        errors.append("waiting_for_input 必须输出 required_information_requests 主动询问用户")
+    final_status = payload.get("document_metadata", {}).get("document_status")
+    if final_status in {"approved", "final"}:
+        for required in ["库名", "实例", "字符集", "索引名"]:
+            if required + "：" not in text and required + ":" not in text:
+                errors.append("approved/final 文档必须确认" + required)
+    if payload.get("status") == "succeeded" and any(term in text for term in ["CREATE TABLE", "ALTER TABLE", "DROP TABLE", "DDL"]):
+        errors.append("包含 DDL 时必须 waiting_for_human_review")
+    return errors
+''',
+        "redis-design": r'''
+def validate_output(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "redis-design.md")
+    if not text:
+        return ["缺少 redis-design.md artifact 或文件不可读"]
+    for section in POLICY["required_sections"] + POLICY["item_fields"]:
+        if section not in text:
+            errors.append("redis-design.md 缺少模板章节或字段: " + section)
+    if re.search(r"Redis\s*(作为|做|充当).{0,12}事实库", text):
+        errors.append("Redis 不得作为事实库")
+    if re.search(r"Redis\s*(作为|做|充当).{0,12}消息队列", text):
+        errors.append("Redis 不得作为消息队列")
+    if not re.search(r"TTL[^\n]*(秒|分钟|小时|天|ms|s|min|hour|day)", text, re.IGNORECASE):
+        errors.append("TTL 必须带单位")
+    if "降级" not in text:
+        errors.append("Redis 不可用必须有降级策略")
+    if payload.get("status") == "succeeded" and any(term in text for term in ["版本待确认", "拓扑待确认", "持久化待确认", "淘汰策略待确认"]):
+        errors.append("Redis 版本、拓扑、持久化或淘汰策略无法确认时不得 succeeded")
+    if payload.get("status") == "succeeded" and any(term in text for term in ["Redis 新 Key", "新增 Key", "新 Key"]):
+        errors.append("Redis 新 Key 必须 waiting_for_human_review")
+    return errors
+''',
+        "mq-design": r'''
+def validate_output(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "mq-design.md")
+    if not text:
+        return ["缺少 mq-design.md artifact 或文件不可读"]
+    for field in POLICY["producer_fields"]:
+        if field not in text:
+            errors.append("mq-design.md 生产者表缺少字段: " + field)
+    for field in POLICY["consumer_fields"]:
+        if field not in text:
+            errors.append("mq-design.md 消费者表缺少字段: " + field)
+    if "死信" not in text:
+        errors.append("MQ 必须设计死信队列")
+    if "幂等" not in text:
+        errors.append("MQ 必须定义幂等策略")
+    for size in re.findall(r"(\d+)\s*KB", text, re.IGNORECASE):
+        if int(size) > 10 and payload.get("status") == "succeeded":
+            errors.append("消息体超过 10KB 必须 waiting_for_human_review")
+    if payload.get("status") == "succeeded" and any(term in text for term in ["回放生产消息", "删除队列", "重命名队列", "删除 topic", "重命名 topic", "删除Topic", "重命名Topic"]):
+        errors.append("生产消息回放或删除/重命名 topic/queue 必须 waiting_for_human_review")
+    return errors
+''',
+    }
+    policy = policies[skill_id]
     return f"""#!/usr/bin/env python3
 import json
 import re
@@ -1828,119 +2570,11 @@ def fail(errors):
         raise SystemExit("\\n".join(errors))
     print("ok")
 
-
-def validate_detailed(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "detailed-design.md")
-    if not text:
-        return ["缺少 detailed-design.md artifact 或文件不可读"]
-    normalized_headings = [re.sub(r"\\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
-    for forbidden in POLICY["forbidden_headings"]:
-        if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):
-            errors.append("detailed-design.md 包含禁止标题: " + forbidden)
-    if "sequenceDiagram" in text:
-        errors.append("detailed-design.md 不得包含 sequenceDiagram")
-    if "flowchart" not in text:
-        errors.append("detailed-design.md 必须包含 flowchart")
-    flow_blocks = list(re.finditer(r"```mermaid\\s*\\n\\s*flowchart[\\s\\S]*?```", text))
-    for index, block in enumerate(flow_blocks, start=1):
-        tail = text[block.end(): block.end() + 700]
-        if "流程设计说明" not in tail:
-            errors.append(f"第 {{index}} 个 flowchart 后缺少流程设计说明")
-            continue
-        for field in POLICY["flow_note_fields"]:
-            if field not in tail:
-                errors.append(f"第 {{index}} 个 flowchart 的流程设计说明缺少 {{field}}")
-    if any(term in text for term in POLICY["ddd_terms"]) and "classDiagram" not in text:
-        errors.append("出现 DDD/分层/扩展点关键词时必须包含 classDiagram")
-    artifacts = artifact_map(payload)
-    for doc_name in POLICY["specialty_docs"]:
-        if doc_name not in artifacts:
-            errors.append("StageRunResult.artifacts 未登记专项文档: " + doc_name)
-    status = payload.get("status")
-    high_risk_terms = ["DDL", "CREATE TABLE", "ALTER TABLE", "新队列", "新 topic", "新Topic", "Redis 新 Key", "新增 Key"]
-    if status == "succeeded" and any(term in text for term in high_risk_terms):
-        errors.append("存在 DDL、MQ 新队列/topic 或 Redis 新 Key 时状态必须为 waiting_for_human_review")
-    return errors
-
-
-def validate_database(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "database-design.md")
-    if not text:
-        return ["缺少 database-design.md artifact 或文件不可读"]
-    sections = POLICY["olap_sections"] if any(term in text for term in ["ClickHouse", "MergeTree", "物化视图", "分析宽表"]) else POLICY["oltp_sections"]
-    for section in sections:
-        if section not in text:
-            errors.append("database-design.md 缺少模板章节或字段: " + section)
-    for match in re.finditer(r"(?is)\\b(update|delete)\\b([^;]{{0,300}});", text):
-        if "where" not in match.group(2).lower():
-            errors.append("禁止没有 WHERE 的 UPDATE/DELETE")
-    final_status = payload.get("document_metadata", {{}}).get("document_status")
-    if final_status in {{"approved", "final"}}:
-        for required in ["库名", "实例", "字符集", "索引名"]:
-            if required + "：" not in text and required + ":" not in text:
-                errors.append("approved/final 文档必须确认" + required)
-    if payload.get("status") == "succeeded" and any(term in text for term in ["CREATE TABLE", "ALTER TABLE", "DROP TABLE", "DDL"]):
-        errors.append("包含 DDL 时必须 waiting_for_human_review")
-    return errors
-
-
-def validate_redis(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "redis-design.md")
-    if not text:
-        return ["缺少 redis-design.md artifact 或文件不可读"]
-    for section in POLICY["required_sections"] + POLICY["item_fields"]:
-        if section not in text:
-            errors.append("redis-design.md 缺少模板章节或字段: " + section)
-    if re.search(r"Redis\\s*(作为|做|充当).{{0,12}}事实库", text):
-        errors.append("Redis 不得作为事实库")
-    if re.search(r"Redis\\s*(作为|做|充当).{{0,12}}消息队列", text):
-        errors.append("Redis 不得作为消息队列")
-    if not re.search(r"TTL[^\\n]*(秒|分钟|小时|天|ms|s|min|hour|day)", text, re.IGNORECASE):
-        errors.append("TTL 必须带单位")
-    if "降级" not in text:
-        errors.append("Redis 不可用必须有降级策略")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["版本待确认", "拓扑待确认", "持久化待确认", "淘汰策略待确认"]):
-        errors.append("Redis 版本、拓扑、持久化或淘汰策略无法确认时不得 succeeded")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["Redis 新 Key", "新增 Key", "新 Key"]):
-        errors.append("Redis 新 Key 必须 waiting_for_human_review")
-    return errors
-
-
-def validate_mq(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "mq-design.md")
-    if not text:
-        return ["缺少 mq-design.md artifact 或文件不可读"]
-    for field in POLICY["producer_fields"]:
-        if field not in text:
-            errors.append("mq-design.md 生产者表缺少字段: " + field)
-    for field in POLICY["consumer_fields"]:
-        if field not in text:
-            errors.append("mq-design.md 消费者表缺少字段: " + field)
-    if "死信" not in text:
-        errors.append("MQ 必须设计死信队列")
-    if "幂等" not in text:
-        errors.append("MQ 必须定义幂等策略")
-    for size in re.findall(r"(\\d+)\\s*KB", text, re.IGNORECASE):
-        if int(size) > 10 and payload.get("status") == "succeeded":
-            errors.append("消息体超过 10KB 必须 waiting_for_human_review")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["回放生产消息", "删除队列", "重命名队列", "删除 topic", "重命名 topic", "删除Topic", "重命名Topic"]):
-        errors.append("生产消息回放或删除/重命名 topic/queue 必须 waiting_for_human_review")
-    return errors
-
+{validator_bodies[skill_id]}
 
 payload_path = Path(sys.argv[1])
 payload = load_payload(payload_path)
-validators = {{
-    "detailed-design": validate_detailed,
-    "database-design": validate_database,
-    "redis-design": validate_redis,
-    "mq-design": validate_mq,
-}}
-fail(validators[SKILL_ID](payload_path, payload))
+fail(validate_output(payload_path, payload))
 """
 
 
@@ -2041,6 +2675,15 @@ EXTRA_EVAL_SCENARIOS = {
             "rule_refs": ["DB7", "DB8", "DB9", "DB10"],
             "risk_focus": ["OLTP 模板", "OLAP 模板", "DDL 审批"],
             "forbidden_behavior": ["用主文档字段表替代专项", "未确认库名实例却 final"],
+        },
+        {
+            "case": "team_database_missing_info_must_ask",
+            "title": "数据库设计缺少事实必须主动询问",
+            "material": "用户只给出表名和部分 DDL，未提供逻辑库、物理库、实例、数据库版本、DBA、安全接口人、QPS、容量、索引用途和审批状态。",
+            "expected_gate_decision": "waiting_for_input",
+            "rule_refs": ["DB7", "DB10", "DB11", "DB12"],
+            "risk_focus": ["主动询问", "禁止推测", "模板占位符"],
+            "forbidden_behavior": ["编造库名实例或负责人", "用待补充输出 succeeded", "删除模板中不适用章节"],
         }
     ],
 }
@@ -5943,7 +6586,9 @@ print("CI 产物目录已准备")
         "forbidden_write": True,
     })
     write_text(base / "evals" / "reports" / "README.md", "# Eval Reports\n\n`run_skill_evals.py --mode scored` writes deterministic scored eval results here and mirrors the report into the plugin package when present.")
-    write_json(base / "evals" / "reports" / "eval-report.json", {"status": "pass", "metrics": {}, "checks": []})
+    eval_report_path = base / "evals" / "reports" / "eval-report.json"
+    if not eval_report_path.exists():
+        write_json(eval_report_path, {"status": "pass", "metrics": {}, "checks": []})
     write_json(base / "plugin" / "plugin.json", plugin_manifest())
     write_text(base / "artifacts" / "README.md", "# 运行产物\n\nWorkflow 输出、trace 日志、审批请求和审计证据按 run id 存放在这里。")
     generate_runtime_policy_pack(base)

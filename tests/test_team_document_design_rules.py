@@ -89,6 +89,33 @@ class TeamDocumentDesignRulesTest(unittest.TestCase):
         self.assertNotIn("## 来源证据", detailed_template)
         self.assertNotIn("## 发布", detailed_template)
 
+        oltp_template = (ROOT / "skills" / "database-design" / "assets" / "database-oltp-template.md").read_text(encoding="utf-8")
+        required_order = [
+            "## 1. 文档信息",
+            "### 1.1 变更记录",
+            "### 1.2 术语定义",
+            "### 1.3 参考文档",
+            "## 2. 文档定位",
+            "## 3. 业务语义与生命周期",
+            "## 4. 物理结构设计",
+            "## 5. 数据量与性能设计",
+            "## 6. CRUD 契约设计",
+            "## 7. 事务、一致性与并发控制",
+            "## 8. 分区、分片与归档设计",
+            "## 9. 安全与审计设计",
+            "## 10. 测试与验收",
+            "## 11. 附录",
+        ]
+        positions = [oltp_template.index(item) for item in required_order]
+        self.assertEqual(sorted(positions), positions)
+        for table_header in [
+            "| 项目 | 内容 |",
+            "| 操作 | 典型入口 | 定位键/幂等键 | 必备前置条件 | 允许字段/投影 | 明确禁止 | 并发控制 | 审计 |",
+            "| 编号 | 禁止行为 | 适用范围 | 例外（须工单+审批） |",
+            "| 检查项 | 结果 | 备注 |",
+        ]:
+            self.assertIn(table_header, oltp_template)
+
     def test_extra_team_eval_cases_are_generated_and_checked_by_runner(self) -> None:
         expected_cases = [
             "team_db_reference_only",
@@ -109,6 +136,28 @@ class TeamDocumentDesignRulesTest(unittest.TestCase):
         runner = (ROOT / "engineering-assistant" / "scripts" / "run_skill_evals.py").read_text(encoding="utf-8")
         self.assertIn('glob("*.yaml")', runner)
         self.assertIn("StageRunResult.artifacts", runner)
+
+    def test_specialty_validators_only_contain_current_skill_rules(self) -> None:
+        scripts = {
+            "database-design": (ROOT / "skills" / "database-design" / "scripts" / "validate_output.py").read_text(encoding="utf-8"),
+            "redis-design": (ROOT / "skills" / "redis-design" / "scripts" / "validate_output.py").read_text(encoding="utf-8"),
+            "mq-design": (ROOT / "skills" / "mq-design" / "scripts" / "validate_output.py").read_text(encoding="utf-8"),
+        }
+
+        self.assertIn('SKILL_ID = "database-design"', scripts["database-design"])
+        self.assertIn('SKILL_ID = "redis-design"', scripts["redis-design"])
+        self.assertIn('SKILL_ID = "mq-design"', scripts["mq-design"])
+
+        forbidden_by_skill = {
+            "database-design": ["redis-design.md", "mq-design.md", "detailed-design.md", "validate_redis", "validate_mq", "validate_detailed"],
+            "redis-design": ["database-design.md", "mq-design.md", "detailed-design.md", "validate_database", "validate_mq", "validate_detailed"],
+            "mq-design": ["database-design.md", "redis-design.md", "detailed-design.md", "validate_database", "validate_redis", "validate_detailed"],
+        }
+        for skill_id, forbidden_items in forbidden_by_skill.items():
+            for forbidden in forbidden_items:
+                self.assertNotIn(forbidden, scripts[skill_id], f"{skill_id} validator leaked {forbidden}")
+            self.assertIn("def validate_output", scripts[skill_id])
+            self.assertIn("fail(validate_output(payload_path, payload))", scripts[skill_id])
 
     def test_detailed_design_validator_blocks_forbidden_sections_and_sequence_diagram(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -220,6 +269,29 @@ flowchart TD
             mq_output = mq_result.stdout + mq_result.stderr
             self.assertIn("生产者表缺少字段", mq_output)
             self.assertIn("超过 10KB", mq_output)
+
+    def test_database_validator_blocks_unresolved_info_and_requires_questions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            db_doc = root / "database-design.md"
+            template = (ROOT / "skills" / "database-design" / "assets" / "database-oltp-template.md").read_text(encoding="utf-8")
+            db_doc.write_text(template.replace("安全/合规接口人 |  |", "安全/合规接口人 | 待补充 |"), encoding="utf-8")
+
+            succeeded_payload = root / "db-succeeded-stage-run-result.json"
+            succeeded_payload.write_text(
+                json.dumps(payload("database-design", [{"name": "database-design.md", "path": str(db_doc)}]), ensure_ascii=False),
+                encoding="utf-8",
+            )
+            succeeded_result = run_validator("database-design", succeeded_payload)
+            self.assertNotEqual(0, succeeded_result.returncode)
+            self.assertIn("waiting_for_input", succeeded_result.stdout + succeeded_result.stderr)
+
+            waiting_payload = payload("database-design", [{"name": "database-design.md", "path": str(db_doc)}], status="waiting_for_input")
+            waiting_path = root / "db-waiting-stage-run-result.json"
+            waiting_path.write_text(json.dumps(waiting_payload, ensure_ascii=False), encoding="utf-8")
+            waiting_result = run_validator("database-design", waiting_path)
+            self.assertNotEqual(0, waiting_result.returncode)
+            self.assertIn("required_information_requests", waiting_result.stdout + waiting_result.stderr)
 
 
 if __name__ == "__main__":

@@ -11,3 +11,5 @@
 - DB8 ClickHouse、物化视图或分析宽表必须使用 OLAP 模板，覆盖数据分层、字段级血缘、MergeTree 引擎选型、ORDER BY、PARTITION BY、TTL、物化视图关系、刷新策略、上下游影响
 - DB9 禁止无用途字段和索引，禁止没有 WHERE 的 UPDATE/DELETE，禁止业务代码物理删除在线事实行，除非专项审批
 - DB10 未确认库名、实例、字符集、索引名时，不得标记为 approved/final
+- DB11 关系型 OLTP 输出必须保持 `assets/database-oltp-template.md` 的章节顺序、标题名称和表格列头；不适用章节必须保留并写明不适用原因
+- DB12 缺少库名、实例、版本、负责人、字段口径、索引用途、QPS/容量、审批状态、敏感级别等事实时，必须进入 waiting_for_input 并输出 required_information_requests；除非用户明确允许，不得推测

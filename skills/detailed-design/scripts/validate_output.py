@@ -97,7 +97,7 @@ def fail(errors):
     print("ok")
 
 
-def validate_detailed(payload_path, payload):
+def validate_output(payload_path, payload):
     errors = []
     text = read_artifact(payload_path, payload, "detailed-design.md")
     if not text:
@@ -132,80 +132,6 @@ def validate_detailed(payload_path, payload):
     return errors
 
 
-def validate_database(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "database-design.md")
-    if not text:
-        return ["缺少 database-design.md artifact 或文件不可读"]
-    sections = POLICY["olap_sections"] if any(term in text for term in ["ClickHouse", "MergeTree", "物化视图", "分析宽表"]) else POLICY["oltp_sections"]
-    for section in sections:
-        if section not in text:
-            errors.append("database-design.md 缺少模板章节或字段: " + section)
-    for match in re.finditer(r"(?is)\b(update|delete)\b([^;]{0,300});", text):
-        if "where" not in match.group(2).lower():
-            errors.append("禁止没有 WHERE 的 UPDATE/DELETE")
-    final_status = payload.get("document_metadata", {}).get("document_status")
-    if final_status in {"approved", "final"}:
-        for required in ["库名", "实例", "字符集", "索引名"]:
-            if required + "：" not in text and required + ":" not in text:
-                errors.append("approved/final 文档必须确认" + required)
-    if payload.get("status") == "succeeded" and any(term in text for term in ["CREATE TABLE", "ALTER TABLE", "DROP TABLE", "DDL"]):
-        errors.append("包含 DDL 时必须 waiting_for_human_review")
-    return errors
-
-
-def validate_redis(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "redis-design.md")
-    if not text:
-        return ["缺少 redis-design.md artifact 或文件不可读"]
-    for section in POLICY["required_sections"] + POLICY["item_fields"]:
-        if section not in text:
-            errors.append("redis-design.md 缺少模板章节或字段: " + section)
-    if re.search(r"Redis\s*(作为|做|充当).{0,12}事实库", text):
-        errors.append("Redis 不得作为事实库")
-    if re.search(r"Redis\s*(作为|做|充当).{0,12}消息队列", text):
-        errors.append("Redis 不得作为消息队列")
-    if not re.search(r"TTL[^\n]*(秒|分钟|小时|天|ms|s|min|hour|day)", text, re.IGNORECASE):
-        errors.append("TTL 必须带单位")
-    if "降级" not in text:
-        errors.append("Redis 不可用必须有降级策略")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["版本待确认", "拓扑待确认", "持久化待确认", "淘汰策略待确认"]):
-        errors.append("Redis 版本、拓扑、持久化或淘汰策略无法确认时不得 succeeded")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["Redis 新 Key", "新增 Key", "新 Key"]):
-        errors.append("Redis 新 Key 必须 waiting_for_human_review")
-    return errors
-
-
-def validate_mq(payload_path, payload):
-    errors = []
-    text = read_artifact(payload_path, payload, "mq-design.md")
-    if not text:
-        return ["缺少 mq-design.md artifact 或文件不可读"]
-    for field in POLICY["producer_fields"]:
-        if field not in text:
-            errors.append("mq-design.md 生产者表缺少字段: " + field)
-    for field in POLICY["consumer_fields"]:
-        if field not in text:
-            errors.append("mq-design.md 消费者表缺少字段: " + field)
-    if "死信" not in text:
-        errors.append("MQ 必须设计死信队列")
-    if "幂等" not in text:
-        errors.append("MQ 必须定义幂等策略")
-    for size in re.findall(r"(\d+)\s*KB", text, re.IGNORECASE):
-        if int(size) > 10 and payload.get("status") == "succeeded":
-            errors.append("消息体超过 10KB 必须 waiting_for_human_review")
-    if payload.get("status") == "succeeded" and any(term in text for term in ["回放生产消息", "删除队列", "重命名队列", "删除 topic", "重命名 topic", "删除Topic", "重命名Topic"]):
-        errors.append("生产消息回放或删除/重命名 topic/queue 必须 waiting_for_human_review")
-    return errors
-
-
 payload_path = Path(sys.argv[1])
 payload = load_payload(payload_path)
-validators = {
-    "detailed-design": validate_detailed,
-    "database-design": validate_database,
-    "redis-design": validate_redis,
-    "mq-design": validate_mq,
-}
-fail(validators[SKILL_ID](payload_path, payload))
+fail(validate_output(payload_path, payload))
