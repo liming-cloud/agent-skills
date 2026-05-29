@@ -403,5 +403,39 @@
     "架构师",
     "测试负责人"
   ],
-  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor"
+  "change_policy": "contract、gate、schema 或审批规则变更必须经过 skill owner 评审，并通过 skill-quality-auditor",
+  "team_document_policy": {
+    "artifact": "high-level-design.md",
+    "canonical_template": "skills/high-level-design/assets/high-level-design-template.md",
+    "source_template": "inputs/萤启运营系统概要设计 - 萤启服务商系统 - 站点标题.html",
+    "required_sections": [
+      "1. 版本变更记录",
+      "2. 平台概述",
+      "3. 系统设计",
+      "3.1 系统逻辑视图",
+      "3.1.1 系统设计原则",
+      "3.3 研发视图",
+      "3.4 研发结构定义",
+      "4. 核心功能",
+      "5.中间件设计",
+      "6.数据视图"
+    ],
+    "forbidden_headings": [
+      "证据",
+      "Findings",
+      "必须补充信息",
+      "门禁决策"
+    ],
+    "rules": [
+      "概要设计必须保留团队模板章节顺序",
+      "系统设计必须明确逻辑视图、设计原则、研发视图和研发结构",
+      "中间件设计只说明是否涉及并引用专项设计",
+      "数据视图声明事实表、读模型和专项 DB 设计关系"
+    ],
+    "blocked_when": [
+      "high-level-design.md 缺少团队模板章节",
+      "使用通用证据/Findings/门禁决策模板替代概要设计正文",
+      "跨系统边界、事件协作、最终一致性或异常流缺失"
+    ]
+  }
 }

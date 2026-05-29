@@ -60,7 +60,8 @@ description: Use when the request is about 设计 Redis 使用方案，明确 ke
 
 # 团队 Redis 设计规则
 - Redis 设计必须生成独立 `redis-design.md`，不得在主详细设计中展开。
-- 文档必须按 `assets/redis-design-template.md` 组织，并覆盖 Redis 版本、集群、持久化、淘汰策略、设计项、安全与运维和人工评审项。
+- 文档必须按 `assets/redis-design-template.md` 组织，并覆盖历史版本信息、前言、公共配置、Redis版本、集群配置、持久化策略、过期淘汰策略、设计项、资源申请和运维监控。
+- 每个设计项必须包含特性用途、业务说明、存储设计、预估数据、多团队协同；存储设计必须列出库、数据结构、ttl、key 和数据格式。
 - Redis 只做加速层、协调层、短态承载层，不做事实库、不做消息队列；已使用 RabbitMQ 的项目不得设计 Redis 发布订阅或 Redis 延迟队列。
 - Key 默认使用 db0，建议格式 `{服务模块}:{租户ID}:{数据结构}:{业务Key}`，长度不超过 100 字节。
 - 所有 Key 必须设置 TTL，最大不超过 30 天；大批量 Key 必须有随机 TTL 抖动；Redis 不可用必须有降级策略。

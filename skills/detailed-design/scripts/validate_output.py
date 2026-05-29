@@ -6,12 +6,23 @@ from pathlib import Path
 
 SKILL_ID = "detailed-design"
 POLICY = {
+  "required_sections": [
+    "1. 修订历史",
+    "2. 设计背景与目标摘要",
+    "3. 模块/功能详细设计",
+    "3.1. 业务流程图",
+    "3.2. UML类图",
+    "4. 数据库设计",
+    "5. 接口定义",
+    "5.1. API接口列表",
+    "5.2. 中间件设计",
+    "6. 单元测试",
+    "7. 性能与扩展性设计",
+    "8. 人工评审项"
+  ],
   "forbidden_headings": [
     "来源证据",
     "技术选型",
-    "数据库设计",
-    "MQ 设计",
-    "Redis 设计",
     "业务规则与校验",
     "幂等与一致性",
     "异常与日志",
@@ -102,6 +113,16 @@ def validate_output(payload_path, payload):
     text = read_artifact(payload_path, payload, "detailed-design.md")
     if not text:
         return ["缺少 detailed-design.md artifact 或文件不可读"]
+    for section in POLICY["required_sections"]:
+        if section not in text:
+            errors.append("detailed-design.md 缺少团队详细设计模板章节: " + section)
+    section_positions = []
+    for section in POLICY["required_sections"]:
+        index = text.find(section)
+        if index >= 0:
+            section_positions.append(index)
+    if section_positions != sorted(section_positions):
+        errors.append("detailed-design.md 章节顺序必须与团队详细设计模板一致")
     normalized_headings = [re.sub(r"\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
     for forbidden in POLICY["forbidden_headings"]:
         if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):

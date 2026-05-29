@@ -15,7 +15,7 @@ PLUGIN_DISPLAY_NAME = "团队研发助手"
 PLUGIN_MARKETPLACE_NAME = "local-teamwork-engineering"
 PLUGIN_MARKETPLACE_DISPLAY_NAME = "Local Teamwork Engineering Plugins"
 DOWNSTREAM_CANARY_ROOT = "/Users/sunliming/work/project/personal/ai-platform-v1"
-TEAM_STANDARDS_INPUT_ROOT = "/Users/sunliming/Desktop/snbc/hermes/tl-capability-optimization/inputs"
+TEAM_STANDARDS_INPUT_ROOT = str(ROOT / "inputs")
 
 EVAL_CASES = [
     "happy_path",
@@ -31,30 +31,46 @@ EVAL_CASES = [
     "low_quality_automation",
 ]
 
-TEAM_DOC_TARGET_SKILLS = {"detailed-design", "database-design", "redis-design", "mq-design"}
+TEAM_DOC_TARGET_SKILLS = {"high-level-design", "detailed-design", "database-design", "redis-design", "mq-design"}
+
+HIGH_LEVEL_DESIGN_REQUIRED_SECTIONS = [
+    "1. 版本变更记录",
+    "2. 平台概述",
+    "3. 系统设计",
+    "3.1 系统逻辑视图",
+    "3.1.1 系统设计原则",
+    "3.3 研发视图",
+    "3.4 研发结构定义",
+    "4. 核心功能",
+    "5.中间件设计",
+    "6.数据视图",
+]
+
+HIGH_LEVEL_DESIGN_FORBIDDEN_HEADINGS = [
+    "证据",
+    "Findings",
+    "必须补充信息",
+    "门禁决策",
+]
 
 DETAILED_DESIGN_MAIN_SECTIONS = [
-    "文档元数据",
-    "设计规则或设计规范",
-    "关联专项设计文档",
-    "模块边界",
-    "同步/异步或核心策略规则",
-    "流程图与流程设计",
-    "DDD/UML 类图",
-    "状态机",
-    "SDK/服务契约",
-    "接口设计",
-    "兼容策略",
-    "单元测试设计",
-    "人工评审项",
+    "1. 修订历史",
+    "2. 设计背景与目标摘要",
+    "3. 模块/功能详细设计",
+    "3.1. 业务流程图",
+    "3.2. UML类图",
+    "4. 数据库设计",
+    "5. 接口定义",
+    "5.1. API接口列表",
+    "5.2. 中间件设计",
+    "6. 单元测试",
+    "7. 性能与扩展性设计",
+    "8. 人工评审项",
 ]
 
 DETAILED_DESIGN_FORBIDDEN_HEADINGS = [
     "来源证据",
     "技术选型",
-    "数据库设计",
-    "MQ 设计",
-    "Redis 设计",
     "业务规则与校验",
     "幂等与一致性",
     "异常与日志",
@@ -247,46 +263,52 @@ DB_OLAP_REQUIRED_SECTIONS = [
 ]
 
 REDIS_REQUIRED_SECTIONS = [
-    "文档头信息",
     "历史版本信息",
-    "前言",
-    "公共配置",
-    "Redis 版本",
-    "集群配置",
-    "持久化策略",
-    "过期淘汰策略",
-    "设计项",
-    "安全与运维",
-    "人工评审项",
+    "1. 前言",
+    "1.1. 目的",
+    "1.2. 适用范围",
+    "1.3. 参考资料",
+    "2. 公共配置",
+    "2.1. Redis版本",
+    "2.2. 集群配置",
+    "2.3. 持久化策略",
+    "2.4. 过期淘汰策略",
+    "3. 设计项",
+    "3.1. <设计项名称>",
+    "3.1.1. 特性用途",
+    "3.1.2. 业务说明",
+    "3.1.3. 存储设计",
+    "3.1.4. 预估数据",
+    "3.1.5. 多团队协同",
+    "4. 安全与运维",
+    "4.1. 资源申请",
+    "4.2. 运维监控",
 ]
 
 REDIS_DESIGN_ITEM_FIELDS = [
     "特性用途",
     "业务说明",
     "存储设计",
-    "库",
-    "数据结构",
-    "TTL",
-    "Key 定义",
-    "Value 数据格式",
-    "预估数据和容量",
+    "预估数据",
     "多团队协同",
 ]
+
+REDIS_STORAGE_FIELDS = ["库", "数据结构", "ttl", "key", "数据格式"]
 
 MQ_PRODUCER_FIELDS = [
     "业务用途",
     "场景应用",
-    "业务消息 key",
+    "业务消息key",
     "消息类型",
     "消息体内容",
     "优先等级",
-    "消息 TTL",
+    "消息TTL（毫秒）",
     "持久化",
     "目的交换机",
-    "路由 key",
+    "路由key",
     "消息预估大小",
-    "生产服务或模块名称",
-    "软件需求号或 bug 号",
+    "生产服务/模块名称",
+    "软件需求号/bug号",
     "设计日期",
     "设计者",
     "备注",
@@ -303,12 +325,12 @@ MQ_CONSUMER_FIELDS = [
     "自动删除",
     "TTL",
     "消息大小",
-    "绑定的 Exchange/routingKey",
-    "死信队列 exchange/routeKey",
+    "绑定的Exchange/routingKey(多个）",
+    "死信队列exchange/routeKey",
     "消费服务",
-    "消息 key",
+    "消息key",
     "运维监控",
-    "软件需求号或 bug 号",
+    "软件需求号/bug号",
     "设计日期",
     "设计者",
     "备注",
@@ -459,6 +481,7 @@ TEAM_RULE_CATALOG = [
     {"id": "H4", "category": "概要设计", "rule": "后端业务系统研发结构按 presentation/application/domain/port/infrastructure/common 分层；如项目 profile 另有约定，以 profile 为准。"},
     {"id": "H5", "category": "概要设计", "rule": "application 层负责编排，不直接沉淀复杂业务判断；核心业务规则进入 domain。"},
     {"id": "H6", "category": "概要设计", "rule": "聚合根不通过依赖注入创建，应通过工厂创建；一次业务中聚合根创建和修改边界要清晰。"},
+    {"id": "H7", "category": "概要设计", "rule": "概要设计必须按团队概要设计模板生成，保留版本变更记录、平台概述、系统设计、系统逻辑视图、系统设计原则、研发视图、研发结构定义、核心功能、中间件设计、数据视图；不得用通用证据/Findings/门禁决策模板替代正文。"},
     {"id": "D1", "category": "详细设计", "rule": "模块包含描述、业务流程、时序/交互、数据库设计、接口设计、单元测试设计。"},
     {"id": "D2", "category": "详细设计", "rule": "列出业务规则、状态机、校验规则、异常码、幂等点、事务边界、回滚策略。"},
     {"id": "D3", "category": "详细设计", "rule": "导入、批处理、异步任务必须写数据量上限、批次大小、超时时间、进度查询、失败处理。"},
@@ -909,6 +932,7 @@ SKILLS = [
             "H5 application 层负责编排，不直接沉淀复杂业务判断；核心业务规则进入 domain",
             "H6 聚合根不通过依赖注入创建，应通过工厂创建；一次业务中聚合根创建和修改边界要清晰",
             "DG1-DG5 正式概要设计必须有文档编号、状态和留存策略；中间过程摘要不得作为正式文档留存",
+            "H7 high-level-design.md 必须按 `assets/high-level-design-template.md` 的章节顺序生成，不得使用通用证据/Findings/门禁决策模板替代概要设计正文",
         ],
     },
     {
@@ -925,10 +949,10 @@ SKILLS = [
         "gates": ["主详细设计只保留功能实现主线", "专项设计独立成文并在主文档引用", "流程使用 flowchart 且紧跟流程设计说明", "DDD/分层/扩展点方案包含 classDiagram", "测试策略覆盖主干和异常路径"],
         "approvals": ["核心链路事务边界变化", "高并发路径设计", "权限/认证/鉴权设计", "DDL", "MQ 新队列或 topic", "Redis 新 Key"],
         "checks": [
-            "D1 详细设计主文档只保留功能实现主线，推荐结构为文档元数据、设计规则或规范、关联专项设计文档、模块边界、同步/异步或核心策略、流程图与流程设计、DDD/UML 类图、状态机、SDK/服务契约、接口设计、兼容策略、单元测试设计、人工评审项",
-            "D2 主文档不得生成来源证据、技术选型、数据库设计展开、MQ 设计展开、Redis 设计展开、业务规则和校验独立章节、幂等和一致性独立章节、异常和日志独立章节、发布、灰度、上线章节",
+            "D1 详细设计主文档必须按 `assets/detailed-design-template.md` 的章节顺序生成：修订历史、设计背景与目标摘要、模块/功能详细设计、业务流程图、UML类图、数据库设计、接口定义、API接口列表、中间件设计、单元测试、性能与扩展性设计、人工评审项",
+            "D2 主文档不得生成来源证据、技术选型、数据库表结构展开、MQ 设计展开、Redis 设计展开、业务规则和校验独立章节、幂等和一致性独立章节、异常和日志独立章节、发布、灰度、上线章节",
             "D3 来源证据放入 StageRunResult、repo-context 产物或评审证据；技术选型放入概要设计、技术选型评审或 repo-context 产物，除非用户明确要求，不进入详细设计正文",
-            "D4 数据库、MQ、Redis、接口契约、测试策略只能在主文档的关联专项设计文档表中引用；不得在主文档重复展开字段表、消息表、Redis Key 表",
+            "D4 数据库设计章节只能关联 `database-design.md` 或数据库模板；中间件设计章节只能关联 `mq-design.md`、`redis-design.md` 和对应规范，不得在主文档重复展开字段表、消息表、Redis Key 表",
             "D5 详细设计流程必须使用 Mermaid flowchart，不得用 sequenceDiagram 替代流程图；每个 flowchart 下必须紧跟流程设计说明",
             "D6 流程设计说明必须把业务规则、校验规则、事务边界、幂等与一致性、异常场景、日志要求、取消、重试、补偿、文件清理等合并到对应流程下，不得堆到文档后半部分",
             "D7 出现 DDD、聚合根、领域服务、application/domain/infrastructure 分层、port/adapter、SDK 模板方法、Handler、Strategy、Template 等扩展模型时，必须补充 Mermaid classDiagram",
@@ -1620,11 +1644,23 @@ def control_surface_policy(skill: dict) -> dict:
 
 
 def team_document_policy(skill: dict) -> dict:
+    if skill["id"] == "high-level-design":
+        return {
+            "artifact": "high-level-design.md",
+            "canonical_template": "skills/high-level-design/assets/high-level-design-template.md",
+            "source_template": "inputs/萤启运营系统概要设计 - 萤启服务商系统 - 站点标题.html",
+            "required_sections": HIGH_LEVEL_DESIGN_REQUIRED_SECTIONS,
+            "forbidden_headings": HIGH_LEVEL_DESIGN_FORBIDDEN_HEADINGS,
+            "rules": ["概要设计必须保留团队模板章节顺序", "系统设计必须明确逻辑视图、设计原则、研发视图和研发结构", "中间件设计只说明是否涉及并引用专项设计", "数据视图声明事实表、读模型和专项 DB 设计关系"],
+            "blocked_when": ["high-level-design.md 缺少团队模板章节", "使用通用证据/Findings/门禁决策模板替代概要设计正文", "跨系统边界、事件协作、最终一致性或异常流缺失"],
+        }
     if skill["id"] == "detailed-design":
         return {
-            "scope": "团队详细设计主文档只保留功能实现主线，证据、选型、专项设计和发布灰度内容必须拆出。",
+            "scope": "团队详细设计主文档按输入详细设计规范组织，证据、选型、专项展开和发布灰度内容必须拆出。",
             "main_document": {
                 "artifact": "detailed-design.md",
+                "canonical_template": "skills/detailed-design/assets/detailed-design-template.md",
+                "source_template": "inputs/详细设计规范.md",
                 "allowed_sections": DETAILED_DESIGN_MAIN_SECTIONS,
                 "forbidden_headings": DETAILED_DESIGN_FORBIDDEN_HEADINGS,
                 "forbidden_mermaid": ["sequenceDiagram"],
@@ -1673,6 +1709,7 @@ def team_document_policy(skill: dict) -> dict:
             "artifact": "redis-design.md",
             "required_sections": REDIS_REQUIRED_SECTIONS,
             "design_item_required_fields": REDIS_DESIGN_ITEM_FIELDS,
+            "storage_required_fields": REDIS_STORAGE_FIELDS,
             "rules": ["Redis 只做加速层、协调层、短态承载层", "Redis 不做事实库", "Redis 不做消息队列", "所有 Key 必须设置 TTL，最大不超过 30 天", "Redis 不可用必须有降级策略"],
             "waiting_for_input_when": ["Redis 版本无法确认", "拓扑无法确认", "持久化策略无法确认", "淘汰策略无法确认"],
             "waiting_for_human_review_when": ["Redis 新 Key", "批量 Key", "Key 批量删除", "Value 单 Key 超过 1MB"],
@@ -1691,14 +1728,23 @@ def team_document_policy(skill: dict) -> dict:
 
 
 def team_document_note(skill: dict) -> str:
+    if skill["id"] == "high-level-design":
+        return f"""
+# 团队概要设计模板规则
+- `high-level-design.md` 必须按 `assets/high-level-design-template.md` 组织，章节顺序为：{"、".join(HIGH_LEVEL_DESIGN_REQUIRED_SECTIONS)}。
+- 不得用通用 `证据`、`Findings`、`必须补充信息`、`门禁决策` 模板替代概要设计正文；这些内容只能进入 `StageRunResult` 或评审产物。
+- `系统设计` 必须覆盖系统逻辑视图、系统设计原则、研发视图和研发结构定义。
+- `核心功能` 必须按业务功能拆分，说明参与系统、职责边界、流程、状态或异常流；涉及 Redis/MQ/DB 时只在概要层说明范围，并关联专项设计。
+- `中间件设计` 必须声明是否涉及 Redis/MQ/定时任务/外部依赖，并引用专项文档；`数据视图` 必须声明事实表、读模型或关联数据库专项。
+"""
     if skill["id"] == "detailed-design":
         forbidden = "、".join(DETAILED_DESIGN_FORBIDDEN_HEADINGS)
         return f"""
 # 团队详细设计主文档规则
-- `detailed-design.md` 只保留功能实现相关的主线设计，章节限定为：{"、".join(DETAILED_DESIGN_MAIN_SECTIONS)}。
+- `detailed-design.md` 必须按 `assets/detailed-design-template.md` 组织，章节顺序为：{"、".join(DETAILED_DESIGN_MAIN_SECTIONS)}。
 - 主文档不得包含独立章节：{forbidden}；不得展开数据库字段表、MQ 表格、Redis Key 表格。
 - 来源证据只能进入 `stage-run-result.json`、repo-context 产物或评审证据；技术选型进入概要设计、技术选型评审或 repo-context，除非用户明确要求。
-- 数据库、MQ、Redis、接口契约和测试策略只能在“关联专项设计文档”中引用，并登记到 `StageRunResult.artifacts`。
+- `数据库设计` 章节只能关联 `database-design.md` 或数据库模板；`中间件设计` 章节只能关联 `mq-design.md`、`redis-design.md` 和对应规范，并登记到 `StageRunResult.artifacts`。
 - 流程必须使用 Mermaid `flowchart`，禁止用 `sequenceDiagram` 替代；每个 `flowchart` 后必须紧跟“流程设计说明”。
 - 流程设计说明必须把业务规则、校验规则、事务边界、幂等与一致性、异常场景、日志要求以及取消、重试、补偿、文件清理等合并到对应流程下。
 - 出现 DDD、聚合根、领域服务、application/domain/infrastructure 分层、port/adapter、SDK 模板方法、Handler、Strategy、Template 等设计取向时，主文档必须补充 Mermaid `classDiagram`。
@@ -1720,7 +1766,8 @@ def team_document_note(skill: dict) -> str:
         return """
 # 团队 Redis 设计规则
 - Redis 设计必须生成独立 `redis-design.md`，不得在主详细设计中展开。
-- 文档必须按 `assets/redis-design-template.md` 组织，并覆盖 Redis 版本、集群、持久化、淘汰策略、设计项、安全与运维和人工评审项。
+- 文档必须按 `assets/redis-design-template.md` 组织，并覆盖历史版本信息、前言、公共配置、Redis版本、集群配置、持久化策略、过期淘汰策略、设计项、资源申请和运维监控。
+- 每个设计项必须包含特性用途、业务说明、存储设计、预估数据、多团队协同；存储设计必须列出库、数据结构、ttl、key 和数据格式。
 - Redis 只做加速层、协调层、短态承载层，不做事实库、不做消息队列；已使用 RabbitMQ 的项目不得设计 Redis 发布订阅或 Redis 延迟队列。
 - Key 默认使用 db0，建议格式 `{服务模块}:{租户ID}:{数据结构}:{业务Key}`，长度不超过 100 字节。
 - 所有 Key 必须设置 TTL，最大不超过 30 天；大批量 Key 必须有随机 TTL 抖动；Redis 不可用必须有降级策略。
@@ -2220,6 +2267,78 @@ def database_oltp_template_md() -> str:
 
 
 def artifact_templates(skill: dict) -> dict:
+    if skill["id"] == "high-level-design":
+        return {
+            "high-level-design-template.md": """---
+document_number: "HLD-<DOMAIN>-<YYYYMMDD>-<SEQ>"
+document_status: "draft"
+retention_policy: "keep_until_run_end"
+language: "zh-CN"
+owner: "架构师"
+source_artifacts: []
+---
+
+# <系统/项目名称>概要设计
+
+## 1. 版本变更记录
+
+| 版本 | 日期 | 变更内容 | 作者 | 评审/批准 |
+| --- | --- | --- | --- | --- |
+| V1.0 | YYYY-MM-DD | 初版 |  |  |
+
+## 2. 平台概述
+
+## 3. 系统设计
+
+### 3.1 系统逻辑视图
+
+### 3.1.1 系统设计原则
+
+### 3.3 研发视图
+
+### 3.4 研发结构定义
+
+## 4. 核心功能
+
+### 4.1 <核心功能名称>
+
+#### 4.1.1 参与系统与职责设计
+
+| 系统 | 职责 |
+| --- | --- |
+|  |  |
+
+#### 4.1.2 核心流程
+
+```mermaid
+flowchart TD
+    A["开始"] --> B["处理"]
+```
+
+#### 4.1.3 状态机设计
+
+| 状态 | 条件 | 动作 |
+| --- | --- | --- |
+|  |  |  |
+
+#### 4.1.4 异常流与最终一致性
+
+## 5.中间件设计
+
+| 类型 | 是否涉及 | 专项文档 | 说明 |
+| --- | --- | --- | --- |
+| Redis | 是/否 | `redis-design.md` |  |
+| MQ | 是/否 | `mq-design.md` |  |
+| 定时任务 | 是/否 |  |  |
+| 外部依赖 | 是/否 |  |  |
+
+## 6.数据视图
+
+| 数据对象 | 类型 | 权威来源 | 专项文档 | 说明 |
+| --- | --- | --- | --- | --- |
+|  | 事实表/读模型/缓存/消息 |  | `database-design.md` |  |
+""",
+        }
     if skill["id"] == "detailed-design":
         return {
             "detailed-design-template.md": """---
@@ -2231,28 +2350,22 @@ owner: "后端开发"
 source_artifacts: []
 ---
 
-# 详细设计
+# [项目/模块名称] 详细设计说明书
 
-## 1. 文档元数据
+## 1. 修订历史
 
-## 2. 设计规则或设计规范
+| 版本号 | 修订日期 | 修订人 | 修订描述 |
+| --- | --- | --- | --- |
+| V1.0 | YYYY-MM-DD |  | 初稿创建 |
 
-## 3. 关联专项设计文档
-| 专项 | 文档 | 说明 |
-| --- | --- | --- |
-| 数据库设计 | `database-design.md` | 表级 OLTP/OLAP 设计、字段、索引、CRUD 契约、并发和修复规则 |
-| MQ 设计 | `mq-design.md` | 生产者、消费者、消息体、队列、死信、重试、回放和监控 |
-| Redis 设计 | `redis-design.md` | Key、Value、TTL、容量、降级和运维 |
-| 接口契约 | `interface-contracts.yaml` | 请求响应、处理上限和消息 contract |
-| 测试策略 | `test-strategy.md` | 单元、集成、性能、稳定性和回归测试 |
+## 2. 设计背景与目标摘要
 
-## 4. 模块边界
+- 关联概要设计：`high-level-design.md`
+- 核心目标摘要：
 
-## 5. 同步/异步或核心策略规则
+## 3. 模块/功能详细设计
 
-## 6. 流程图与流程设计
-
-### 6.1 <流程名称>
+### 3.1. 业务流程图
 
 ```mermaid
 flowchart TD
@@ -2269,7 +2382,7 @@ flowchart TD
 - 日志要求：
 - 取消、重试、补偿、文件清理：
 
-## 7. DDD/UML 类图
+### 3.2. UML类图
 
 ```mermaid
 classDiagram
@@ -2282,17 +2395,38 @@ classDiagram
     ApplicationService --> ExternalAdapter
 ```
 
-## 8. 状态机
+类图说明：
 
-## 9. SDK/服务契约
+## 4. 数据库设计
 
-## 10. 接口设计
+| 设计项 | 关联文档 | 说明 |
+| --- | --- | --- |
+| 数据库专项设计 | `database-design.md` | 关联关系型 OLTP/OLAP 数据库模板，不在主详细设计展开字段和索引 |
 
-## 11. 兼容策略
+## 5. 接口定义
 
-## 12. 单元测试设计
+### 5.1. API接口列表
 
-## 13. 人工评审项
+| 接口名称 | YApi链接 | 接口路径 | 说明 |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
+### 5.2. 中间件设计
+
+| 中间件 | 是否涉及 | 关联文档 | 评审要求 |
+| --- | --- | --- | --- |
+| MQ | 是/否 | `mq-design.md` | 遵循 MQ 设计模板并完成对应评审 |
+| Redis | 是/否 | `redis-design.md` | 遵循 Redis 设计模板并完成对应评审 |
+
+## 6. 单元测试
+
+| 测试对象 | 正常流程 | 分支流程 | 异常流程 | 断言 |
+| --- | --- | --- | --- | --- |
+|  |  |  |  |  |
+
+## 7. 性能与扩展性设计
+
+## 8. 人工评审项
 """,
         }
     if skill["id"] == "database-design":
@@ -2301,34 +2435,65 @@ classDiagram
             "database-olap-template.md": "# OLAP 数据库设计\n\n" + "\n\n".join(f"## {index}. {section}" for index, section in enumerate(DB_OLAP_REQUIRED_SECTIONS, start=1)) + "\n",
         }
     if skill["id"] == "redis-design":
-        item_fields = "\n".join(f"- {field}：" for field in REDIS_DESIGN_ITEM_FIELDS)
         return {
-            "redis-design-template.md": """# Redis 设计
+            "redis-design-template.md": """# Redis 详细设计
 
-## 1. 文档头信息
+## 历史版本信息
 
-## 2. 历史版本信息
+| 版本 | 日期 | 编制 | 审核 | 批准 | 备注 |
+| --- | --- | --- | --- | --- | --- |
+| V1.0.0 | YYYY-MM-DD |  |  |  | 初版 |
 
-## 3. 前言
+## 1. 前言
 
-## 4. 公共配置
+### 1.1. 目的
 
-## 5. Redis 版本
+### 1.2. 适用范围
 
-## 6. 集群配置
+### 1.3. 参考资料
 
-## 7. 持久化策略
+## 2. 公共配置
 
-## 8. 过期淘汰策略
+### 2.1. Redis版本
 
-## 9. 设计项
+### 2.2. 集群配置
 
-### 9.1 <设计项名称>
-""" + item_fields + """
+### 2.3. 持久化策略
 
-## 10. 安全与运维
+### 2.4. 过期淘汰策略
 
-## 11. 人工评审项
+## 3. 设计项
+
+### 3.1. <设计项名称>
+
+#### 3.1.1. 特性用途
+
+#### 3.1.2. 业务说明
+
+#### 3.1.3. 存储设计
+
+| 项/值 | 数值 | 说明 |
+| --- | --- | --- |
+| 库 | 0 |  |
+| 数据结构 | String/Hash/List/Set/ZSet |  |
+| ttl |  | TTL 必须说明单位 |
+| key |  |  |
+
+**数据格式**
+
+| 字段名 | 字段类型 | 是否可空 | 备注 |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
+#### 3.1.4. 预估数据
+
+#### 3.1.5. 多团队协同
+
+## 4. 安全与运维
+
+### 4.1. 资源申请
+
+### 4.2. 运维监控
 """,
         }
     if skill["id"] == "mq-design":
@@ -2384,7 +2549,12 @@ def team_validator_script(skill_id: str) -> str:
     if skill_id not in TEAM_DOC_TARGET_SKILLS:
         return generic_validator_script()
     policies = {
+        "high-level-design": {
+            "required_sections": HIGH_LEVEL_DESIGN_REQUIRED_SECTIONS,
+            "forbidden_headings": HIGH_LEVEL_DESIGN_FORBIDDEN_HEADINGS,
+        },
         "detailed-design": {
+            "required_sections": DETAILED_DESIGN_MAIN_SECTIONS,
             "forbidden_headings": DETAILED_DESIGN_FORBIDDEN_HEADINGS,
             "flow_note_fields": DETAILED_DESIGN_FLOW_NOTE_FIELDS,
             "ddd_terms": DETAILED_DESIGN_DDD_TERMS,
@@ -2400,6 +2570,7 @@ def team_validator_script(skill_id: str) -> str:
         "redis-design": {
             "required_sections": REDIS_REQUIRED_SECTIONS,
             "item_fields": REDIS_DESIGN_ITEM_FIELDS,
+            "storage_fields": REDIS_STORAGE_FIELDS,
         },
         "mq-design": {
             "producer_fields": MQ_PRODUCER_FIELDS,
@@ -2407,12 +2578,47 @@ def team_validator_script(skill_id: str) -> str:
         },
     }
     validator_bodies = {
+        "high-level-design": r'''
+def validate_output(payload_path, payload):
+    errors = []
+    text = read_artifact(payload_path, payload, "high-level-design.md")
+    if not text:
+        return ["缺少 high-level-design.md artifact 或文件不可读"]
+    for section in POLICY["required_sections"]:
+        if section not in text:
+            errors.append("high-level-design.md 缺少团队概要设计模板章节: " + section)
+    section_positions = []
+    for section in POLICY["required_sections"]:
+        index = text.find(section)
+        if index >= 0:
+            section_positions.append(index)
+    if section_positions != sorted(section_positions):
+        errors.append("high-level-design.md 章节顺序必须与团队概要设计模板一致")
+    normalized_headings = [re.sub(r"\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
+    for forbidden in POLICY["forbidden_headings"]:
+        if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):
+            errors.append("high-level-design.md 不得使用通用产物模板标题: " + forbidden)
+    for required in ["系统逻辑视图", "系统设计原则", "研发视图", "研发结构定义", "中间件设计", "数据视图"]:
+        if required not in text:
+            errors.append("high-level-design.md 缺少概要设计核心内容: " + required)
+    return errors
+''',
         "detailed-design": r'''
 def validate_output(payload_path, payload):
     errors = []
     text = read_artifact(payload_path, payload, "detailed-design.md")
     if not text:
         return ["缺少 detailed-design.md artifact 或文件不可读"]
+    for section in POLICY["required_sections"]:
+        if section not in text:
+            errors.append("detailed-design.md 缺少团队详细设计模板章节: " + section)
+    section_positions = []
+    for section in POLICY["required_sections"]:
+        index = text.find(section)
+        if index >= 0:
+            section_positions.append(index)
+    if section_positions != sorted(section_positions):
+        errors.append("detailed-design.md 章节顺序必须与团队详细设计模板一致")
     normalized_headings = [re.sub(r"\s+", " ", heading).strip(" ：:") for heading in markdown_headings(text)]
     for forbidden in POLICY["forbidden_headings"]:
         if any(heading == forbidden or heading.startswith(forbidden + " ") for heading in normalized_headings):
@@ -2495,6 +2701,9 @@ def validate_output(payload_path, payload):
     for section in POLICY["required_sections"] + POLICY["item_fields"]:
         if section not in text:
             errors.append("redis-design.md 缺少模板章节或字段: " + section)
+    for field in POLICY["storage_fields"]:
+        if field not in text:
+            errors.append("redis-design.md 存储设计缺少字段: " + field)
     if re.search(r"Redis\s*(作为|做|充当).{0,12}事实库", text):
         errors.append("Redis 不得作为事实库")
     if re.search(r"Redis\s*(作为|做|充当).{0,12}消息队列", text):
@@ -2600,6 +2809,17 @@ fail(validate_output(payload_path, payload))
 
 
 EXTRA_EVAL_SCENARIOS = {
+    "high-level-design": [
+        {
+            "case": "team_high_level_template_required",
+            "title": "概要设计必须使用萤启团队模板",
+            "material": "用户要求生成萤启运营系统能力概要设计，需覆盖版本变更、平台概述、系统设计、系统逻辑视图、系统设计原则、研发视图、研发结构、核心功能、中间件设计和数据视图。",
+            "expected_gate_decision": "pass",
+            "rule_refs": ["H1", "H2", "H3", "H7"],
+            "risk_focus": ["概要设计模板", "系统边界", "中间件范围", "数据视图"],
+            "forbidden_behavior": ["只输出证据/Findings/门禁决策", "省略中间件设计或数据视图"],
+        }
+    ],
     "detailed-design": [
         {
             "case": "team_db_reference_only",
@@ -2717,6 +2937,44 @@ def extra_eval_case(skill: dict, scenario: dict) -> dict:
         "require_human_review": "waiting_for_human_review",
         "block": "blocked",
     }[scenario["expected_gate_decision"]]
+    common_pass_criteria = [
+        "StageRunResult status 合法",
+        "未指定 language 时必须询问用户选择 zh-CN 或 en",
+        "正式 Markdown 文档必须包含 document_metadata.document_number、document_status、retention_policy",
+        "required_information_requests 在输入缺失时必须包含 questions",
+        "framework selection 必须遵循 repo_context/profile；Java/Spring 持久化默认 mybatis-plus，JDBC 必须评审",
+        "forbidden_behavior 未出现在输出决策中",
+    ]
+    skill_specific_pass_criteria = {
+        "high-level-design": [
+            "high-level-design.md 必须按 assets/high-level-design-template.md 生成",
+            "high-level-design.md 必须包含版本变更记录、平台概述、系统设计、系统逻辑视图、系统设计原则、研发视图、研发结构定义、核心功能、中间件设计、数据视图",
+            "high-level-design.md 不得使用通用证据/Findings/门禁决策模板替代概要设计正文",
+        ],
+        "detailed-design": [
+            "detailed-design.md 必须按 assets/detailed-design-template.md 生成",
+            "detailed-design.md 不得包含来源证据、技术选型、业务规则与校验、幂等与一致性、异常与日志、发布、灰度、上线等禁止标题",
+            "detailed-design.md 不得包含 sequenceDiagram，必须包含 flowchart，且每个 flowchart 后必须有流程设计说明",
+            "出现 DDD、聚合根、ApplicationService、Repository、Handler 或 Template 时必须包含 classDiagram",
+            "涉及 DB/MQ/Redis 时必须生成独立专项文档并登记到 StageRunResult.artifacts",
+            "存在 DDL、MQ 新队列或 Redis 新 Key 时必须 waiting_for_human_review",
+        ],
+        "redis-design": [
+            "redis-design.md 必须按 assets/redis-design-template.md 生成",
+            "Redis 设计项必须包含特性用途、业务说明、存储设计、预估数据、多团队协同",
+            "存储设计必须包含库、数据结构、ttl、key、数据格式，且 TTL 必须带单位",
+        ],
+        "mq-design": [
+            "mq-design.md 必须按 assets/mq-design-template.md 生成",
+            "MQ 设计必须包含生产者表和消费者表，列头与 xxxMQ设计.xlsx 一致",
+            "必须定义死信、幂等、重试和回放策略；超过 10KB 或回放生产消息必须 waiting_for_human_review",
+        ],
+        "database-design": [
+            "database-design.md 必须按 assets/database-oltp-template.md 或 assets/database-olap-template.md 生成",
+            "OLTP 章节顺序、标题名称和表格列头必须与关系型(OLTP)详细设计模板一致",
+            "缺少库名、实例、版本、负责人、索引用途、QPS/容量、审批状态、敏感级别等事实时必须 waiting_for_input",
+        ],
+    }.get(skill["id"], [])
     return {
         "id": f"{skill['id']}-{scenario['case']}",
         "name": f"{skill['name']} {scenario['title']}",
@@ -2750,19 +3008,7 @@ def extra_eval_case(skill: dict, scenario: dict) -> dict:
         "expected_behavior": "按团队详细设计拆分规范输出产物，主文档不混入证据、选型、专项展开或发布灰度章节，并用确定性校验阻断违规内容。",
         "expected_gate_decision": scenario["expected_gate_decision"],
         "expected_status": expected_status,
-        "pass_criteria": [
-            "StageRunResult status 合法",
-            "未指定 language 时必须询问用户选择 zh-CN 或 en",
-            "正式 Markdown 文档必须包含 document_metadata.document_number、document_status、retention_policy",
-            "required_information_requests 在输入缺失时必须包含 questions",
-            "framework selection 必须遵循 repo_context/profile；Java/Spring 持久化默认 mybatis-plus，JDBC 必须评审",
-            "detailed-design.md 不得包含来源证据、技术选型、数据库设计、MQ 设计、Redis 设计、业务规则与校验、幂等与一致性、异常与日志、发布、灰度、上线等禁止标题",
-            "detailed-design.md 不得包含 sequenceDiagram，必须包含 flowchart，且每个 flowchart 后必须有流程设计说明",
-            "出现 DDD、聚合根、ApplicationService、Repository、Handler 或 Template 时必须包含 classDiagram",
-            "涉及 DB/MQ/Redis 时必须生成独立专项文档并登记到 StageRunResult.artifacts",
-            "存在 DDL、MQ 新队列或 Redis 新 Key 时必须 waiting_for_human_review",
-            "forbidden_behavior 未出现在输出决策中",
-        ],
+        "pass_criteria": common_pass_criteria + skill_specific_pass_criteria,
         "severity_when_failed": "critical",
         "grader": {
             "type": "deterministic",

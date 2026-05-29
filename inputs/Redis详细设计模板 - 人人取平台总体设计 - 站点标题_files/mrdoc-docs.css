@@ -1,0 +1,300 @@
+/*一级无序li显示实心圆点*/
+.doc-content ul li{
+    list-style:disc;
+}
+/*二级无序li显示空心圆点*/
+.doc-content ul > li > ul > li{
+    list-style-type: circle;
+}
+/*有序li显示数字*/
+.doc-content ol li{
+    list-style-type: decimal;
+}
+.doc-content ol ol ul,.doc-content ol ul ul,.doc-content ul ol ul,.doc-content ul ul ul {
+    list-style-type: square;
+}
+/* 三级及以下无序li显示小方块 */
+.doc-content ul ul ul li{
+    list-style-type: square;
+}
+/* 下拉目录隐藏li样式 */
+.editormd-toc-menu ul.markdown-toc-list li{
+    /*list-style:none;*/
+}
+/* 弹出框文档目录样式 */
+ul.markdown-toc-list{
+    list-style-position:inside;
+}
+ul.markdown-toc-list li, .mce-toc li{
+    list-style: none!important;
+    line-height: 24px;
+}
+ul.markdown-toc-list > li > ul > li,ul.markdown-toc-list > li > ul li{
+    padding-left:15px;
+}
+.mce-toc ul ul{
+    padding-left:15px;
+}
+ul.markdown-toc-list a{
+    /* text-decoration: underline!important; */
+}
+/* 块级代码和行内代码去除边框 */
+.markdown-body p code{
+    border:none;
+}
+/* HTML预览样式 */
+.markdown-body h1{ 
+    font-size: 1.7em;
+}
+.markdown-body h2{
+    font-size: 1.5em;
+}
+.markdown-body h3{
+    font-size: 1.25em;
+}
+.markdown-body h4{
+    font-size: 1em;
+}
+.markdown-body h5{
+    font-size: .875em;
+}
+.markdown-body h6{
+    font-size: .85em;
+}
+#url_qrcode img{
+    margin: auto;
+}
+/* 文档代码块样式 */
+ol.linenums li{ 
+    width: max-content;
+}
+pre.linenums{
+    max-height: 500px;
+}
+li.L1, li.L3, li.L5, li.L7, li.L9 {
+    background: none !important;
+}
+
+/* layui弹出框颜色 */
+.layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after{
+    border-bottom: 2px solid #333;
+}
+.layui-tab-brief>.layui-tab-title .layui-this{
+    color: #333;
+}
+/* 覆盖vditor样式 */
+.vditor-outline__item{
+    padding: 0;
+    padding-bottom: 5px;
+    color: #333;
+}
+.vditor-reset pre>code{
+    font-size: 100%;
+}
+/* 文档图片悬浮鼠标样式 */
+#content img:hover{
+    cursor: -moz-zoom-in;
+    cursor: -webkit-zoom-in;
+    cursor: zoom-in;
+}
+#wm{
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    opacity: 0.1;
+    pointer-events: none;
+}
+.collected{
+    color: rgb(250, 173, 20);
+}
+.doc-bottom-icon,.doc-bottom-btn{
+    cursor: pointer;
+}
+
+/* 文集大纲图标 */
+i.switch-toc{
+    /* padding-bottom:10px;
+    padding-top: 10px; */
+    padding: 10px;
+    cursor: pointer;
+    /* margin-left: 10px; */
+}
+
+i.switch-toc + a{
+    padding-left: 0px !important;
+}
+
+/* 文集大纲样式 */
+ul#doc-tree{
+    padding-left: 0;
+}
+.layui-tab-item #doc-tree li{
+    list-style: none;
+}
+
+.project-toc-right,.project-toc-left,.project-toc-center{
+    display: inline-block;
+}
+.project-toc-left{
+    border-top:1px dashed #d8d8d8;
+    width: 100%;
+    padding-top: 4px;
+}
+.project-toc-right{
+    float: right;
+    position: absolute;
+    right: 0px;
+    z-index: 100;
+    background-color: white;
+    color: #bfbfbf;
+    padding-left: 40px;
+    padding-right: 90px;
+    font-family: Consolas,Menlo,Courier,monospace;
+}
+.project-toc-left a{
+    text-align: left;
+    margin-top: -15px;
+    padding-right: 40px;
+    position: absolute;
+    background: #fff;
+    z-index: 1;
+    min-width: 0;
+    height: 24px;
+    color: #666;
+    font-family: Consolas,Menlo,Courier,monospace;
+    overflow: hidden;
+}
+/* 为外部链接添加图标指示 */
+.external::after {
+  content: '\e7c2';
+  font-family: 'iconfont';
+}
+@media screen and (max-width:768px){
+    .project-toc-left{
+        border-top:1px dashed #d8d8d8;
+        width: 0;
+        padding-top: 4px;
+    }
+}
+/* 覆盖vditor文档目录样式 */
+.vditor-outline{
+    width: 200px;
+}
+.vditor-outline ul{
+    padding-left: 0px;
+}
+
+/* 文集大纲搜索框 */
+.project-search-div{
+    position: relative;
+    width: 100%;
+    z-index: 999;
+}
+.project-search-active-div{
+    position: fixed;
+    width: inherit;
+    top: 0;
+}
+
+/* 文档评论样式 */
+.doc-comment{
+    margin:20px;
+}
+
+/* 覆盖jq-comments的一些样式 */
+/* 头像大小 */
+.jquery-comments i.fa{
+    height: 2em !important;
+}
+.jquery-comments i.profile-picture{
+    font-size: 1em !important;
+}
+.jquery-comments ul.main li.comment .comment-wrapper > .profile-picture{
+    margin-right: 0 !important;
+}
+.jquery-comments ul.main li.comment .comment-header{
+    line-height: 1em !important;
+}
+.jquery-comments ul.main li.comment .child-comments .profile-picture{
+    width: 1em !important;
+}
+
+/* 文集目录悬浮添加按钮 */
+.hover-add{
+    display: none !important;
+    text-decoration: none !important;
+    margin-right: 10px !important;
+    padding-right: 0px !important;    
+}
+.hover-add > i{
+    background-color: #fafafa;
+}
+ul.summary div:hover .hover-add,ul.summary li:hover > .hover-add{
+    display: inline !important;
+    right: 15px;
+    position: absolute !important;
+}
+
+/* 文档评论样式 */
+.commentBox {
+    margin:20px;
+}
+.noComment {
+    display:none;
+}
+.comment {
+    padding-bottom: 10px;
+}
+.comment + .comment, .reply + .reply{
+    border-top:1px solid #ccc;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+.reply + .reply{
+    border-top:1px solid #ccc;
+    padding: 10px;
+}
+.comment b{
+    color:#333; 
+    font-size:16px; 
+    margin-top:5px;
+    margin-right: 10px;
+}
+.comment b span {
+    color:#333; 
+    font-size:14px; 
+    margin-left:20px;
+}
+.comment .comment-time{
+    float: right;
+    font-size: 14px;
+    color: #8590a6;
+}
+.comment p {
+    /* font-size:16px;  */
+    color:#333;
+}
+.commentBox textarea {
+    overflow: auto; 
+    width: 100%; 
+    height: 95px; 
+    outline: none; 
+    resize: none;
+    border:solid 1px #999; 
+    padding: 10px;
+    border-radius:10px;
+}
+.commentBox button {
+    float:right; 
+    margin-left:20px;  
+    border-radius:5px; 
+}
+.reply {
+    margin:15px 0 0px 15px;
+}
+.reply-link{
+    float: right;
+    color: #8ab8f3;
+    font-size: 14px;
+}

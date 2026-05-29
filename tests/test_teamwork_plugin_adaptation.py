@@ -39,10 +39,12 @@ class TeamworkPluginAdaptationTests(unittest.TestCase):
         self.assertIn("人人取----Yapi使用规范", titles)
         self.assertIn("人人取----缓存Redis设计规范", titles)
         self.assertIn("萤启运营系统概要设计", titles)
+        for item in sources["documents"]:
+            self.assertIn(str(ROOT / "inputs"), item["source_path"])
 
         rules = json.loads((ROOT / "engineering-assistant" / "registry" / "team-rule-catalog.yaml").read_text(encoding="utf-8"))
         rule_ids = {item["id"] for item in rules["rules"]}
-        for rule_id in ["RRQ-LOG1", "RRQ-IDEMP1", "YAPI5", "YQ3"]:
+        for rule_id in ["H7", "RRQ-LOG1", "RRQ-IDEMP1", "YAPI5", "YQ3"]:
             self.assertIn(rule_id, rule_ids)
         self.assertIn("YAPI", rules["eval_rule_prefixes"]["detailed-design"])
         self.assertIn("YQ", rules["eval_rule_prefixes"]["code-review"])

@@ -56,6 +56,18 @@ def payload(skill_id: str, artifacts: list[dict[str, str]], status: str = "succe
 
 
 class TeamDocumentDesignRulesTest(unittest.TestCase):
+    def test_high_level_design_contract_exposes_team_template_policy(self) -> None:
+        contract = json.loads((ROOT / "skills" / "high-level-design" / "contract.yaml").read_text(encoding="utf-8"))
+        policy = contract["team_document_policy"]
+
+        self.assertEqual("skills/high-level-design/assets/high-level-design-template.md", policy["canonical_template"])
+        for section in ["1. 版本变更记录", "2. 平台概述", "3. 系统设计", "5.中间件设计", "6.数据视图"]:
+            self.assertIn(section, policy["required_sections"])
+
+        skill_md = (ROOT / "skills" / "high-level-design" / "SKILL.md").read_text(encoding="utf-8")
+        for text in ["团队概要设计模板规则", "high-level-design-template.md", "系统逻辑视图", "数据视图"]:
+            self.assertIn(text, skill_md)
+
     def test_detailed_design_contract_exposes_team_document_policy(self) -> None:
         contract = json.loads((ROOT / "skills" / "detailed-design" / "contract.yaml").read_text(encoding="utf-8"))
         policy = contract["team_document_policy"]
@@ -64,15 +76,18 @@ class TeamDocumentDesignRulesTest(unittest.TestCase):
         self.assertIn("sequenceDiagram", policy["main_document"]["forbidden_mermaid"])
         self.assertIn("flowchart", policy["main_document"]["required_mermaid"])
         self.assertIn("classDiagram", json.dumps(policy, ensure_ascii=False))
+        self.assertIn("1. 修订历史", policy["main_document"]["allowed_sections"])
+        self.assertIn("5.2. 中间件设计", policy["main_document"]["allowed_sections"])
         self.assertIn("database-design.md", policy["stage_result"]["must_register_specialty_artifacts"])
         self.assertIn("Redis 新 Key", policy["stage_result"]["waiting_for_human_review_when"])
 
         skill_md = (ROOT / "skills" / "detailed-design" / "SKILL.md").read_text(encoding="utf-8")
-        for text in ["主文档不得包含独立章节", "sequenceDiagram", "流程设计说明", "classDiagram", "waiting_for_human_review"]:
+        for text in ["detailed-design-template.md", "sequenceDiagram", "流程设计说明", "classDiagram", "waiting_for_human_review"]:
             self.assertIn(text, skill_md)
 
     def test_team_templates_are_generated(self) -> None:
         expected = [
+            ROOT / "skills" / "high-level-design" / "assets" / "high-level-design-template.md",
             ROOT / "skills" / "detailed-design" / "assets" / "detailed-design-template.md",
             ROOT / "skills" / "database-design" / "assets" / "database-oltp-template.md",
             ROOT / "skills" / "database-design" / "assets" / "database-olap-template.md",
@@ -82,8 +97,15 @@ class TeamDocumentDesignRulesTest(unittest.TestCase):
         for path in expected:
             self.assertTrue(path.exists(), f"missing template: {path}")
 
-        detailed_template = expected[0].read_text(encoding="utf-8")
-        self.assertIn("关联专项设计文档", detailed_template)
+        hld_template = expected[0].read_text(encoding="utf-8")
+        for text in ["1. 版本变更记录", "2. 平台概述", "3.1 系统逻辑视图", "5.中间件设计", "6.数据视图"]:
+            self.assertIn(text, hld_template)
+        self.assertNotIn("## 证据", hld_template)
+        self.assertNotIn("## Findings", hld_template)
+
+        detailed_template = expected[1].read_text(encoding="utf-8")
+        for text in ["1. 修订历史", "2. 设计背景与目标摘要", "3.1. 业务流程图", "3.2. UML类图", "4. 数据库设计", "5.2. 中间件设计", "6. 单元测试"]:
+            self.assertIn(text, detailed_template)
         self.assertIn("flowchart TD", detailed_template)
         self.assertIn("classDiagram", detailed_template)
         self.assertNotIn("## 来源证据", detailed_template)
@@ -117,6 +139,12 @@ class TeamDocumentDesignRulesTest(unittest.TestCase):
             self.assertIn(table_header, oltp_template)
 
     def test_extra_team_eval_cases_are_generated_and_checked_by_runner(self) -> None:
+        hld_case = ROOT / "skills" / "high-level-design" / "evals" / "team_high_level_template_required.yaml"
+        self.assertTrue(hld_case.exists())
+        hld_data = json.loads(hld_case.read_text(encoding="utf-8"))
+        self.assertEqual("team_high_level_template_required", hld_data["case_type"])
+        self.assertIn("high-level-design.md", "\n".join(hld_data["pass_criteria"]))
+
         expected_cases = [
             "team_db_reference_only",
             "team_mq_template_reference_only",
@@ -196,6 +224,43 @@ sequenceDiagram
         self.assertIn("禁止标题", output)
         self.assertIn("sequenceDiagram", output)
         self.assertIn("必须包含 flowchart", output)
+        self.assertIn("缺少团队详细设计模板章节", output)
+
+    def test_high_level_design_validator_blocks_generic_template(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            design = root / "high-level-design.md"
+            design.write_text(
+                """# High Level Design 产物模板
+
+## 证据
+
+## Findings
+
+## 必须补充信息
+
+## 门禁决策
+""",
+                encoding="utf-8",
+            )
+            result_payload = payload(
+                "high-level-design",
+                [
+                    {"name": "high-level-design.md", "path": str(design)},
+                    {"name": "architecture-decision-record.md", "path": str(root / "architecture-decision-record.md")},
+                    {"name": "module-boundary.yaml", "path": str(root / "module-boundary.yaml"), "artifact_type": "yaml"},
+                    {"name": "risk-list.json", "path": str(root / "risk-list.json"), "artifact_type": "json"},
+                ],
+            )
+            payload_path = root / "hld-stage-run-result.json"
+            payload_path.write_text(json.dumps(result_payload, ensure_ascii=False), encoding="utf-8")
+
+            result = run_validator("high-level-design", payload_path)
+
+        self.assertNotEqual(0, result.returncode)
+        output = result.stdout + result.stderr
+        self.assertIn("缺少团队概要设计模板章节", output)
+        self.assertIn("通用产物模板标题", output)
 
     def test_detailed_design_validator_blocks_missing_flow_notes_uml_and_human_review(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

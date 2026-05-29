@@ -7,29 +7,40 @@ from pathlib import Path
 SKILL_ID = "redis-design"
 POLICY = {
   "required_sections": [
-    "文档头信息",
     "历史版本信息",
-    "前言",
-    "公共配置",
-    "Redis 版本",
-    "集群配置",
-    "持久化策略",
-    "过期淘汰策略",
-    "设计项",
-    "安全与运维",
-    "人工评审项"
+    "1. 前言",
+    "1.1. 目的",
+    "1.2. 适用范围",
+    "1.3. 参考资料",
+    "2. 公共配置",
+    "2.1. Redis版本",
+    "2.2. 集群配置",
+    "2.3. 持久化策略",
+    "2.4. 过期淘汰策略",
+    "3. 设计项",
+    "3.1. <设计项名称>",
+    "3.1.1. 特性用途",
+    "3.1.2. 业务说明",
+    "3.1.3. 存储设计",
+    "3.1.4. 预估数据",
+    "3.1.5. 多团队协同",
+    "4. 安全与运维",
+    "4.1. 资源申请",
+    "4.2. 运维监控"
   ],
   "item_fields": [
     "特性用途",
     "业务说明",
     "存储设计",
+    "预估数据",
+    "多团队协同"
+  ],
+  "storage_fields": [
     "库",
     "数据结构",
-    "TTL",
-    "Key 定义",
-    "Value 数据格式",
-    "预估数据和容量",
-    "多团队协同"
+    "ttl",
+    "key",
+    "数据格式"
   ]
 }
 
@@ -90,6 +101,9 @@ def validate_output(payload_path, payload):
     for section in POLICY["required_sections"] + POLICY["item_fields"]:
         if section not in text:
             errors.append("redis-design.md 缺少模板章节或字段: " + section)
+    for field in POLICY["storage_fields"]:
+        if field not in text:
+            errors.append("redis-design.md 存储设计缺少字段: " + field)
     if re.search(r"Redis\s*(作为|做|充当).{0,12}事实库", text):
         errors.append("Redis 不得作为事实库")
     if re.search(r"Redis\s*(作为|做|充当).{0,12}消息队列", text):
